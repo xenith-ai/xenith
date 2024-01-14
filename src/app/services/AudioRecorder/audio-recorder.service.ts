@@ -121,8 +121,8 @@ export class AudioRecorder {
   }
 
   async loadModel() {
-    const response = await this.fetchRemote('assets/whisper.wasm/models/ggml-tiny.en.bin');
-    window.Module.FS_createDataFile('/', 'whisper.bin', response);
+    const response = await this.fetchRemote('assets/whisper.wasm/models/ggml-model-whisper-tiny.en-q5_1.bin');
+    window.Module.FS_createDataFile('/', 'whisper.bin', response, true, true);
   }
 
   async initializeWhisper(): Promise<void> {

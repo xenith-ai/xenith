@@ -18,23 +18,17 @@ export class AppComponent {
   constructor(private audioRecorder: AudioRecorder) { }
 
   startRecording() {
-    console.log(window.Module);
     this.audioRecorder.initRecording();
-    console.log(window.Module);
   }
 
   initializeWhisper() {
-    console.log(window.Module);
     this.audioRecorder.initializeWhisper();
-    console.log(window.Module);
   }
 
   loadModel() {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 
-    console.log(window.Module);
     this.audioRecorder.loadModel();
-    console.log(window.Module);
   }
 }
