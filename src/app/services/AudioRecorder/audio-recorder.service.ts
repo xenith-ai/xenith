@@ -15,10 +15,9 @@ export class AudioRecorder {
   private audio0: Float32Array | undefined;
   private whisperInstance: any;
 
-  private kMaxAudio_s = 30*60;
-  private kMaxRecording_s = 2*60;
   private kSampleRate = 16000;
-  private kIntervalAudio_ms = 5000;
+  private kIntervalAudio = 5;
+  private kIntervalAudio_ms = this.kIntervalAudio * 1000;
 
   constructor(private http: HttpClient) {
   }
@@ -37,7 +36,6 @@ export class AudioRecorder {
       this.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       this.mediaRecorder = new MediaRecorder(this.stream);
       this.mediaRecorder.ondataavailable = (event) => {
-        console.log('Data available');
         this.chunks.push(event.data);
 
         const blob = new Blob(this.chunks, { type: 'audio/ogg; codecs=opus' });
@@ -80,7 +78,6 @@ export class AudioRecorder {
           audioAll.set(this.audio, this.audio0 == null ? 0 : this.audio0.length);
 
           if (this.whisperInstance && window.Module) {
-            console.log('Setting audio');
             window.Module.set_audio(this.whisperInstance, audioAll);
           }
         };
@@ -94,14 +91,14 @@ export class AudioRecorder {
     if (this.mediaRecorder) {
       this.mediaRecorder.start(this.kIntervalAudio_ms);
 
-      const intervalUpdate = setInterval(function() {
+      /*const intervalUpdate = setInterval(function() {
         var transcribed = window.Module.get_transcribed();
-        console.log(transcribed);
-    }, 100);
+        //console.log(transcribed);
+      }, 100);*/
     }
   }
 
-  logRecorded() {
+  logTranscribed() {
     var transcribed = window.Module.get_transcribed();
     console.log(transcribed);
   }
@@ -127,11 +124,7 @@ export class AudioRecorder {
 
   async initializeWhisper(): Promise<void> {
     if (window.Module) {
-      /*const memoryLimit = 800;
-      const memoryBytes = memoryLimit * 1024 * 1024;
-      window.Module.HEAPU8.set(new Uint8Array(memoryBytes), window.Module.HEAP8.buffer);*/
-
-      this.whisperInstance = window.Module.init('whisper.bin');
+      this.whisperInstance = window.Module.init('whisper.bin', this.kIntervalAudio);
       if (!this.whisperInstance) {
         console.log("Failed to initialize whisper");
         return;

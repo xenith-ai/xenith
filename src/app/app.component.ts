@@ -31,4 +31,12 @@ export class AppComponent {
 
     this.audioRecorder.loadModel();
   }
+
+  logTranscribed() {
+    this.audioRecorder.logTranscribed()
+  }
+
+  stopRecording() {
+    this.audioRecorder.stopRecording();
+  }
 }
