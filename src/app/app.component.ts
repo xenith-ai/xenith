@@ -13,30 +13,5 @@ declare var window: any;
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'xenith';
-
   constructor(private audioRecorder: AudioRecorder) { }
-
-  startRecording() {
-    this.audioRecorder.initRecording();
-  }
-
-  initializeWhisper() {
-    this.audioRecorder.initializeWhisper();
-  }
-
-  loadModel() {
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-
-    this.audioRecorder.loadModel();
-  }
-
-  logTranscribed() {
-    this.audioRecorder.logTranscribed()
-  }
-
-  stopRecording() {
-    this.audioRecorder.stopRecording();
-  }
 }

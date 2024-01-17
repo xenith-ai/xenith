@@ -1,0 +1,41 @@
+$background-color-1: #1a202f;
+$background-color-2: #171d2c;
+$background-color-3: #111620;
+
+$message-height: 3em;
+
+$logo-color: #FFFFFF;
+
+$ai-message-box-color: linear-gradient(
+    320deg,
+    hsl(338deg 63% 57%) 0%,
+    hsl(339deg 65% 57%) 19%,
+    hsl(341deg 68% 57%) 27%,
+    hsl(342deg 70% 57%) 34%,
+    hsl(343deg 72% 56%) 41%,
+    hsl(345deg 74% 56%) 47%,
+    hsl(346deg 75% 56%) 53%,
+    hsl(347deg 77% 56%) 59%,
+    hsl(349deg 78% 56%) 66%,
+    hsl(350deg 79% 55%) 73%,
+    hsl(352deg 79% 55%) 81%,
+    hsl(354deg 80% 55%) 100%
+  );
+
+$user-message-box-color: linear-gradient(
+    315deg,
+    hsl(240deg 100% 63%) 0%,
+    hsl(259deg 87% 59%) 9%,
+    hsl(272deg 76% 54%) 18%,
+    hsl(283deg 68% 50%) 27%,
+    hsl(293deg 70% 46%) 36%,
+    hsl(302deg 71% 44%) 45%,
+    hsl(310deg 70% 46%) 55%,
+    hsl(316deg 67% 49%) 64%,
+    hsl(322deg 65% 51%) 73%,
+    hsl(327deg 65% 53%) 82%,
+    hsl(333deg 65% 55%) 91%,
+    hsl(338deg 63% 57%) 100%
+  );
+
+$border-radius-1: 15px;

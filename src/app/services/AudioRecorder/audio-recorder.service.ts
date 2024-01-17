@@ -16,7 +16,7 @@ export class AudioRecorder {
   private whisperInstance: any;
 
   private kSampleRate = 16000;
-  private kIntervalAudio = 5;
+  private kIntervalAudio = 2;
   private kIntervalAudio_ms = this.kIntervalAudio * 1000;
 
   constructor(private http: HttpClient) {
@@ -98,6 +98,20 @@ export class AudioRecorder {
     }
   }
 
+  startListener() {
+    const intervalUpdate = setInterval(() => {
+      var transcribed = window.Module.get_transcribed();
+
+      if (transcribed != '') {
+        this.transcriptionDetected(transcribed);
+      }
+    }, 100);
+  }
+
+  transcriptionDetected(transcription: string) {
+    console.log('TRANSCRIPTION: ' + transcription);
+  }
+
   logTranscribed() {
     var transcribed = window.Module.get_transcribed();
     console.log(transcribed);
@@ -118,6 +132,9 @@ export class AudioRecorder {
   }
 
   async loadModel() {
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+
     const response = await this.fetchRemote('assets/whisper.wasm/models/ggml-model-whisper-tiny.en-q5_1.bin');
     window.Module.FS_createDataFile('/', 'whisper.bin', response, true, true);
   }
