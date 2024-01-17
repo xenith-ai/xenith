@@ -1,0 +1,39 @@
+#nav-container {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9990;
+}
+
+#nav-bar {
+  height: 5em;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  position: fixed;
+  z-index: 9991;
+}
+
+#nav-menu-button {
+  margin-left: 1em;
+  height: 3em;
+  border-radius: 1.5em;
+  overflow: clip;
+
+  img {
+    height: 70%;
+  }
+}
+
+#nav-user-button {
+  margin-right: 1em;
+  height: 3em;
+  border-radius: 1.5em;
+  overflow: clip;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
