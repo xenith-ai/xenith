@@ -2,6 +2,55 @@
 
 $file-drop-border-width: 15px;
 
+.gradient-1 {
+  position: absolute;
+  z-index: 9979;
+  --size: 600px;
+  --speed: 30s;
+  --easing: cubic-bezier(0.4, 0.2, 0.2, 0.8);
+
+  width: var(--size);
+  height: var(--size);
+  filter: blur(calc(var(--size) / 5));
+  background-image: linear-gradient(hsl(158, 82, 57, 85%), hsl(252, 82, 57));
+  animation: rotate var(--speed) var(--easing) infinite, gradientAnimation 5s infinite;;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+.gradient-2 {
+  position: absolute;
+  z-index: 9979;
+  --size: 600px;
+  --speed: 30s;
+  --easing: cubic-bezier(0.4, 0.2, 0.2, 0.8);
+
+  width: var(--size);
+  height: var(--size);
+  filter: blur(calc(var(--size) / 5));
+  background-image: linear-gradient(hsla(197, 82%, 57%, 0.85), hsl(315, 100%, 24%));
+  animation: rotate-counter var(--speed) var(--easing) infinite, gradientAnimation 5s infinite;;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  transition: opacity 5s linear;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate-counter {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
 canvas {
   display: none;
   position: absolute;
@@ -9,6 +58,12 @@ canvas {
 
 #inner-container {
   width: 30em;
+  z-index: 9980;
+}
+
+#outer-container {
+  background: $background-color-3;
+  z-index: 9978;
 }
 
 #title-container {
