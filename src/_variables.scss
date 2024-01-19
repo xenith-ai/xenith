@@ -1,10 +1,19 @@
+//* --- Structural --- *//
+
+$message-height: 3em;
+
+$nav-top-height: 6em;
+
+$border-radius-1: 15px;
+
+//* --- Colors --- *//
+
 $background-color-1: #1a202f;
 $background-color-2: #171d2c;
 $background-color-3: #111620;
 
-$message-height: 3em;
-
 $logo-color: #FFFFFF;
+$text-color: #FFFFFF;
 
 $ai-message-box-color: linear-gradient(
     320deg,
@@ -37,5 +46,3 @@ $user-message-box-color: linear-gradient(
     hsl(333deg 65% 55%) 91%,
     hsl(338deg 63% 57%) 100%
   );
-
-$border-radius-1: 15px;

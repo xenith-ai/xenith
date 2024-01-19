@@ -1,0 +1,79 @@
+@import '../../../_variables.scss';
+
+//* --- Content Structure --- *//
+
+$chat-width: 35em;
+$chat-height: 30em;
+$content-z: 9980;
+
+#title-container {
+  z-index: $content-z;
+  text-align: center;
+  font-weight: 600;
+
+  > h1 {
+    color: $logo-color;
+  }
+}
+
+#primary-chat-container {
+  z-index: $content-z;
+  width: $chat-width;
+  height: $chat-height;
+  background: $background-color-2;
+  border-radius: $border-radius-1;
+}
+
+app-chat {
+  width: 100%;
+  height: 100%;
+}
+
+//* --- Orb Animation --- *//
+
+$orb-speed: 30s;
+$orb-easing: cubic-bezier(0.4, 0.2, 0.2, 0.8);
+$orb-z: 9979;
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate-counter {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+#gradient-1 {
+  position: absolute;
+  z-index: 9979;
+
+  width: $chat-width;
+  height: $chat-width;
+  filter: blur(calc($chat-width / 5));
+  background-image: linear-gradient(hsl(158, 82, 57, 85%), hsl(252, 82, 57));
+  animation: rotate $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+#gradient-2 {
+  position: absolute;
+  z-index: 9979;
+
+  width: $chat-width;
+  height: $chat-width;
+  filter: blur(calc($chat-width / 5));
+  background-image: linear-gradient(hsla(197, 82%, 57%, 0.85), hsl(315, 100%, 24%));
+  animation: rotate-counter $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  transition: opacity 5s linear;
+}

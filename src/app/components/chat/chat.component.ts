@@ -9,6 +9,6 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
-export class ChatComponent {
+export class chatComponent {
   constructor() { }
 }

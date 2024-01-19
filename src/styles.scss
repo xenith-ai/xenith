@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Montserrat:wght@300;400;500;600;700;800&family=Ubuntu+Mono:ital@1&display=swap');
 
 @import '_variables.scss';
@@ -6,7 +10,16 @@
   display: none;
 }
 
+* {
+  scroll-behavior: smooth !important;
+}
+
+html, body {
+  scroll-behavior: smooth !important;
+}
+
 html {
+  position: absolute;
   width: 100%;
   height: 100%;
   margin: 0;
@@ -14,16 +27,32 @@ html {
 }
 
 body {
+  background: $background-color-3;
+  position: absolute;
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
+app-root {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.page-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
 input {
   font-family: 'Montserrat', sans-serif;
   text-decoration: none;
-  color: #000000;
+  color: $text-color;
   margin: 0;
   display: flex;
   flex-direction: row;
@@ -32,6 +61,7 @@ input {
   border-width: 0;
   appearance: none;
   outline: none;
+  background: none;
 }
 
 textarea {
@@ -54,7 +84,6 @@ textarea::-webkit-scrollbar {
 h1 {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #FEFEFE;
   font-family: 'Montserrat', sans-serif;
   font-size: 3.2rem;
   margin-bottom: 0.2em;
@@ -87,30 +116,4 @@ button {
 
 strong {
   color: #FEFEFE;
-}
-
-.flex-row {
-  display: flex;
-  flex-direction: row;
-}
-
-.flex-column {
-  display: flex;
-  flex-direction: column;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.align-items-center {
-  align-items: center;
-}
-
-.full-height {
-  height: 100%;
-}
-
-.full-width {
-  width: 100%;
 }

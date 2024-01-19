@@ -1,39 +1,29 @@
-#nav-container {
-  width: 100%;
-  height: 100%;
-  position: fixed;
+@import '../../../_variables.scss';
+
+#nav-top-container {
   pointer-events: none;
-  z-index: 9990;
-}
 
-#nav-bar {
-  height: 5em;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  position: fixed;
-  z-index: 9991;
-}
+  > button {
+    overflow: clip;
 
-#nav-menu-button {
-  margin-left: 1em;
-  height: 3em;
-  border-radius: 1.5em;
-  overflow: clip;
-
-  img {
-    height: 70%;
+    > img {
+      width: 100%;
+      height: 100%;
+    }
   }
-}
 
-#nav-user-button {
-  margin-right: 1em;
-  height: 3em;
-  border-radius: 1.5em;
-  overflow: clip;
+  #menu-button {
+    padding: calc($nav-top-height / 3);
+  }
 
-  img {
-    width: 100%;
-    height: 100%;
+  #profile-button {
+    $padding: calc($nav-top-height / 4);
+    $border-radius: calc($padding * 2);
+
+    padding: $padding;
+
+    > img {
+      border-radius: $border-radius;
+    }
   }
 }
