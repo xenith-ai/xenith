@@ -4,7 +4,8 @@
 
 $chat-width: 35em;
 $chat-height: 30em;
-$content-z: 9980;
+$gradient-z: calc($page-container-z + 1);
+$content-z: calc($page-container-z + 2);
 
 #title-container {
   z-index: $content-z;
@@ -55,24 +56,24 @@ $orb-z: 9979;
 
 #gradient-1 {
   position: absolute;
-  z-index: 9979;
+  z-index: $gradient-z;
 
   width: $chat-width;
   height: $chat-width;
   filter: blur(calc($chat-width / 5));
-  background-image: linear-gradient(hsl(158, 82, 57, 85%), hsl(252, 82, 57));
+  background-image: linear-gradient($glow-1, $glow-2);
   animation: rotate $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;;
   border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
 }
 
 #gradient-2 {
   position: absolute;
-  z-index: 9979;
+  z-index: $gradient-z;
 
   width: $chat-width;
   height: $chat-width;
   filter: blur(calc($chat-width / 5));
-  background-image: linear-gradient(hsla(197, 82%, 57%, 0.85), hsl(315, 100%, 24%));
+  background-image: linear-gradient($glow-3, $glow-4);
   animation: rotate-counter $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;;
   border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
   transition: opacity 5s linear;

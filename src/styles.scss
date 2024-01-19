@@ -44,6 +44,7 @@ app-root {
 }
 
 .page-container {
+  z-index: $page-container-z;
   position: absolute;
   width: 100%;
   height: 100%;
@@ -102,16 +103,6 @@ p {
   font-weight: 500;
   color: #FEFEFE;
   font-family: 'Montserrat', sans-serif;
-}
-
-button {
-  background: none;       /* Removes background color */
-  color: inherit;         /* Inherits text color from parent element */
-  border: none;           /* Removes border */
-  padding: 0;             /* Removes padding */
-  font: inherit;          /* Inherits font from parent element */
-  cursor: pointer;        /* Keeps the cursor as pointer to signify it's clickable */
-  outline: inherit;       /* Inherits outline style from parent (or you could set it to 'none') */
 }
 
 strong {

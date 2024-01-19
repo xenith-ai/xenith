@@ -3,7 +3,8 @@
 $file-drop-border-width: 15px;
 
 app-nav-top {
-  position: fixed;
-  width: 100%;
+  z-index: $nav-top-z;
   height: $nav-top-height;
+  position: absolute;
+  width: 100%;
 }
