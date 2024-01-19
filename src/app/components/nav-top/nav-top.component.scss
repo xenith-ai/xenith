@@ -24,11 +24,36 @@
     padding: $padding;
 
     > img {
+      transition: box-shadow 0.2s ease-in-out;
       border-radius: $border-radius;
       box-shadow:
       0 0 4px $glow-4,
       0 0 6px $glow-2,
       0 0 8px $glow-1;
+
+      &:hover {
+        box-shadow:
+        0 0 4px $glow-1,
+        0 0 6px $glow-2,
+        0 0 8px $glow-3;
+      }
+    }
+  }
+
+  #nav-links-container {
+    > a {
+      $padding-vertical: calc($nav-top-height / 2.5);
+      $padding-horizontal: calc($padding-vertical / 2);
+
+      pointer-events: none;
+      position: relative;
+      padding: $padding-vertical $padding-horizontal;
+
+      > img {
+        pointer-events: auto;
+        width: 100%;
+        height: 100%;
+      }
     }
   }
 }

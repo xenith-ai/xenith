@@ -1,4 +1,4 @@
-import { ChatParticipant } from "../interfaces/chat-participant.model";
+import { ChatParticipant } from "../interfaces/chat-participant.interface";
 
 export class AI implements ChatParticipant {
   constructor(
