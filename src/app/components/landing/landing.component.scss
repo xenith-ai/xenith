@@ -2,7 +2,8 @@
 
 //* --- Content Structure --- *//
 
-$chat-width: 35em;
+$pre-collapse-chat-margin: 4em;
+$chat-width: calc($mobile-collapse-width - (2 * $pre-collapse-chat-margin));
 $chat-height: 30em;
 $gradient-z: calc($page-container-z + 1);
 $content-z: calc($page-container-z + 2);
@@ -23,11 +24,31 @@ $content-z: calc($page-container-z + 2);
   height: $chat-height;
   background: $background-color-2;
   border-radius: $border-radius-1;
+  overflow: clip;
 }
 
 app-chat {
   width: 100%;
   height: 100%;
+}
+
+@media screen and (max-width: $mobile-collapse-width) {
+  #gradient-1, #gradient-2 {
+    display: none;
+  }
+
+  #title-container {
+    > h1 {
+      display: none;
+    }
+  }
+
+  #primary-chat-container {
+    padding-top: $nav-top-height;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
 }
 
 //* --- Orb Animation --- *//
