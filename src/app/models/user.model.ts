@@ -1,6 +1,6 @@
-import { ChatParticipant } from "../interfaces/chat-participant.interface";
+import { IChatParticipant } from "../interfaces/chat-participant.interface";
 
-export class User implements ChatParticipant {
+export class User implements IChatParticipant {
   constructor(
     public id: string,
     public name: string,

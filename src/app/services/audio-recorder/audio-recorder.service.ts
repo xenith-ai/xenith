@@ -6,7 +6,7 @@ declare var window: any;
 @Injectable({
   providedIn: 'root',
 })
-export class AudioRecorder {
+export class AudioRecorderService {
   private mediaRecorder: MediaRecorder | undefined;
   private chunks: Blob[] = [];
   private stream : MediaStream | undefined;

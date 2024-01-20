@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Routes } from '@angular/router';
-import { AudioRecorder } from './services/AudioRecorder/audio-recorder.service'
+import { AudioRecorderService } from './services/audio-recorder/audio-recorder.service'
 import { NavTopComponent } from "./components/nav-top/nav-top.component";
-import { chatComponent } from "./components/chat/chat.component";
+import { ChatComponent } from "./components/chat/chat.component";
 import { LandingComponent } from './components/landing/landing.component';
 
 declare var window: any;
@@ -18,8 +18,8 @@ export const routes: Routes = [
     standalone: true,
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
-    imports: [CommonModule, RouterOutlet, NavTopComponent, chatComponent]
+    imports: [CommonModule, RouterOutlet, NavTopComponent, ChatComponent]
 })
 export class AppComponent {
-  constructor(private audioRecorder: AudioRecorder) { }
+  constructor(private audioRecorderService: AudioRecorderService) { }
 }
