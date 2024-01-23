@@ -1,4 +1,4 @@
-@import '../../../_variables.scss';
+@import '../../../variables.scss';
 
 #chat-container {
   width: 100%;
@@ -71,7 +71,7 @@
     .content-item {
       background: $ai-message-box-color;
       border-radius: $border-radius-1;
-      padding: 1em;
+      overflow: clip;
       margin: 0 0 0.5em 0;
     }
   }

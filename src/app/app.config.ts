@@ -18,6 +18,6 @@ export const appConfig: ApplicationConfig = {
     ConversationService,
     AIService,
     UserService,
-    InstanceOfPipe
+    InstanceOfPipe,
   ],
 };

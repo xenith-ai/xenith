@@ -14,12 +14,20 @@ export class AudioRecorderService {
   private audio: Float32Array | undefined;
   private audio0: Float32Array | undefined;
   private whisperInstance: any;
+  public speechCallback?: Function;
 
   private kSampleRate = 16000;
   private kIntervalAudio = 2;
   private kIntervalAudio_ms = this.kIntervalAudio * 1000;
 
   constructor(private http: HttpClient) {
+  }
+
+  public startRecording = async () => {
+    await this.loadModel();
+    await this.initializeWhisper();
+    await this.initRecording();
+    await this.startListener();
   }
 
   async initRecording(): Promise<void> {
@@ -90,26 +98,31 @@ export class AudioRecorderService {
 
     if (this.mediaRecorder) {
       this.mediaRecorder.start(this.kIntervalAudio_ms);
-
-      /*const intervalUpdate = setInterval(function() {
-        var transcribed = window.Module.get_transcribed();
-        //console.log(transcribed);
-      }, 100);*/
     }
   }
 
   startListener() {
     const intervalUpdate = setInterval(() => {
-      var transcribed = window.Module.get_transcribed();
+      var transcribed = this.cleanString(window.Module.get_transcribed());
 
-      if (transcribed != '') {
+      if (transcribed) {
         this.transcriptionDetected(transcribed);
       }
     }, 100);
   }
 
+  cleanString(input: string): string {
+    // Regular expression to match content within () and [] but exclude [BLANK AUDIO]
+    const regex = /(\(.*?\))|(\[(?!BLANK AUDIO).*?\])/g;
+
+    // Replace matched content with an empty string and trim the string
+    return input.replace(regex, '').trim();
+  }
+
   transcriptionDetected(transcription: string) {
-    console.log('TRANSCRIPTION: ' + transcription);
+    if (this.speechCallback) {
+      this.speechCallback(transcription);
+    }
   }
 
   logTranscribed() {

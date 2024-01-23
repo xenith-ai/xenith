@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ChatComponent } from "../chat/chat.component";
@@ -8,7 +8,9 @@ import { AIService } from '../../services/ai/ai.service';
 import { UserService } from '../../services/user/user.service';
 import { AI } from '../../models/ai.model';
 import { User } from '../../models/user.model';
-import { Message } from '../../models/message.model';
+import { TextMessage } from '../../models/text-message.model';
+import { ButtonMessage } from '../../models/button-message.model';
+import { AudioRecorderService } from '../../services/audio-recorder/audio-recorder.service';
 
 @Component({
     selector: 'app-landing',
@@ -22,17 +24,19 @@ export class LandingComponent {
   newAI: AI;
   newUser: User;
 
-  constructor(private conversationService: ConversationService, private AIService: AIService, private userService: UserService) {
+  enableMicrophoneButtonMessage: ButtonMessage;
+
+  constructor(private conversationService: ConversationService, private AIService: AIService, private userService: UserService, private audioRecorderService: AudioRecorderService) {
     this.conversation = this.conversationService.createNewConversation();
 
     this.newAI = this.AIService.createAI();
     this.newUser = this.userService.createUser();
 
+    this.enableMicrophoneButtonMessage = new ButtonMessage(this.newAI, 'Enable Microphone', new Date(), 'assets/img/microphone.svg', 'button-1', this.audioRecorderService.startRecording);
+
     // Some test data for now
-    this.conversation.addMessage(new Message(this.newAI, 'Hello, I am xenith. How can I help you? How can I help you? How can I help you?', new Date()));
-    this.conversation.addMessage(new Message(this.newAI, 'This is a test message.', new Date()));
-    this.conversation.addMessage(new Message(this.newUser, 'Another test message.', new Date()));
-    this.conversation.addMessage(new Message(this.newUser, 'Test message again! We should make this a long message to test the visual component.', new Date()));
-    this.conversation.addMessage(new Message(this.newUser, 'Test message a third time.', new Date()));
+    this.conversation.addMessage(new TextMessage(this.newAI, 'Hello, welcome to Xenith!', new Date()));
+    this.conversation.addMessage(new TextMessage(this.newAI, `Once you've enabled your microphone, you can start talking.`, new Date()));
+    this.conversation.addMessage(this.enableMicrophoneButtonMessage);
   }
 }

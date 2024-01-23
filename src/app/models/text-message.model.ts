@@ -1,13 +1,14 @@
 import { IChatParticipant } from "../interfaces/chat-participant.interface";
+import { IChatMessage } from "../interfaces/chat-message.interface";
 
-export class Message {
+export class TextMessage implements IChatMessage {
   constructor(
     public chatParticipant: IChatParticipant,
-    public message: string,
+    public text: string,
     public timestamp: Date,
   ) { }
 
   toString() {
-    return this.message;
+    return this.text;
   }
 }

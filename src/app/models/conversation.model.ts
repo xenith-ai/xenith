@@ -1,19 +1,19 @@
 import { MessageGroup } from "./message-group.model";
-import { Message } from "./message.model";
+import { IChatMessage } from "../interfaces/chat-message.interface";
 
 export class Conversation {
   public structuredMessages: Array<MessageGroup> = [];
 
   constructor(
-    public messages: Array<Message>,
+    public messages: Array<IChatMessage>,
   ) {
     this.populateStructuredMessages(messages);
   }
 
-  populateStructuredMessages(messages: Array<Message>) {
+  populateStructuredMessages(messages: Array<IChatMessage>) {
     this.structuredMessages = [];
 
-    let previousMessage: Message;
+    let previousMessage: IChatMessage;
     messages.forEach((message) => {
       if (!previousMessage) {
         this.structuredMessages.push(new MessageGroup(message.chatParticipant, [message]));
@@ -29,7 +29,7 @@ export class Conversation {
     });
   }
 
-  addMessage(message: Message) {
+  addMessage(message: IChatMessage) {
     if (this.messages.length === 0) {
       this.structuredMessages.push(new MessageGroup(message.chatParticipant, [message]));
     } else {

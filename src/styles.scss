@@ -4,7 +4,16 @@
 
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Montserrat:wght@300;400;500;600;700;800&family=Ubuntu+Mono:ital@1&display=swap');
 
-@import '_variables.scss';
+@import 'variables.scss';
+
+.button-1 {
+  transition: background 0.1s linear;
+  background: $button-color-1;
+
+  &:hover {
+    background: $button-hover-color-1;
+  }
+}
 
 ::-webkit-scrollbar {
   display: none;

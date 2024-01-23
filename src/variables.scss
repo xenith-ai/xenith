@@ -19,6 +19,10 @@ $background-color-1: #1a202f;
 $background-color-2: #171d2c;
 $background-color-3: #111620;
 
+$button-color-1: #5865F2;
+
+$button-hover-color-1: #333b96;
+
 $logo-color: #FFFFFF;
 $text-color: #FFFFFF;
 
@@ -58,3 +62,8 @@ $user-message-box-color: linear-gradient(
     hsl(333deg 65% 55%) 91%,
     hsl(338deg 63% 57%) 100%
   );
+
+
+  :export {
+    button-color-1: $button-color-1;
+  }
