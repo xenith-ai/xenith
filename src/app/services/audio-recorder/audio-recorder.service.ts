@@ -105,9 +105,7 @@ export class AudioRecorderService {
     const intervalUpdate = setInterval(() => {
       var transcribed = this.cleanString(window.Module.get_transcribed());
 
-      if (transcribed) {
-        this.transcriptionDetected(transcribed);
-      }
+      this.transcriptionDetected(transcribed);
     }, 100);
   }
 
@@ -116,7 +114,7 @@ export class AudioRecorderService {
     const regex = /(\(.*?\))|(\[(?!BLANK AUDIO).*?\])/g;
 
     // Replace matched content with an empty string and trim the string
-    return input.replace(regex, '').trim();
+    return input.replace(regex, '').replaceAll('[', '').replaceAll('(', '').trim();
   }
 
   transcriptionDetected(transcription: string) {

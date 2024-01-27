@@ -32,7 +32,8 @@ export class ChatComponent {
   public TextMessage = TextMessage;
   public ButtonMessage = ButtonMessage;
 
-  currentInput: Array<string> = [];
+  silenceSendDelta = 300;
+  silenceStarted?: Date;
 
   constructor(private cdr: ChangeDetectorRef, private audioRecorderService: AudioRecorderService) {
     this.audioRecorderService.speechCallback = this.speechCallback;
@@ -41,12 +42,12 @@ export class ChatComponent {
   public sendMessage(value: string) {
     if (value && this.currentUser) {
       this.conversation?.addMessage(new TextMessage(this.currentUser, value, new Date()));
+      this.chatInput.nativeElement.value = '';
     }
   }
 
   protected inputOnEnter(element: HTMLInputElement) {
     this.sendMessage(element.value);
-    element.value = '';
 
     // Apply visual changes first before updating scroll
     this.cdr.detectChanges();
@@ -58,15 +59,19 @@ export class ChatComponent {
   }
 
   public speechCallback = (speech: string) => {
-    if (!speech || !this.conversation) {
+    if (!this.conversation) {
       return;
     }
 
-    console.log(speech);
-    if (!speech.includes('[BLANK_AUDIO]')) {
+    if (speech && speech !== '[BLANK_AUDIO]') {
       this.chatInput.nativeElement.value += speech;
-    } else if (this.currentInput.length > 0  && this.currentUser) {
-      this.conversation.addMessage(new TextMessage(this.currentUser, this.chatInput.nativeElement.value, new Date()));
+    } else if (this.chatInput.nativeElement.value.length > 0  && this.currentUser) {
+      if (!this.silenceStarted) {
+        this.silenceStarted = new Date();
+      } else if ((new Date()).getTime() - this.silenceStarted.getTime() > this.silenceSendDelta) {
+        this.sendMessage(this.chatInput.nativeElement.value);
+        this.silenceStarted = undefined;
+      }
     }
   }
 }
