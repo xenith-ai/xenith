@@ -32,7 +32,7 @@ export class ChatComponent {
   public TextMessage = TextMessage;
   public ButtonMessage = ButtonMessage;
 
-  silenceSendDelta = 300;
+  silenceSendDelta = 1000;
   silenceStarted?: Date;
 
   constructor(private cdr: ChangeDetectorRef, private audioRecorderService: AudioRecorderService) {

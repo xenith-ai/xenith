@@ -32,6 +32,37 @@ app-chat {
   height: 100%;
 }
 
+@keyframes pulsate {
+  0% {
+      box-shadow: 0 0 10px rgba(0, 255, 64, 0.5);
+  }
+  50% {
+      box-shadow: 0 0 20px rgba(0, 255, 64, 1);
+  }
+  100% {
+      box-shadow: 0 0 10px rgba(0, 255, 64, 0.5);
+  }
+}
+
+.pulsating-circle {
+  height: 50%;
+  margin-right: 0.5em;
+  aspect-ratio: 1 / 1;
+  background-color: rgba(0, 255, 64, 1);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 255, 64, 0.5);
+  animation: pulsate 2s infinite ease-in-out;
+}
+
+#status-container {
+  z-index: $content-z + 1;
+  margin-bottom: 0.5em;
+
+  p {
+    font-size: 0.75rem;
+  }
+}
+
 @media screen and (max-width: $mobile-collapse-width) {
   #gradient-1, #gradient-2 {
     display: none;
@@ -44,10 +75,16 @@ app-chat {
   }
 
   #primary-chat-container {
-    padding-top: $nav-top-height;
     width: 100%;
     height: 100%;
     border-radius: 0;
+  }
+
+  #status-container {
+    padding-top: $nav-top-height;
+    background: $background-color-2;
+    width: 100%;
+    margin-bottom: 0;
   }
 }
 

@@ -1,5 +1,6 @@
 import { Injectable, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { HttpHandlerService } from '../http-handler/http-handler.service';
 
 declare var window: any;
 
@@ -20,14 +21,15 @@ export class AudioRecorderService {
   private kIntervalAudio = 2;
   private kIntervalAudio_ms = this.kIntervalAudio * 1000;
 
-  constructor(private http: HttpClient) {
+  public listening = false;
+
+  constructor(private httpHandler: HttpHandlerService) {
   }
 
-  public startRecording = async () => {
-    await this.loadModel();
+  public startListening = async () => {
     await this.initializeWhisper();
     await this.initRecording();
-    await this.startListener();
+    await this.startPollingWhisper();
   }
 
   async initRecording(): Promise<void> {
@@ -101,7 +103,7 @@ export class AudioRecorderService {
     }
   }
 
-  startListener() {
+  startPollingWhisper() {
     const intervalUpdate = setInterval(() => {
       var transcribed = this.cleanString(window.Module.get_transcribed());
 
@@ -142,12 +144,15 @@ export class AudioRecorderService {
     });
   }
 
-  async loadModel() {
+  async loadModel(model?: Uint8Array) {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 
-    const response = await this.fetchRemote('assets/whisper.wasm/models/ggml-model-whisper-tiny.en-q5_1.bin');
-    window.Module.FS_createDataFile('/', 'whisper.bin', response, true, true);
+    if (!model) {
+      model = await this.fetchRemote('assets/whisper.wasm/models/ggml-model-whisper-tiny.en-q5_1.bin');
+    }
+
+    window.Module.FS_createDataFile('/', 'whisper.bin', model, true, true);
   }
 
   async initializeWhisper(): Promise<void> {
@@ -212,5 +217,23 @@ export class AudioRecorderService {
     }
 
     return chunksAll;
+  }
+
+  async isMicrophoneEnabled(microphoneStatusChangedCallback: (permissionStatus: PermissionStatus) => any): Promise<boolean | undefined> {
+    if (navigator.permissions) {
+      try {
+        const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        permissionStatus.onchange = (event: Event) => {
+          microphoneStatusChangedCallback(permissionStatus);
+        }
+        return permissionStatus.state === 'granted';
+      } catch (error) {
+        console.error('Error while querying microphone permissions: ', error);
+        return undefined;
+      }
+    } else {
+      console.log('Permissions API is not supported by your browser.');
+      return undefined;
+    }
   }
 }
