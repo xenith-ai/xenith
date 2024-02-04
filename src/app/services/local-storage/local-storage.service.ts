@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { LocalStorageKey } from '../../enums/local-storage-key.enum';
+import { ModelKey } from '../../enums/model-key.enum';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LocalStorageService {
-  public getWhisperModel(key: LocalStorageKey): Uint8Array | null {
+  public getWhisperModel(key: ModelKey): Uint8Array | null {
     const base64Model = localStorage.getItem(key);
 
     if (!base64Model) {
@@ -15,13 +15,21 @@ export class LocalStorageService {
     return this.base64ToUint8Array(base64Model);
   }
 
-  public saveWhisperModel(key: LocalStorageKey, model: Uint8Array): void {
+  public saveWhisperModel(key: ModelKey, model: Uint8Array): void {
     const base64Model = this.uint8ArrayToBase64(model);
+    console.log('Writing model to local storage', base64Model.length, 'bytes');
     localStorage.setItem(key, base64Model);
   }
 
   uint8ArrayToBase64(buffer: Uint8Array): string {
-    const binary = String.fromCharCode.apply(null, Array.from(buffer));
+    let binary = '';
+    const chunkSize = 5000; // Process in chunks to avoid call stack size exceed error
+
+    for (let i = 0; i < buffer.length; i += chunkSize) {
+        const chunk = Array.from(buffer.subarray(i, i + chunkSize)); // Convert Uint8Array to array
+        binary += String.fromCharCode.apply(null, chunk);
+    }
+
     return window.btoa(binary);
   }
 

@@ -1,3 +1,3 @@
-export enum LocalStorageKey {
+export enum ModelKey {
   WhisperTinyEn = 'whisper-tiny-en',
 }

@@ -43,6 +43,9 @@ export class ChatComponent {
     if (value && this.currentUser) {
       this.conversation?.addMessage(new TextMessage(this.currentUser, value, new Date()));
       this.chatInput.nativeElement.value = '';
+
+      this.cdr.detectChanges();
+      this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
     }
   }
 
@@ -51,7 +54,7 @@ export class ChatComponent {
 
     // Apply visual changes first before updating scroll
     this.cdr.detectChanges();
-    this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
+    console.log(this.chatMessages.nativeElement.scrollTop);
   }
 
   protected castType<TOriginal, TCast>(original: TOriginal): TCast {
@@ -60,6 +63,7 @@ export class ChatComponent {
 
   public speechCallback = (speech: string) => {
     if (!this.conversation) {
+      console.log('Speech callback triggered but there is no conversation to send message to');
       return;
     }
 

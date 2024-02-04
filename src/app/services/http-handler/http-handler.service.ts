@@ -5,7 +5,7 @@ import axios from 'axios';
   providedIn: 'root',
 })
 export class HttpHandlerService {
-  async fetchOctetStream(url: string): Promise<ArrayBuffer> {
+  async fetchOctetStream(url: string): Promise<Uint8Array> {
     try {
       const response = await axios({
         method: 'get',
@@ -16,10 +16,10 @@ export class HttpHandlerService {
         }
       });
 
-      return response.data;
+      return new Uint8Array(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
-      throw error; // or handle it as per your application's needs
+      throw error;
     }
   }
 }

@@ -1,5 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { HttpHandlerService } from '../http-handler/http-handler.service';
 
 declare var window: any;
@@ -10,124 +9,200 @@ declare var window: any;
 export class AudioRecorderService {
   private mediaRecorder: MediaRecorder | undefined;
   private chunks: Blob[] = [];
-  private stream : MediaStream | undefined;
+  private stream: MediaStream | undefined;
   private context: AudioContext | undefined;
   private audio: Float32Array | undefined;
   private audio0: Float32Array | undefined;
   private whisperInstance: any;
-  public speechCallback?: Function;
+  public speechCallback?: (transcription: string) => void;
 
-  private kSampleRate = 16000;
-  private kIntervalAudio = 2;
-  private kIntervalAudio_ms = this.kIntervalAudio * 1000;
+  private readonly kSampleRate = 16000;
+  private readonly kIntervalAudio = 2;
+  private readonly kIntervalAudio_ms = this.kIntervalAudio * 1000;
 
   public listening = false;
+  private whisperInitialized = false;
 
-  constructor(private httpHandler: HttpHandlerService) {
-  }
+  private whisperPollingInterval: any;
 
-  public startListening = async () => {
-    await this.initializeWhisper();
-    await this.initRecording();
-    await this.startPollingWhisper();
-  }
+  constructor(private httpHandler: HttpHandlerService) {}
 
-  async initRecording(): Promise<void> {
+  public async requestMicrophoneAccess(): Promise<void> {
     try {
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    } catch (error) {
+      console.error('Error requesting microphone access: ', error);
+    }
+  }
 
-      // Set context
-      if (!this.context) {
-        this.context = new AudioContext({
-          sampleRate: this.kSampleRate
-        });
+  public async startListening(whisperInitializedCallback: Function): Promise<void> {
+    try {
+      await this.requestMicrophoneAccess();
+
+      if (!this.whisperInitialized) {
+        await this.initWhisper(whisperInitializedCallback);
       }
 
-      // Set media recorder
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      this.mediaRecorder = new MediaRecorder(this.stream);
-      this.mediaRecorder.ondataavailable = (event) => {
-        this.chunks.push(event.data);
-
-        const blob = new Blob(this.chunks, { type: 'audio/ogg; codecs=opus' });
-        const reader = new FileReader();
-
-        reader.onload = async (event) => {
-          var buf = new Uint8Array(reader.result as ArrayBuffer);
-
-          if (!this.context) {
-            return;
-          }
-
-          // Set audio buffer from reader
-          const audioBuffer = await this.context.decodeAudioData(buf.buffer);
-
-          // Set offlineContext with specs from audio buffer
-          var offlineContext = new OfflineAudioContext(
-            audioBuffer.numberOfChannels,
-            audioBuffer.length,
-            audioBuffer.sampleRate
-          );
-
-          // Set source from audio buffer
-          var source = offlineContext.createBufferSource();
-          source.buffer = audioBuffer;
-          source.connect(offlineContext.destination);
-          source.start(0);
-
-          // Render audio buffer
-          const renderedBuffer = await offlineContext.startRendering();
-          this.audio = renderedBuffer.getChannelData(0);
-
-          // Handle stream audio data
-          var audioAll = new Float32Array(
-            this.audio0 == null ? this.audio.length : this.audio0.length + this.audio.length
-          );
-          if (this.audio0 != null) {
-            audioAll.set(this.audio0, 0);
-          }
-          audioAll.set(this.audio, this.audio0 == null ? 0 : this.audio0.length);
-
-          if (this.whisperInstance && window.Module) {
-            window.Module.set_audio(this.whisperInstance, audioAll);
-          }
-        };
-
-        reader.readAsArrayBuffer(blob);
-      };
+      await this.initMediaRecorder();
+      await this.startPollingWhisper();
     } catch (error) {
-      console.error('Error accessing the microphone', error);
-    }
-
-    if (this.mediaRecorder) {
-      this.mediaRecorder.start(this.kIntervalAudio_ms);
+      console.error('Error starting to listen: ', error);
     }
   }
 
-  startPollingWhisper() {
-    const intervalUpdate = setInterval(() => {
-      var transcribed = this.cleanString(window.Module.get_transcribed());
+  private initializeAudioContext(): void {
+    if (!this.context) {
+      this.context = new AudioContext({
+        sampleRate: this.kSampleRate,
+      });
+    }
+  }
 
-      this.transcriptionDetected(transcribed);
+  private async initMediaRecorder(): Promise<void> {
+    try {
+      if (!this.stream) {
+        throw new Error('No stream available for MediaRecorder initialization.');
+      }
+
+      this.mediaRecorder = new MediaRecorder(this.stream);
+      this.mediaRecorder.ondataavailable = this.handleDataAvailable;
+      this.mediaRecorder.start(this.kIntervalAudio_ms);
+    } catch (error) {
+      console.error('Error initializing MediaRecorder: ', error);
+    }
+  }
+
+  private handleDataAvailable = (event: BlobEvent): void => {
+    this.chunks.push(event.data);
+    const blob = new Blob(this.chunks, { type: 'audio/ogg; codecs=opus' });
+    this.processAudioBlob(blob);
+  }
+
+  private async processAudioBlob(blob: Blob): Promise<void> {
+    const reader = new FileReader();
+
+    reader.onloadend = async () => {
+      const buffer = new Uint8Array(reader.result as ArrayBuffer);
+      await this.processAudioBuffer(buffer);
+    };
+
+    reader.readAsArrayBuffer(blob);
+  }
+
+  private async processAudioBuffer(buffer: Uint8Array): Promise<void> {
+    try {
+      if (!this.context) {
+        this.initializeAudioContext();
+      }
+      const audioBuffer = await this.context!.decodeAudioData(buffer.buffer);
+      var offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
+
+      var source = offlineContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(offlineContext.destination);
+      source.start(0);
+
+      const renderedBuffer = await offlineContext.startRendering();
+      this.audio = renderedBuffer.getChannelData(0);
+
+      if (this.audio0) {
+        let tempAudio = new Float32Array(this.audio0.length + this.audio.length);
+        tempAudio.set(this.audio0, 0);
+        tempAudio.set(this.audio, this.audio0.length);
+        this.audio0 = tempAudio;
+      } else {
+        this.audio0 = this.audio;
+      }
+
+      if (this.whisperInstance && window.Module) {
+        await window.Module.set_audio(this.whisperInstance, this.audio0);
+      }
+    } catch (error) {
+      console.error('Error processing audio buffer: ', error);
+    }
+  }
+
+  private startPollingWhisper(): void {
+    this.whisperPollingInterval = setInterval(async () => {
+      if (window.Module) {
+        if (window.Module.get_transcribed) {
+          var transcribed = await window.Module.get_transcribed();
+          this.transcriptionDetected(this.cleanString(transcribed));
+        } else {
+          console.error('get_transcribed is not defined.');
+        }
+      }
     }, 100);
   }
 
-  cleanString(input: string): string {
-    // Regular expression to match content within () and [] but exclude [BLANK AUDIO]
-    const regex = /(\(.*?\))|(\[(?!BLANK AUDIO).*?\])/g;
-
-    // Replace matched content with an empty string and trim the string
-    return input.replace(regex, '').replaceAll('[', '').replaceAll('(', '').trim();
+  private stopPollingWhisper(): void {
+    clearInterval(this.whisperPollingInterval);
   }
 
-  transcriptionDetected(transcription: string) {
+  private cleanString(input: string): string {
+    const regex = /(\(.*?\))|(\[(?!BLANK AUDIO).*?\])/g;
+    return input.replace(regex, '').trim();
+  }
+
+  private transcriptionDetected(transcription: string): void {
     if (this.speechCallback) {
       this.speechCallback(transcription);
     }
   }
 
-  logTranscribed() {
-    var transcribed = window.Module.get_transcribed();
-    console.log(transcribed);
+  private async initWhisper(whisperInitializedCallback: Function): Promise<void> {
+    const checkModuleInit = async () => {
+      if (window.Module?.init) {
+        this.whisperInstance = await window.Module.init('whisper.bin', this.kIntervalAudio);
+        if (this.whisperInstance) {
+          console.log('Whisper instance initialized successfully.');
+          this.listening = true;
+          whisperInitializedCallback();
+        } else {
+          console.error("Failed to initialize whisper instance.");
+        }
+      } else {
+        setTimeout(checkModuleInit, 100);
+      }
+    };
+
+    await checkModuleInit();
+  }
+
+  public async loadModel(model?: Uint8Array): Promise<void> {
+    try {
+      console.log('Loading model...');
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+
+      if (!model) {
+        console.error("Model data is undefined.");
+        return;
+      }
+
+      await window.Module.FS_createDataFile('/', 'whisper.bin', model, true, true);
+      console.log('Model loaded successfully.');
+    } catch (error) {
+      console.error('Error loading model: ', error);
+    }
+  }
+
+  public async isMicrophoneEnabled(microphoneStatusChangedCallback: (permissionStatus: PermissionStatus) => any): Promise<boolean | undefined> {
+    if (navigator.permissions) {
+      try {
+        const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        permissionStatus.onchange = () => {
+          microphoneStatusChangedCallback(permissionStatus);
+        };
+        return permissionStatus.state === 'granted';
+      } catch (error) {
+        console.error('Error querying microphone permissions: ', error);
+        return undefined;
+      }
+    } else {
+      console.log('Permissions API is not supported by your browser.');
+      return undefined;
+    }
   }
 
   stopRecording(): Promise<Blob> {
@@ -142,98 +217,5 @@ export class AudioRecorderService {
         reject('MediaRecorder not initialized');
       }
     });
-  }
-
-  async loadModel(model?: Uint8Array) {
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-
-    if (!model) {
-      model = await this.fetchRemote('assets/whisper.wasm/models/ggml-model-whisper-tiny.en-q5_1.bin');
-    }
-
-    window.Module.FS_createDataFile('/', 'whisper.bin', model, true, true);
-  }
-
-  async initializeWhisper(): Promise<void> {
-    if (window.Module) {
-      this.whisperInstance = window.Module.init('whisper.bin', this.kIntervalAudio);
-      if (!this.whisperInstance) {
-        console.log("Failed to initialize whisper");
-        return;
-      }
-    }
-  }
-
-  async fetchRemote(url: any) {
-    const response = await fetch(
-        url,
-        {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/octet-stream',
-            },
-        }
-    );
-
-    if (!response.ok) {
-        return;
-    }
-
-    const contentLength = response.headers.get('content-length');
-    const total = parseInt(contentLength!, 10);
-    const reader = response.body ? response.body.getReader() : null;
-
-    var chunks = [];
-    var receivedLength = 0;
-    var progressLast = -1;
-
-    while (true) {
-        if (reader) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            break;
-          }
-
-          chunks.push(value);
-          receivedLength += value.length;
-        }
-
-        if (contentLength) {
-            var progressCur = Math.round((receivedLength / total) * 10);
-            if (progressCur != progressLast) {
-                progressLast = progressCur;
-            }
-        }
-    }
-
-    var position = 0;
-    var chunksAll = new Uint8Array(receivedLength);
-
-    for (var chunk of chunks) {
-        chunksAll.set(chunk, position);
-        position += chunk.length;
-    }
-
-    return chunksAll;
-  }
-
-  async isMicrophoneEnabled(microphoneStatusChangedCallback: (permissionStatus: PermissionStatus) => any): Promise<boolean | undefined> {
-    if (navigator.permissions) {
-      try {
-        const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-        permissionStatus.onchange = (event: Event) => {
-          microphoneStatusChangedCallback(permissionStatus);
-        }
-        return permissionStatus.state === 'granted';
-      } catch (error) {
-        console.error('Error while querying microphone permissions: ', error);
-        return undefined;
-      }
-    } else {
-      console.log('Permissions API is not supported by your browser.');
-      return undefined;
-    }
   }
 }
