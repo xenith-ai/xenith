@@ -1,0 +1,10 @@
+@import '../variables.scss';
+
+$file-drop-border-width: 15px;
+
+app-nav-top {
+  z-index: $nav-top-z;
+  height: $nav-top-height;
+  position: absolute;
+  width: 100%;
+}

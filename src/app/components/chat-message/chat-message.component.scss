@@ -1,0 +1,14 @@
+@import '../../../variables.scss';
+
+.text-message {
+  padding: 1em;
+}
+
+.button-message {
+  padding: 1em;
+
+  > img {
+    width: 1.5em;
+    margin-right: 0.5em;
+  }
+}

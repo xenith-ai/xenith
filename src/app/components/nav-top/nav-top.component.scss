@@ -1,0 +1,83 @@
+@import '../../../variables.scss';
+
+#nav-top-container {
+  button {
+    overflow: clip;
+    pointer-events: none;
+
+    > img {
+      pointer-events: auto;
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+#nav-menu-container {
+  > #menu-button {
+    padding: calc($nav-top-height / 3);
+  }
+
+  > h1 {
+    display: none;
+    color: $logo-color;
+    font-size: 1.4rem;
+  }
+}
+
+#nav-links-container {
+  > #profile-button {
+    position: relative;
+    $padding: calc($nav-top-height / 4);
+    $border-radius: calc($padding * 2);
+
+    padding: $padding;
+
+    > img {
+      transition: box-shadow 0.2s ease-in-out;
+      border-radius: $border-radius;
+      box-shadow:
+      0 0 4px $glow-4,
+      0 0 6px $glow-2,
+      0 0 8px $glow-1;
+
+      &:hover {
+        box-shadow:
+        0 0 4px $glow-1,
+        0 0 6px $glow-2,
+        0 0 8px $glow-3;
+      }
+    }
+  }
+
+  > a {
+    $padding-vertical: calc($nav-top-height / 2.5);
+    $padding-horizontal: calc($padding-vertical / 2);
+
+    pointer-events: none;
+    position: relative;
+    padding: $padding-vertical $padding-horizontal;
+
+    > img {
+      pointer-events: auto;
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+@media screen and (max-width: $mobile-collapse-width) {
+  #nav-menu-container {
+    > h1 {
+      display: block;
+    }
+  }
+}
+
+@media screen and (max-width: 30em) {
+  #nav-links-container {
+    > a {
+      display: none;
+    }
+  }
+}

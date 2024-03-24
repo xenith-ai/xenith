@@ -1,0 +1,5 @@
+<p *ngIf="isTextMessage && textMessage" class="text-message">{{ textMessage }}</p>
+<button *ngIf="isButtonMessage && buttonMessage" class="button-message flex flex-row items-center" [class]="buttonMessage.styleClass" (click)="buttonMessage.onClick()">
+  <img [src]="buttonMessage.image" alt="Enable microphone button image">
+  <p>{{ message }}</p>
+</button>
