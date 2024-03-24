@@ -7,14 +7,14 @@
       "request": "launch",
       "type": "node-terminal",
       "serverReadyAction":{
-        "action": "startDebugging",
-        "name": "Chrome Client",
-        "pattern":"listening on (.*)localhost:([0-9]+)"
+        "action": "debugWithChrome",
+        "pattern":"(.*)localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s"
       }
     },
     {
       "name": "Chrome Client",
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "url": "http://localhost:4200",
       "sourceMaps": true,

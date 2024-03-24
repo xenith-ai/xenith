@@ -52,10 +52,9 @@ export class LandingComponent {
 
     if (!whisperModel) {
       this.promptDownloadModelFlow();
-      return;
+    } else {
+      await this.loadModelFlow(whisperModel);
     }
-
-    await this.loadModelFlow(whisperModel);
   }
 
   loadModelFlow = async (model: Uint8Array) => {
@@ -94,8 +93,6 @@ export class LandingComponent {
   }
 
   async requestMicrophoneAccessFlow() {
-    const microphoneStatus = await this.audioRecorderService.isMicrophoneEnabled(this.microphoneStatusChangedCallback);
-
     this.conversation.addMessage(new TextMessage(this.newAI, `You'll need to provide access to your microphone.`, new Date()));
     this.conversation.addMessage(this.enableMicrophoneButtonMessage);
   }
@@ -103,10 +100,10 @@ export class LandingComponent {
   async startListeningFlow() {
     this.conversation.addMessage(new TextMessage(this.newAI, `Initializing listener...`, new Date()));
 
-    await this.audioRecorderService.startListening(this.whisperInitializedCallback);
+    await this.audioRecorderService.startListening(this.whisperListeningCallback);
   }
 
-  whisperInitializedCallback = () => {
+  whisperListeningCallback = () => {
     this.conversation.addMessage(new TextMessage(this.newAI, `Started listening! Say the activation `, new Date()));
     this.cdr.detectChanges(); // Ensure listener status is updated in the UI
   }

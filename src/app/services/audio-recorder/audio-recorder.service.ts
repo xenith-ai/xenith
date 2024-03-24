@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Transcription } from '../../models/transcription.model';
+import { Utilities } from '../../helpers/utilities';
 
 declare var window: any;
 
@@ -32,13 +33,15 @@ export class AudioRecorderService {
     }
   }
 
-  public async startListening(whisperInitializedCallback: Function): Promise<void> {
+  public async startListening(listeningCallback: Function): Promise<void> {
     try {
       await this.requestMicrophoneAccess();
 
       if (!this.whisperInitialized) {
-        await this.initWhisper(whisperInitializedCallback);
+        await this.initWhisper();
       }
+
+      await this.waitForListening(listeningCallback);
 
       await this.initMediaRecorder();
       await this.startPollingWhisper();
@@ -114,12 +117,14 @@ export class AudioRecorderService {
   private startPollingWhisper(): void {
     this.whisperPollingInterval = setInterval(async () => {
       if (window.Module) {
-        if (window.Module.get_transcribed) { // for some inexplicable reason, checking for function existence causes it to exist...
+        if (window.Module.get_transcribed) {
           var transcribed = await window.Module.get_transcribed();
           this.transcriptionDetected(transcribed);
         } else {
-          console.error('get_transcribed is not defined.');
+          console.error('get_transcribed is not defined');
         }
+      } else {
+        console.error('Module is not defined')
       }
     }, 100);
   }
@@ -152,24 +157,35 @@ export class AudioRecorderService {
     return input.replace(/[^a-zA-Z ]/g, "").toLowerCase();
   }
 
-  private async initWhisper(whisperInitializedCallback: Function): Promise<void> {
-    const checkModuleInit = async () => {
+  private async initWhisper(): Promise<void> {
+    while (!this.whisperInitialized) {
       if (window.Module?.init) {
         this.whisperInstance = await window.Module.init('whisper.bin', this.kIntervalAudio);
 
         if (this.whisperInstance) {
+          this.whisperInitialized = true;
           console.log('Whisper instance initialized successfully.');
-          this.listening = true;
-          whisperInitializedCallback();
         } else {
-          console.error("Failed to initialize whisper instance.");
+          console.error('Failed to initialize whisper instance.');
+          break; // Module.init is available but failed to initialize, give up
         }
-      } else {
-        setTimeout(checkModuleInit, 100);
       }
-    };
 
-    await checkModuleInit();
+      await Utilities.sleep(100);
+    }
+  }
+
+  private async waitForListening(whisperListeningCallback: Function): Promise<void> {
+    while (!this.listening) {
+      if (window.Module?.get_transcribed && window.Module?.set_audio) {
+        console.log('Module.get_transcribed and Module.set_audio are available');
+
+        whisperListeningCallback();
+        this.listening = true;
+      }
+
+      await Utilities.sleep(100);
+    }
   }
 
   public async loadModel(model?: Uint8Array): Promise<void> {
