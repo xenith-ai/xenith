@@ -27,12 +27,12 @@ export class IndexedDBService {
       const store = transaction.objectStore(IndexedDBStore.Models);
       const request = store.put(value, key);
 
-      request.onerror = (event) => {
+      request.onerror = () => {
         console.error('Error writing model:', request.error);
         reject(request.error);
       };
 
-      request.onsuccess = (event) => {
+      request.onsuccess = () => {
         resolve();
       };
     });
@@ -52,12 +52,12 @@ export class IndexedDBService {
       const store = transaction.objectStore(IndexedDBStore.Models);
       const request = store.get(key);
 
-      request.onerror = (event) => {
+      request.onerror = () => {
         console.error('Error reading string:', request.error);
         reject(request.error);
       };
 
-      request.onsuccess = (event) => {
+      request.onsuccess = () => {
         if (request.result) {
           resolve(request.result);
         } else {
@@ -74,19 +74,19 @@ export class IndexedDBService {
     return new Promise<void>((resolve, reject) => {
       const request = indexedDB.open(name, version);
 
-      request.onerror = (event) => {
+      request.onerror = () => {
         console.error('IndexedDB error:', request.error);
         reject(request.error);
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = () => {
         this.db = request.result;
         if (!this.db.objectStoreNames.contains(IndexedDBStore.Models)) {
           this.db.createObjectStore(IndexedDBStore.Models);
         }
       };
 
-      request.onsuccess = (event) => {
+      request.onsuccess = () => {
         this.db = request.result;
         resolve();
       };

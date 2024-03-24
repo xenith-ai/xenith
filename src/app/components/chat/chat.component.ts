@@ -92,7 +92,7 @@ export class ChatComponent {
         this.chatInput.nativeElement.value +=
           ' ' + transcription.originalTranscription;
       } else {
-        let triggerIndex = transcription.wordList.indexOf(this.triggerWord);
+        const triggerIndex = transcription.wordList.indexOf(this.triggerWord);
         if (triggerIndex != -1) {
           const relevantString = transcription.wordList
             .slice(triggerIndex + 1)

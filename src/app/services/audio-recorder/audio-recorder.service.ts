@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Transcription } from '../../models/transcription.model';
 import { Utilities } from '../../helpers/utilities';
 
-declare var window: any;
+declare let window: any;
 
 @Injectable({
   providedIn: 'root',
@@ -48,7 +48,7 @@ export class AudioRecorderService {
    * 5. Start polling Whisper for transcriptions.
    * @param listeningCallback Callback function to execute when listening has started.
    */
-  public async startListening(listeningCallback: Function): Promise<void> {
+  public async startListening(listeningCallback: () => void): Promise<void> {
     try {
       await this.requestMicrophoneAccess();
 
@@ -203,13 +203,13 @@ export class AudioRecorderService {
       }
       const audioBuffer = await this.context!.decodeAudioData(buffer.buffer);
 
-      var offlineContext = new OfflineAudioContext(
+      const offlineContext = new OfflineAudioContext(
         audioBuffer.numberOfChannels,
         audioBuffer.length,
         audioBuffer.sampleRate
       );
 
-      var source = offlineContext.createBufferSource();
+      const source = offlineContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(offlineContext.destination);
       source.start(0);
@@ -260,7 +260,7 @@ export class AudioRecorderService {
         continue;
       }
 
-      var transcribed = await window.Module.get_transcribed();
+      const transcribed = await window.Module.get_transcribed();
       this.transcriptionDetected(transcribed);
     }
   }
@@ -291,7 +291,7 @@ export class AudioRecorderService {
    */
   private removeDescriptions(transcription: string): string {
     return transcription
-      .replace(/(\(.*?\))|(\[(?!BLANK AUDIO).*?\])|[\[\]()]/g, '')
+      .replace(/(\(.*?\))|(\[(?!BLANK AUDIO).*?\])|[[\]()]/g, '')
       .trim();
   }
 
@@ -332,7 +332,7 @@ export class AudioRecorderService {
    * @param whisperListeningCallback Callback function to execute when listening has started.
    */
   private async waitForListening(
-    whisperListeningCallback: Function
+    whisperListeningCallback: () => void
   ): Promise<void> {
     while (!this.listening) {
       if (window.Module?.get_transcribed && window.Module?.set_audio) {

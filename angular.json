@@ -28,7 +28,11 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              { "glob": "**/*", "input": "src/assets/whisper.wasm", "output": "/" }
+              {
+                "glob": "**/*",
+                "input": "src/assets/whisper.wasm",
+                "output": "/"
+              }
             ],
             "styles": [
               "src/styles.scss"
@@ -74,8 +78,8 @@
           "defaultConfiguration": "development",
           "options": {
             "headers": {
-              "Cross-Origin-Opener-Policy":"same-origin",
-              "Cross-Origin-Embedder-Policy":"require-corp"
+              "Cross-Origin-Opener-Policy": "same-origin",
+              "Cross-Origin-Embedder-Policy": "require-corp"
             }
           }
         },
@@ -97,7 +101,11 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              { "glob": "**/*", "input": "src/assets/whisper.wasm", "output": "/" }
+              {
+                "glob": "**/*",
+                "input": "src/assets/whisper.wasm",
+                "output": "/"
+              }
             ],
             "styles": [
               "src/styles.scss"
@@ -106,11 +114,23 @@
               "src/assets/whisper.wasm/stream.js"
             ]
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }
   },
   "cli": {
-    "analytics": false
+    "analytics": false,
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
   }
 }

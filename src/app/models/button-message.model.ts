@@ -8,7 +8,7 @@ export class ButtonMessage implements IChatMessage {
     public timestamp: Date,
     public image: string,
     public styleClass: string,
-    public onClick: Function
+    public onClick: () => void
   ) {}
 
   toString() {
