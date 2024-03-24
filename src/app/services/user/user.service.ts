@@ -6,9 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
   providedIn: 'root',
 })
 export class UserService {
-  constructor() { }
+  constructor() {}
 
-  createUser() {
+  public createUser() {
     return new User(uuidv4(), 'Shane Duffy', 'assets/dev/shane.webp');
   }
 }

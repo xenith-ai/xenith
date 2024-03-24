@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-
 import { AudioRecorderService } from './audio-recorder.service';
 
 describe('AudioRecordingService', () => {

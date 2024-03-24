@@ -6,7 +6,7 @@ import { IChatMessage } from '../../interfaces/chat-message.interface';
   providedIn: 'root',
 })
 export class ConversationService {
-  constructor() { }
+  constructor() {}
 
   public createNewConversation(): Conversation {
     return new Conversation(new Array<IChatMessage>());

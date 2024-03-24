@@ -5,7 +5,7 @@ import axios from 'axios';
   providedIn: 'root',
 })
 export class HttpHandlerService {
-  async fetchOctetStream(url: string): Promise<Uint8Array> {
+  public async fetchOctetStream(url: string): Promise<Uint8Array> {
     try {
       const response = await axios({
         method: 'get',
@@ -13,7 +13,7 @@ export class HttpHandlerService {
         responseType: 'arraybuffer',
         headers: {
           'Content-Type': 'application/octet-stream',
-        }
+        },
       });
 
       return new Uint8Array(response.data);

@@ -1,5 +1,5 @@
-import { IChatParticipant } from "../interfaces/chat-participant.interface";
-import { IChatMessage } from "../interfaces/chat-message.interface";
+import { IChatParticipant } from '../interfaces/chat-participant.interface';
+import { IChatMessage } from '../interfaces/chat-message.interface';
 
 export class ButtonMessage implements IChatMessage {
   constructor(
@@ -8,8 +8,8 @@ export class ButtonMessage implements IChatMessage {
     public timestamp: Date,
     public image: string,
     public styleClass: string,
-    public onClick: Function,
-  ) { }
+    public onClick: Function
+  ) {}
 
   toString() {
     return this.text;

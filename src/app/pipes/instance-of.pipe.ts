@@ -2,7 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'instanceOf',
-  standalone: true
+  standalone: true,
 })
 export class InstanceOfPipe implements PipeTransform {
   transform(value: any, target: any): boolean {

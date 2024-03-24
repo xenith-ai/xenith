@@ -8,19 +8,21 @@ declare var window: any;
   providedIn: 'root',
 })
 export class AudioRecorderService {
+  public listening = false;
+
+  public transcriptionCallback?: (transcription: Transcription) => void;
+
   private mediaRecorder: MediaRecorder | undefined;
   private chunks: Blob[] = [];
   private stream: MediaStream | undefined;
   private context: AudioContext | undefined;
   private audio: Float32Array | undefined;
   private whisperInstance: any;
-  public transcriptionCallback?: (transcription: Transcription) => void;
 
   private readonly kSampleRate = 16000;
   private readonly kIntervalAudio = 2;
   private readonly kIntervalAudio_ms = this.kIntervalAudio * 1000;
 
-  public listening = false;
   private whisperInitialized = false;
 
   /**
@@ -28,7 +30,10 @@ export class AudioRecorderService {
    */
   public async requestMicrophoneAccess(): Promise<void> {
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
     } catch (error) {
       console.error('Error requesting microphone access: ', error);
     }
@@ -81,10 +86,14 @@ export class AudioRecorderService {
    * @param microphoneStatusChangedCallback Callback function to execute when microphone status changes.
    * @returns True if microphone access is granted, false if denied, and undefined if permissions API is not supported.
    */
-  public async isMicrophoneEnabled(microphoneStatusChangedCallback: (permissionStatus: PermissionStatus) => any): Promise<boolean | undefined> {
+  public async isMicrophoneEnabled(
+    microphoneStatusChangedCallback: (permissionStatus: PermissionStatus) => any
+  ): Promise<boolean | undefined> {
     if (navigator.permissions) {
       try {
-        const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        const permissionStatus = await navigator.permissions.query({
+          name: 'microphone' as PermissionName,
+        });
         permissionStatus.onchange = () => {
           microphoneStatusChangedCallback(permissionStatus);
         };
@@ -107,14 +116,21 @@ export class AudioRecorderService {
     try {
       console.log('Loading model...');
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
-      window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      window.OfflineAudioContext =
+        window.OfflineAudioContext || window.webkitOfflineAudioContext;
 
       if (!model) {
-        console.error("Model data is undefined.");
+        console.error('Model data is undefined.');
         return;
       }
 
-      await window.Module.FS_createDataFile('/', 'whisper.bin', model, true, true);
+      await window.Module.FS_createDataFile(
+        '/',
+        'whisper.bin',
+        model,
+        true,
+        true
+      );
       console.log('Model loaded successfully.');
     } catch (error) {
       console.error('Error loading model: ', error);
@@ -138,7 +154,9 @@ export class AudioRecorderService {
   private async initMediaRecorder(): Promise<void> {
     try {
       if (!this.stream) {
-        throw new Error('No stream available for MediaRecorder initialization.');
+        throw new Error(
+          'No stream available for MediaRecorder initialization.'
+        );
       }
 
       this.mediaRecorder = new MediaRecorder(this.stream);
@@ -157,7 +175,7 @@ export class AudioRecorderService {
     this.chunks.push(event.data);
     const blob = new Blob(this.chunks, { type: 'audio/ogg; codecs=opus' });
     this.processAudioBlob(blob);
-  }
+  };
 
   /**
    * Processes the audio data from the BlobEvent.
@@ -185,7 +203,11 @@ export class AudioRecorderService {
       }
       const audioBuffer = await this.context!.decodeAudioData(buffer.buffer);
 
-      var offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
+      var offlineContext = new OfflineAudioContext(
+        audioBuffer.numberOfChannels,
+        audioBuffer.length,
+        audioBuffer.sampleRate
+      );
 
       var source = offlineContext.createBufferSource();
       source.buffer = audioBuffer;
@@ -249,9 +271,14 @@ export class AudioRecorderService {
    */
   private transcriptionDetected(transcription: string): void {
     const filteredTranscription = this.removeDescriptions(transcription);
-    const indexableTranscription = this.makeIndexable(filteredTranscription).toLowerCase();
+    const indexableTranscription = this.makeIndexable(
+      filteredTranscription
+    ).toLowerCase();
 
-    const transcriptionContainer = new Transcription(indexableTranscription, filteredTranscription);
+    const transcriptionContainer = new Transcription(
+      indexableTranscription,
+      filteredTranscription
+    );
 
     if (this.transcriptionCallback) {
       this.transcriptionCallback(transcriptionContainer);
@@ -263,7 +290,9 @@ export class AudioRecorderService {
    * @param transcription Transcription string from Whisper.
    */
   private removeDescriptions(transcription: string): string {
-    return transcription.replace(/(\(.*?\))|(\[(?!BLANK AUDIO).*?\])|[\[\]()]/g, '').trim();
+    return transcription
+      .replace(/(\(.*?\))|(\[(?!BLANK AUDIO).*?\])|[\[\]()]/g, '')
+      .trim();
   }
 
   /**
@@ -271,13 +300,19 @@ export class AudioRecorderService {
    * @param transcription Transcription string from Whisper.
    */
   private makeIndexable(transcription: string): string {
-    return transcription.replace(/[^a-zA-Z ]/g, "").toLowerCase().trim();
+    return transcription
+      .replace(/[^a-zA-Z ]/g, '')
+      .toLowerCase()
+      .trim();
   }
 
   private async initWhisper(): Promise<void> {
     while (!this.whisperInitialized) {
       if (window.Module?.init) {
-        this.whisperInstance = await window.Module.init('whisper.bin', this.kIntervalAudio);
+        this.whisperInstance = await window.Module.init(
+          'whisper.bin',
+          this.kIntervalAudio
+        );
 
         if (this.whisperInstance) {
           this.whisperInitialized = true;
@@ -296,10 +331,14 @@ export class AudioRecorderService {
    * Waits for listening to start by checking if the Whisper functions are available.
    * @param whisperListeningCallback Callback function to execute when listening has started.
    */
-  private async waitForListening(whisperListeningCallback: Function): Promise<void> {
+  private async waitForListening(
+    whisperListeningCallback: Function
+  ): Promise<void> {
     while (!this.listening) {
       if (window.Module?.get_transcribed && window.Module?.set_audio) {
-        console.log('Module.get_transcribed and Module.set_audio are available');
+        console.log(
+          'Module.get_transcribed and Module.set_audio are available'
+        );
 
         whisperListeningCallback();
         this.listening = true;

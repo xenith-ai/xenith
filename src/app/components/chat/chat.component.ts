@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  Input,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { Conversation } from '../../models/conversation.model';
@@ -12,11 +18,11 @@ import { AudioRecorderService } from '../../services/audio-recorder/audio-record
 import { Transcription } from '../../models/transcription.model';
 
 @Component({
-    selector: 'app-chat',
-    standalone: true,
-    templateUrl: './chat.component.html',
-    styleUrl: './chat.component.scss',
-    imports: [CommonModule, RouterOutlet, InstanceOfPipe, ChatMessageComponent]
+  selector: 'app-chat',
+  standalone: true,
+  templateUrl: './chat.component.html',
+  styleUrl: './chat.component.scss',
+  imports: [CommonModule, RouterOutlet, InstanceOfPipe, ChatMessageComponent],
 })
 export class ChatComponent {
   @ViewChild('chatMessages') chatMessages!: ElementRef;
@@ -33,22 +39,31 @@ export class ChatComponent {
   public TextMessage = TextMessage;
   public ButtonMessage = ButtonMessage;
 
-  silenceSendDelta = 3000;
-  silenceStarted?: Date;
-  triggered = false;
-  triggerWord = 'miku';
+  private silenceStarted?: Date;
 
-  constructor(private cdr: ChangeDetectorRef, private audioRecorderService: AudioRecorderService) {
-    this.audioRecorderService.transcriptionCallback = this.transcriptionCallback;
-   }
+  private triggered = false;
+
+  private readonly silenceSendDelta = 3000;
+  private readonly triggerWord = 'miku';
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private audioRecorderService: AudioRecorderService
+  ) {
+    this.audioRecorderService.transcriptionCallback =
+      this.transcriptionCallback;
+  }
 
   public sendMessage(value: string) {
     if (value && this.currentUser) {
-      this.conversation?.addMessage(new TextMessage(this.currentUser, value, new Date()));
+      this.conversation?.addMessage(
+        new TextMessage(this.currentUser, value, new Date())
+      );
       this.chatInput.nativeElement.value = '';
 
       this.cdr.detectChanges();
-      this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
+      this.chatMessages.nativeElement.scrollTop =
+        this.chatMessages.nativeElement.scrollHeight;
     }
   }
 
@@ -66,18 +81,23 @@ export class ChatComponent {
 
   public transcriptionCallback = (transcription: Transcription) => {
     if (!this.conversation) {
-      console.log('Transcription callback triggered but there is no conversation to send message to');
+      console.log(
+        'Transcription callback triggered but there is no conversation to send message to'
+      );
       return;
     }
 
     if (transcription?.indexableTranscription) {
       if (this.triggered) {
-        this.chatInput.nativeElement.value += ' ' + transcription.originalTranscription;
+        this.chatInput.nativeElement.value +=
+          ' ' + transcription.originalTranscription;
       } else {
         let triggerIndex = transcription.wordList.indexOf(this.triggerWord);
         if (triggerIndex != -1) {
-          const relevantString = transcription.wordList.slice(triggerIndex + 1).join(" ");
-          this.chatInput.nativeElement.value += ' ' + relevantString
+          const relevantString = transcription.wordList
+            .slice(triggerIndex + 1)
+            .join(' ');
+          this.chatInput.nativeElement.value += ' ' + relevantString;
           this.triggered = true;
         }
       }
@@ -85,7 +105,10 @@ export class ChatComponent {
       if (this.triggered) {
         if (!this.silenceStarted) {
           this.silenceStarted = new Date();
-        } else if ((new Date()).getTime() - this.silenceStarted.getTime() > this.silenceSendDelta) {
+        } else if (
+          new Date().getTime() - this.silenceStarted.getTime() >
+          this.silenceSendDelta
+        ) {
           // if transcription is empty, reset trigger and send message if there is any content
           if (this.chatInput.nativeElement.value.length > 0) {
             this.sendMessage(this.chatInput.nativeElement.value);
@@ -96,5 +119,5 @@ export class ChatComponent {
         }
       }
     }
-  }
+  };
 }

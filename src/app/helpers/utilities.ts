@@ -4,6 +4,6 @@ export class Utilities {
    * @param ms The time to sleep in milliseconds.
    */
   static sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

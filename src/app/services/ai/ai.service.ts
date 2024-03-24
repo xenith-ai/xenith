@@ -6,9 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
   providedIn: 'root',
 })
 export class AIService {
-  constructor() { }
+  constructor() {}
 
-  createAI() {
+  public createAI() {
     return new AI(uuidv4(), 'xenith', 'assets/dev/miku.jpg');
   }
 }

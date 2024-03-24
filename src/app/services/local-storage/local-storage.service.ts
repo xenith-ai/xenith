@@ -21,25 +21,25 @@ export class LocalStorageService {
     localStorage.setItem(key, base64Model);
   }
 
-  uint8ArrayToBase64(buffer: Uint8Array): string {
+  private uint8ArrayToBase64(buffer: Uint8Array): string {
     let binary = '';
     const chunkSize = 5000; // Process in chunks to avoid call stack size exceed error
 
     for (let i = 0; i < buffer.length; i += chunkSize) {
-        const chunk = Array.from(buffer.subarray(i, i + chunkSize)); // Convert Uint8Array to array
-        binary += String.fromCharCode.apply(null, chunk);
+      const chunk = Array.from(buffer.subarray(i, i + chunkSize)); // Convert Uint8Array to array
+      binary += String.fromCharCode.apply(null, chunk);
     }
 
     return window.btoa(binary);
   }
 
-  base64ToUint8Array(base64: string): Uint8Array {
+  private base64ToUint8Array(base64: string): Uint8Array {
     const binaryString = window.atob(base64);
     const len = binaryString.length;
     const bytes = new Uint8Array(len);
 
     for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      bytes[i] = binaryString.charCodeAt(i);
     }
 
     return bytes;

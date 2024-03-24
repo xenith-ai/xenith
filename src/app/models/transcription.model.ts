@@ -3,7 +3,7 @@ export class Transcription {
 
   constructor(
     public indexableTranscription: string,
-    public originalTranscription: string,
+    public originalTranscription: string
   ) {
     this.wordList = indexableTranscription.split(' ');
   }

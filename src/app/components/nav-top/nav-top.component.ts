@@ -7,8 +7,8 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterOutlet],
   templateUrl: './nav-top.component.html',
-  styleUrl: './nav-top.component.scss'
+  styleUrl: './nav-top.component.scss',
 })
 export class NavTopComponent {
-  constructor() { }
+  constructor() {}
 }
