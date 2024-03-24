@@ -9,6 +9,7 @@ import { TextMessage } from '../../models/text-message.model';
 import { ButtonMessage } from '../../models/button-message.model';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
 import { AudioRecorderService } from '../../services/audio-recorder/audio-recorder.service';
+import { Transcription } from '../../models/transcription.model';
 
 @Component({
     selector: 'app-chat',
@@ -32,11 +33,13 @@ export class ChatComponent {
   public TextMessage = TextMessage;
   public ButtonMessage = ButtonMessage;
 
-  silenceSendDelta = 1000;
+  silenceSendDelta = 3000;
   silenceStarted?: Date;
+  triggered = false;
+  triggerWord = 'miku';
 
   constructor(private cdr: ChangeDetectorRef, private audioRecorderService: AudioRecorderService) {
-    this.audioRecorderService.speechCallback = this.speechCallback;
+    this.audioRecorderService.transcriptionCallback = this.transcriptionCallback;
    }
 
   public sendMessage(value: string) {
@@ -61,20 +64,36 @@ export class ChatComponent {
     return original as unknown as TCast;
   }
 
-  public speechCallback = (speech: string) => {
+  public transcriptionCallback = (transcription: Transcription) => {
     if (!this.conversation) {
-      console.log('Speech callback triggered but there is no conversation to send message to');
+      console.log('Transcription callback triggered but there is no conversation to send message to');
       return;
     }
 
-    if (speech && speech !== '[BLANK_AUDIO]') {
-      this.chatInput.nativeElement.value += speech;
-    } else if (this.chatInput.nativeElement.value.length > 0  && this.currentUser) {
-      if (!this.silenceStarted) {
-        this.silenceStarted = new Date();
-      } else if ((new Date()).getTime() - this.silenceStarted.getTime() > this.silenceSendDelta) {
-        this.sendMessage(this.chatInput.nativeElement.value);
-        this.silenceStarted = undefined;
+    if (transcription?.indexableTranscription) {
+      if (this.triggered) {
+        this.chatInput.nativeElement.value += ' ' + transcription.originalTranscription;
+      } else {
+        let triggerIndex = transcription.wordList.indexOf(this.triggerWord);
+        if (triggerIndex != -1) {
+          const relevantString = transcription.wordList.slice(triggerIndex + 1).join(" ");
+          this.chatInput.nativeElement.value += ' ' + relevantString
+          this.triggered = true;
+        }
+      }
+    } else {
+      if (this.triggered) {
+        if (!this.silenceStarted) {
+          this.silenceStarted = new Date();
+        } else if ((new Date()).getTime() - this.silenceStarted.getTime() > this.silenceSendDelta) {
+          // if transcription is empty, reset trigger and send message if there is any content
+          if (this.chatInput.nativeElement.value.length > 0) {
+            this.sendMessage(this.chatInput.nativeElement.value);
+          }
+
+          this.triggered = false;
+          this.silenceStarted = undefined;
+        }
       }
     }
   }

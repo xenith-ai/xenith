@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Transcription } from '../../models/transcription.model';
 
 declare var window: any;
 
@@ -12,10 +13,10 @@ export class AudioRecorderService {
   private context: AudioContext | undefined;
   private audio: Float32Array | undefined;
   private whisperInstance: any;
-  public speechCallback?: (transcription: string) => void;
+  public transcriptionCallback?: (transcription: Transcription) => void;
 
   private readonly kSampleRate = 16000;
-  private readonly kIntervalAudio = 4;
+  private readonly kIntervalAudio = 2;
   private readonly kIntervalAudio_ms = this.kIntervalAudio * 1000;
 
   public listening = false;
@@ -115,7 +116,7 @@ export class AudioRecorderService {
       if (window.Module) {
         if (window.Module.get_transcribed) { // for some inexplicable reason, checking for function existence causes it to exist...
           var transcribed = await window.Module.get_transcribed();
-          this.transcriptionDetected(this.cleanString(transcribed));
+          this.transcriptionDetected(transcribed);
         } else {
           console.error('get_transcribed is not defined.');
         }
@@ -124,8 +125,17 @@ export class AudioRecorderService {
   }
 
   private transcriptionDetected(transcription: string): void {
-    if (this.speechCallback) {
-      this.speechCallback(transcription);
+    const filteredTranscription = this.removeDescriptions(transcription);
+    const indexableTranscription = this.makeIndexable(filteredTranscription).toLowerCase();
+
+    const transcriptionContainer = new Transcription(indexableTranscription, filteredTranscription);
+
+    if (filteredTranscription || indexableTranscription) {
+      console.log(transcriptionContainer);
+    }
+
+    if (this.transcriptionCallback) {
+      this.transcriptionCallback(transcriptionContainer);
     }
   }
 
@@ -133,9 +143,13 @@ export class AudioRecorderService {
     clearInterval(this.whisperPollingInterval);
   }
 
-  private cleanString(input: string): string {
-    const regex = /(\(.*?\))|(\[(?!BLANK AUDIO).*?\])|[\[\]()]/g;
-    return input.replace(regex, '').trim();
+  // Remove nonsense like [BLANK_AUDIO] and (inaudible) from transcription
+  private removeDescriptions(transcription: string): string {
+    return transcription.replace(/(\(.*?\))|(\[(?!BLANK AUDIO).*?\])|[\[\]()]/g, '').trim();
+  }
+
+  private makeIndexable(input: string): string {
+    return input.replace(/[^a-zA-Z ]/g, "").toLowerCase();
   }
 
   private async initWhisper(whisperInitializedCallback: Function): Promise<void> {
