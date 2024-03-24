@@ -50,12 +50,11 @@ export class ChatComponent {
   }
 
   protected inputOnEnter(element: HTMLInputElement) {
-    this.audioRecorderService.createMediaRecorder();
-    /*this.sendMessage(element.value);
+    this.sendMessage(element.value);
 
     // Apply visual changes first before updating scroll
     this.cdr.detectChanges();
-    console.log(this.chatMessages.nativeElement.scrollTop);*/
+    console.log(this.chatMessages.nativeElement.scrollTop);
   }
 
   protected castType<TOriginal, TCast>(original: TOriginal): TCast {

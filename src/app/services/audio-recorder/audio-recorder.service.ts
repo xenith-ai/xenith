@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpHandlerService } from '../http-handler/http-handler.service';
 
 declare var window: any;
 
@@ -16,7 +15,7 @@ export class AudioRecorderService {
   public speechCallback?: (transcription: string) => void;
 
   private readonly kSampleRate = 16000;
-  private readonly kIntervalAudio = 2;
+  private readonly kIntervalAudio = 4;
   private readonly kIntervalAudio_ms = this.kIntervalAudio * 1000;
 
   public listening = false;
@@ -53,22 +52,6 @@ export class AudioRecorderService {
         sampleRate: this.kSampleRate,
       });
     }
-  }
-
-  public async createMediaRecorder(): Promise<void> {
-    try {
-      const tStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      const tRecorder = new MediaRecorder(tStream);
-
-      tRecorder.ondataavailable = this.handleDataAvailableT;
-      tRecorder.start(this.kIntervalAudio_ms);
-    } catch (error) {
-      console.error('Error initializing MediaRecorder: ', error);
-    }
-  }
-
-  private handleDataAvailableT = async (event: BlobEvent): Promise<void> => {
-    console.log(event.data);
   }
 
   private async initMediaRecorder(): Promise<void> {
@@ -140,25 +123,26 @@ export class AudioRecorderService {
     }, 100);
   }
 
-  private stopPollingWhisper(): void {
-    clearInterval(this.whisperPollingInterval);
-  }
-
-  private cleanString(input: string): string {
-    const regex = /(\(.*?\))|(\[(?!BLANK AUDIO).*?\])/g;
-    return input.replace(regex, '').trim();
-  }
-
   private transcriptionDetected(transcription: string): void {
     if (this.speechCallback) {
       this.speechCallback(transcription);
     }
   }
 
+  private stopPollingWhisper(): void {
+    clearInterval(this.whisperPollingInterval);
+  }
+
+  private cleanString(input: string): string {
+    const regex = /(\(.*?\))|(\[(?!BLANK AUDIO).*?\])|[\[\]()]/g;
+    return input.replace(regex, '').trim();
+  }
+
   private async initWhisper(whisperInitializedCallback: Function): Promise<void> {
     const checkModuleInit = async () => {
       if (window.Module?.init) {
         this.whisperInstance = await window.Module.init('whisper.bin', this.kIntervalAudio);
+
         if (this.whisperInstance) {
           console.log('Whisper instance initialized successfully.');
           this.listening = true;
