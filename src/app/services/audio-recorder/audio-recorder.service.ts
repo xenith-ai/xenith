@@ -12,7 +12,6 @@ export class AudioRecorderService {
   private stream: MediaStream | undefined;
   private context: AudioContext | undefined;
   private audio: Float32Array | undefined;
-  private audio0: Float32Array | undefined;
   private whisperInstance: any;
   public speechCallback?: (transcription: string) => void;
 
@@ -24,8 +23,6 @@ export class AudioRecorderService {
   private whisperInitialized = false;
 
   private whisperPollingInterval: any;
-
-  constructor(private httpHandler: HttpHandlerService) {}
 
   public async requestMicrophoneAccess(): Promise<void> {
     try {
@@ -58,6 +55,22 @@ export class AudioRecorderService {
     }
   }
 
+  public async createMediaRecorder(): Promise<void> {
+    try {
+      const tStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      const tRecorder = new MediaRecorder(tStream);
+
+      tRecorder.ondataavailable = this.handleDataAvailableT;
+      tRecorder.start(this.kIntervalAudio_ms);
+    } catch (error) {
+      console.error('Error initializing MediaRecorder: ', error);
+    }
+  }
+
+  private handleDataAvailableT = async (event: BlobEvent): Promise<void> => {
+    console.log(event.data);
+  }
+
   private async initMediaRecorder(): Promise<void> {
     try {
       if (!this.stream) {
@@ -72,7 +85,7 @@ export class AudioRecorderService {
     }
   }
 
-  private handleDataAvailable = (event: BlobEvent): void => {
+  private handleDataAvailable = async (event: BlobEvent): Promise<void> => {
     this.chunks.push(event.data);
     const blob = new Blob(this.chunks, { type: 'audio/ogg; codecs=opus' });
     this.processAudioBlob(blob);
@@ -95,6 +108,7 @@ export class AudioRecorderService {
         this.initializeAudioContext();
       }
       const audioBuffer = await this.context!.decodeAudioData(buffer.buffer);
+
       var offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
 
       var source = offlineContext.createBufferSource();
@@ -105,17 +119,8 @@ export class AudioRecorderService {
       const renderedBuffer = await offlineContext.startRendering();
       this.audio = renderedBuffer.getChannelData(0);
 
-      if (this.audio0) {
-        let tempAudio = new Float32Array(this.audio0.length + this.audio.length);
-        tempAudio.set(this.audio0, 0);
-        tempAudio.set(this.audio, this.audio0.length);
-        this.audio0 = tempAudio;
-      } else {
-        this.audio0 = this.audio;
-      }
-
       if (this.whisperInstance && window.Module) {
-        await window.Module.set_audio(this.whisperInstance, this.audio0);
+        await window.Module.set_audio(this.whisperInstance, this.audio);
       }
     } catch (error) {
       console.error('Error processing audio buffer: ', error);
@@ -125,7 +130,7 @@ export class AudioRecorderService {
   private startPollingWhisper(): void {
     this.whisperPollingInterval = setInterval(async () => {
       if (window.Module) {
-        if (window.Module.get_transcribed) {
+        if (window.Module.get_transcribed) { // for some inexplicable reason, checking for function existence causes it to exist...
           var transcribed = await window.Module.get_transcribed();
           this.transcriptionDetected(this.cleanString(transcribed));
         } else {

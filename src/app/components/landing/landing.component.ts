@@ -84,13 +84,6 @@ export class LandingComponent {
 
       await this.startListeningFlow();
     } else {
-      /*
-      this.audioRecorderService.initializeAudioContext();
-
-      if (this.audioRecorderService.context?.state !== 'running') {
-        this.conversation.addMessage(new TextMessage(this.newAI, `It looks like your browser needs you to enable your audio context.`, new Date()));
-      }*/
-
       await this.requestMicrophoneAccessFlow();
     }
   }

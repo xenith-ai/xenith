@@ -34,7 +34,8 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "src/assets/whisper.wasm/stream.js"
+              "src/assets/whisper.wasm/stream.js",
+              "src/assets/libopus.js/libopus.js"
             ]
           },
           "configurations": {
@@ -103,7 +104,8 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "src/assets/whisper.wasm/stream.js"
+              "src/assets/whisper.wasm/stream.js",
+              "src/assets/libopus.js/libopus.js"
             ]
           }
         }
