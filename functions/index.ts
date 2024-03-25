@@ -11,17 +11,21 @@ export const onRequestOptions: PagesFunction = async () => {
   });
 };
 
-// Cloudflare Pages Function to set CORS and additional security headers for all responses
-export const onRequest: PagesFunction = async ({ next }) => {
+// Cloudflare Pages Function to set CORS and conditionally set additional security headers
+export const onRequest: PagesFunction = async ({ request, next }) => {
   const response = await next();
+  const url = new URL(request.url);
 
   // Set CORS headers
   response.headers.set('Access-Control-Allow-Origin', '*');
   response.headers.set('Access-Control-Max-Age', '86400');
 
-  // Set additional security headers
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  // Check if the request URL matches the pattern for scripts files
+  if (url.pathname.match(/\/scripts-.*\.js$/)) {
+    // Set additional security headers for scripts files
+    response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+    response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  }
 
   return response;
 };
