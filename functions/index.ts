@@ -21,7 +21,7 @@ export const onRequest: PagesFunction = async ({ request, next }) => {
   response.headers.set('Access-Control-Max-Age', '86400');
 
   // Check if the request URL matches the pattern for scripts files
-  if (url.pathname.match(/\/scripts-.*\.js$/)) {
+  if (url.pathname.includes('scripts')) {
     // Set additional security headers for scripts files
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
     response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
