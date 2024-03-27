@@ -1,6 +1,6 @@
 # Xenith
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/70139d0b-6e4a-4332-9d8d-4809fa0921ee/deploy-status)](https://app.netlify.com/sites/xenith/deploys) ![Discord](https://img.shields.io/discord/1221688220580843550?label=Discord&logo=discord) ![GitLab Stars](https://img.shields.io/gitlab/stars/xenith-ai/xenith)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/70139d0b-6e4a-4332-9d8d-4809fa0921ee/deploy-status)](https://app.netlify.com/sites/xenith/deploys) ![Discord](https://img.shields.io/discord/1221688220580843550?label=discord&logo=discord) ![GitLab Stars](https://img.shields.io/gitlab/stars/xenith-ai/xenith)
 
 Create and interact with LLM powered voice assistants with WebAssembly!
 
