@@ -16,6 +16,7 @@ import { IndexedDBService } from '../../services/indexed-db/indexed-db.service';
 import { ModelKey } from '../../enums/model-key.enum';
 import { HttpHandlerService } from '../../services/http-handler/http-handler.service';
 import { ModelUrl } from '../../enums/model-url.enum';
+import { Utilities } from '../../helpers/utilities';
 
 @Component({
   selector: 'app-landing',
@@ -171,11 +172,19 @@ export class LandingComponent {
     );
   }
 
-  private whisperListeningCallback = () => {
+  private whisperListeningCallback = async () => {
     this.conversation.addMessage(
       new TextMessage(
         this.newAI,
-        `Started listening! Say the activation `,
+        `Started listening! Say "Miku" to start interacting.`,
+        new Date()
+      )
+    );
+    await Utilities.sleep(300);
+    this.conversation.addMessage(
+      new TextMessage(
+        this.newAI,
+        `For instance, you can say "Miku, what's the weather like?"`,
         new Date()
       )
     );
