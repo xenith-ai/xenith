@@ -23,6 +23,10 @@
   scroll-behavior: smooth !important;
 }
 
+img, video {
+  max-width: none;
+}
+
 html, body {
   scroll-behavior: smooth !important;
 }
