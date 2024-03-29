@@ -79,6 +79,7 @@ export class AudioRecorderService {
    * TODO: Implement this method to stop listening and handle anything else associated.
    */
   public stopListening() {
+    this.stream?.getTracks().forEach(track => track.stop());
     this.mediaRecorder?.stop();
     this.listening = false;
   }
