@@ -5,3 +5,8 @@
 Create and interact with LLM powered voice assistants with WebAssembly!
 
 The goal of xenith is to provide a platform for users to create their own voice assistants. This means supporting remote _and_ local Speech-to-Text, Text-to-Speech and Large Language Models.
+
+## Credits
+
+- OpenAI - Creating (and open sourcing) the [Whisper Model](https://github.com/openai/whisper)
+- ggerganov - Writing the C++ and WebAssembly [Whisper Port](https://github.com/ggerganov/whisper.cpp)
