@@ -34,8 +34,6 @@
     padding: $padding;
 
     > img {
-      height: 100%;
-      aspect-ratio: 1;
       transition: box-shadow 0.2s ease-in-out;
       border-radius: $border-radius;
       box-shadow:
@@ -61,6 +59,8 @@
     padding: $padding-vertical $padding-horizontal;
 
     > img {
+      height: 100%;
+      aspect-ratio: 1;
       pointer-events: auto;
       width: 100%;
       height: 100%;
