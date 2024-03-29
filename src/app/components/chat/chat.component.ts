@@ -48,7 +48,7 @@ export class ChatComponent {
 
   constructor(
     private cdr: ChangeDetectorRef,
-    private audioRecorderService: AudioRecorderService
+    protected audioRecorderService: AudioRecorderService
   ) {
     this.audioRecorderService.transcriptionCallback =
       this.transcriptionCallback;
@@ -64,6 +64,16 @@ export class ChatComponent {
       this.cdr.detectChanges();
       this.chatMessages.nativeElement.scrollTop =
         this.chatMessages.nativeElement.scrollHeight;
+    }
+  }
+
+  protected toggleListener() {
+    if (!this.audioRecorderService.microphoneAccess) {
+      this.audioRecorderService.requestMicrophoneAccess();
+    } else if (!this.audioRecorderService.listening) {
+      this.audioRecorderService.startListening(() => {});
+    } else if (this.audioRecorderService.listening) {
+      this.audioRecorderService.stopListening();
     }
   }
 

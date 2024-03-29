@@ -4,11 +4,6 @@
   <div id="title-container">
     <h1>xenith</h1>
   </div>
-  <div id="status-container" class="flex flex-row items-center justify-center">
-    <div *ngIf="!audioRecorderService.listening" class="pulsating-circle red"></div>
-    <div *ngIf="audioRecorderService.listening" class="pulsating-circle green"></div>
-    <p>{{ audioRecorderService.listening ? 'listening...' : 'inactive' }}</p>
-  </div>
   <div id="primary-chat-container">
     <app-chat [conversation]="conversation" [currentUser]="newUser"></app-chat>
   </div>

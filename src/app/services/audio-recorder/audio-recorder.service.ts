@@ -8,6 +8,7 @@ declare let window: any;
   providedIn: 'root',
 })
 export class AudioRecorderService {
+  public microphoneAccess = false;
   public listening = false;
 
   public transcriptionCallback?: (transcription: Transcription) => void;
@@ -56,6 +57,8 @@ export class AudioRecorderService {
         await this.initWhisper();
       }
 
+      // TODO: make callback options
+      // Probably do this for other callback params in project as well
       await this.waitForListening(listeningCallback);
       await this.initMediaRecorder();
       await this.startPollingWhisper();
@@ -67,18 +70,9 @@ export class AudioRecorderService {
   /**
    * TODO: Implement this method to stop listening and handle anything else associated.
    */
-  public stopListening(): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      if (this.mediaRecorder) {
-        this.mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(this.chunks, { type: 'audio/wav' });
-          resolve(audioBlob);
-        };
-        this.mediaRecorder.stop();
-      } else {
-        reject('MediaRecorder not initialized');
-      }
-    });
+  public stopListening() {
+    this.mediaRecorder?.stop();
+    this.listening = false;
   }
 
   /**
@@ -95,6 +89,12 @@ export class AudioRecorderService {
           name: 'microphone' as PermissionName,
         });
         permissionStatus.onchange = () => {
+          if (permissionStatus.state === 'granted') {
+            this.microphoneAccess = true;
+          } else {
+            this.microphoneAccess = false;
+          }
+
           microphoneStatusChangedCallback(permissionStatus);
         };
         return permissionStatus.state === 'granted';
