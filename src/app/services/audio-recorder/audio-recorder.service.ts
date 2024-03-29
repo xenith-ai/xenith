@@ -53,6 +53,14 @@ export class AudioRecorderService {
     try {
       await this.requestMicrophoneAccess();
 
+      if (await this.isMicrophoneEnabled(() => {})) {
+        this.microphoneAccess = true;
+      } else {
+        this.microphoneAccess = false;
+        console.error('Microphone access is not granted.');
+        return;
+      }
+
       if (!this.whisperInitialized) {
         await this.initWhisper();
       }
