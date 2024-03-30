@@ -16,6 +16,10 @@
 #nav-menu-container {
   > #menu-button {
     padding: calc($nav-top-height / 3);
+
+    > img {
+      aspect-ratio: 1;
+    }
   }
 
   > h1 {
