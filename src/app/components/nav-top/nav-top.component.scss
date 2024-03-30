@@ -1,7 +1,7 @@
 @import '../../../variables.scss';
 
 #nav-top-container {
-  button {
+  button, a {
     overflow: clip;
     pointer-events: none;
 
