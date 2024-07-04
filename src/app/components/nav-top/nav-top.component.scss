@@ -1,10 +1,11 @@
-@import '../../../variables.scss';
+@import "../../../variables.scss";
 
 #nav-top-container {
   width: 100%;
   max-width: 100%;
 
-  button, a {
+  button,
+  a {
     overflow: clip;
     pointer-events: none;
 
@@ -12,6 +13,13 @@
       pointer-events: auto;
       height: 100%;
       aspect-ratio: 1;
+    }
+  }
+
+  button {
+    width: $nav-top-height;
+    img {
+      margin: auto;
     }
   }
 
@@ -44,16 +52,10 @@
     > img {
       transition: box-shadow 0.2s ease-in-out;
       border-radius: $border-radius;
-      box-shadow:
-      0 0 4px $glow-4,
-      0 0 6px $glow-2,
-      0 0 8px $glow-1;
+      box-shadow: 0 0 4px $glow-4, 0 0 6px $glow-2, 0 0 8px $glow-1;
 
       &:hover {
-        box-shadow:
-        0 0 4px $glow-1,
-        0 0 6px $glow-2,
-        0 0 8px $glow-3;
+        box-shadow: 0 0 4px $glow-1, 0 0 6px $glow-2, 0 0 8px $glow-3;
       }
     }
   }
