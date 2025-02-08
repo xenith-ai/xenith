@@ -30,7 +30,7 @@
               "src/assets",
               {
                 "glob": "**/*",
-                "input": "src/assets/whisper.wasm",
+                "input": "src/assets/whisper",
                 "output": "/"
               }
             ],
@@ -38,7 +38,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "src/assets/whisper.wasm/stream.js"
+              "src/assets/whisper/stream.js"
             ]
           },
           "configurations": {
@@ -103,7 +103,7 @@
               "src/assets",
               {
                 "glob": "**/*",
-                "input": "src/assets/whisper.wasm",
+                "input": "src/assets/whisper",
                 "output": "/"
               }
             ],
@@ -111,7 +111,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "src/assets/whisper.wasm/stream.js"
+              "src/assets/whisper/stream.js"
             ]
           }
         },
