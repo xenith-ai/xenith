@@ -17,9 +17,9 @@
   <div id="chat-input-container" class="flex flex-row items-start">
     <div class="flex h-full aspect-square justify-center align-center">
       <button id="listening-container" class="flex h-full w-auto items-center justify-center" (click)="toggleListener()">
-        <img [src]="audioRecorderService.microphoneAccess ? 'assets/img/microphone.svg' : 'assets/img/no-microphone.svg'" [style.opacity]="(audioRecorderService.microphoneAccess && audioRecorderService.listening) ? 0 : 1" alt="Microphone" class="h-full w-auto">
-        <div class="loader h-full w-auto" *ngIf="(audioRecorderService.microphoneAccess && audioRecorderService.listening)"></div>
-        <div id="circle-gradient-container" [class.listening]="audioRecorderService.microphoneAccess && audioRecorderService.listening" [class.not-listening]="audioRecorderService.microphoneAccess && !audioRecorderService.listening" [class.microphone-disabled]="!audioRecorderService.microphoneAccess">
+        <img [src]="audioService.microphoneAccess ? 'assets/img/microphone.svg' : 'assets/img/no-microphone.svg'" [style.opacity]="(audioService.microphoneAccess && audioService.listening) ? 0 : 1" alt="Microphone" class="h-full w-auto">
+        <div class="loader h-full w-auto" *ngIf="(audioService.microphoneAccess && audioService.listening)"></div>
+        <div id="circle-gradient-container" [class.listening]="audioService.microphoneAccess && audioService.listening" [class.not-listening]="audioService.microphoneAccess && !audioService.listening" [class.microphone-disabled]="!audioService.microphoneAccess">
         </div>
       </button>
     </div>

@@ -1,0 +1,341 @@
+import { Injectable } from '@angular/core';
+import { AudioProcessor } from '../../enums/audio-processor.enum';
+import { WhisperService } from '../whisper/whisper.service';
+import { Transcription } from '../../models/transcription.model';
+import * as ort from 'onnxruntime-web';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class AudioService {
+  private readonly audioWorkletNodePath = '/assets/worklets/audio-processor.js';
+  private readonly bufferSize: number = 1024;
+  private readonly sampleRate: number = 16000;
+  private readonly vadConfidenceThreshold: number = 0.5;
+
+  public processingStates: Map<AudioProcessor, boolean> = new Map();
+  public listening: boolean = false;
+  public microphoneAccess: boolean = false;
+  private stream: MediaStream | undefined;
+  private context: AudioContext | undefined;
+  private vadSession: ort.InferenceSession | null = null;
+  private audioWorkletNode: AudioWorkletNode | undefined;
+  private previousWhisperBuffer: Float32Array | null = null;
+  private vadJustStopped: boolean = false;
+  private vadActive: boolean = false;
+
+  private readonly registeredCallbacks: Map<
+    AudioProcessor,
+    Map<string, (message: any) => void>
+  > = new Map();
+
+  constructor(private whisperService: WhisperService) {
+    whisperService.transcriptionCallback = (transcription: Transcription) => {
+      this.notifyAll(transcription, AudioProcessor.Whisper);
+    };
+    this.initializeModelSessions();
+  }
+
+  /**
+   * Initializes the model sessions for VAD.
+   */
+  private async initializeModelSessions() {
+    ort.env.wasm.wasmPaths = '/assets/onnx/';
+    ort.env.wasm.numThreads = 1;
+    this.vadSession = await ort.InferenceSession.create(
+      '/assets/silero/silero_vad.onnx',
+      {
+        executionProviders: ['wasm'],
+        graphOptimizationLevel: 'all',
+        enableCpuMemArena: false,
+        executionMode: 'sequential',
+      }
+    );
+  }
+
+  /**
+   * Starts listening to the microphone input.
+   * @returns {Promise<void>}
+   */
+  public async startListening(): Promise<void> {
+    try {
+      await this.requestMicrophoneAccess();
+      if (await this.isMicrophoneEnabled(() => {})) {
+        this.microphoneAccess = true;
+      } else {
+        this.microphoneAccess = false;
+        console.error('Microphone access is not granted.');
+        return;
+      }
+      await this.initAudioWorklet();
+      this.listening = true;
+    } catch (error) {
+      throw new Error('Error starting to listen: ' + error);
+    }
+  }
+
+  /**
+   * Stops listening to the microphone input.
+   */
+  public stopListening(): void {
+    this.stream?.getTracks().forEach((track) => track.stop());
+    this.stream = undefined;
+    this.context?.close();
+    this.context = undefined;
+    this.audioWorkletNode?.port.close();
+    this.audioWorkletNode = undefined;
+    this.listening = false;
+  }
+
+  /**
+   * Checks if the microphone is enabled.
+   * @param microphoneStatusChangedCallback - Callback function to handle microphone status changes.
+   * @returns {Promise<boolean | undefined>}
+   */
+  public async isMicrophoneEnabled(
+    microphoneStatusChangedCallback: (permissionStatus: PermissionStatus) => any
+  ): Promise<boolean | undefined> {
+    if (navigator.permissions) {
+      try {
+        const permissionStatus = await navigator.permissions.query({
+          name: 'microphone' as PermissionName,
+        });
+        permissionStatus.onchange = () => {
+          this.microphoneAccess = permissionStatus.state === 'granted';
+          microphoneStatusChangedCallback(permissionStatus);
+        };
+        return permissionStatus.state === 'granted';
+      } catch (error) {
+        throw new Error('Error querying microphone permissions: ' + error);
+      }
+    } else {
+      throw new Error('Permissions API is not supported by your browser.');
+    }
+  }
+
+  /**
+   * Requests access to the microphone.
+   * @returns {Promise<void>}
+   */
+  public async requestMicrophoneAccess(): Promise<void> {
+    try {
+      if (!navigator.mediaDevices) {
+        throw new Error('MediaDevices API is not supported by your browser.');
+      }
+      if (!this.stream) {
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: false,
+        });
+      } else {
+        console.warn('Stream is already initialized');
+      }
+    } catch (error) {
+      throw new Error('Error requesting microphone access: ' + error);
+    }
+  }
+
+  /**
+   * Registers a callback with a provided GUID and processor type.
+   * @param guid - Unique identifier for the callback.
+   * @param processor - The type of audio processor.
+   * @param callback - The callback function to register.
+   */
+  public registerCallback(
+    guid: string,
+    processor: AudioProcessor,
+    callback: (message: any) => void
+  ) {
+    if (!guid || typeof callback !== 'function') {
+      throw new Error('Invalid GUID, processor type, or callback.');
+    }
+    let isFirstInstance = false;
+    if (!this.registeredCallbacks.has(processor)) {
+      this.registeredCallbacks.set(processor, new Map());
+      isFirstInstance = true;
+    }
+    this.registeredCallbacks.get(processor)!.set(guid, callback);
+    if (isFirstInstance) {
+      this.startProcessor(processor);
+    }
+  }
+
+  /**
+   * Unregisters a callback using the provided GUID.
+   * @param guid - Unique identifier for the callback.
+   * @returns {boolean} - Returns true if the callback was removed, false otherwise.
+   */
+  public unregisterCallback(guid: string): boolean {
+    let removed = false;
+    this.registeredCallbacks.forEach((callbackMap, processor) => {
+      if (callbackMap.has(guid)) {
+        callbackMap.delete(guid);
+        removed = true;
+        if (callbackMap.size === 0) {
+          this.registeredCallbacks.delete(processor);
+          this.stopProcessor(processor);
+        }
+      }
+    });
+    return removed;
+  }
+
+  /**
+   * Notifies all registered callbacks or optionally filters by processor type.
+   * @param message - The message to send to the callbacks.
+   * @param processorType - The type of audio processor.
+   */
+  private notifyAll(message: any, processorType: AudioProcessor): void {
+    const callbacks = this.registeredCallbacks.get(processorType);
+    if (callbacks) {
+      callbacks.forEach((callback) => callback(message));
+    }
+  }
+
+  /**
+   * Called when the first instance of a processor type is registered.
+   * @param processor - The type of audio processor.
+   */
+  private startProcessor(processor: AudioProcessor): void {
+    console.log(`Starting processor: ${processor}`);
+    this.processingStates.set(processor, true);
+  }
+
+  /**
+   * Called when the last instance of a processor type is unregistered.
+   * @param processor - The type of audio processor.
+   */
+  private stopProcessor(processor: AudioProcessor): void {
+    console.log(`Stopping processor: ${processor}`);
+    this.processingStates.set(processor, false);
+  }
+
+  /**
+   * Initializes the AudioWorklet.
+   * @returns {Promise<void>}
+   */
+  private async initAudioWorklet(): Promise<void> {
+    try {
+      if (!this.stream) {
+        throw new Error('No stream available for AudioWorklet initialization.');
+      }
+      if (!this.context) {
+        this.context = new AudioContext({ sampleRate: 16000 });
+        await this.context.audioWorklet.addModule(this.audioWorkletNodePath);
+        console.log('AudioContext initialized successfully');
+      } else {
+        console.warn('AudioContext is already initialized');
+      }
+      if (!this.audioWorkletNode) {
+        const source = this.context.createMediaStreamSource(this.stream);
+        this.audioWorkletNode = new AudioWorkletNode(
+          this.context,
+          'audio-processor'
+        );
+        source.connect(this.audioWorkletNode);
+        this.audioWorkletNode.port.onmessage = async (event) => {
+          if (event.data.type === 'vad') {
+            await this.handleVAD(event.data.data);
+          }
+          if (event.data.type === 'whisper') {
+            this.handleWhisper(event.data.data);
+          }
+        };
+        console.log('AudioWorklet initialized successfully');
+      } else {
+        console.warn('AudioWorklet is already initialized');
+      }
+    } catch (error) {
+      console.error('Error initializing AudioWorklet:', error);
+    }
+  }
+
+  /**
+   * Handles Voice Activity Detection (VAD) processing.
+   * @param vadAudioBuffer - The audio buffer for VAD processing.
+   */
+  private async handleVAD(vadAudioBuffer: Float32Array) {
+    if (!this.vadSession) {
+      console.error('❌ VAD session is not initialized.');
+      return;
+    }
+    const vadScore = await this.runVAD(vadAudioBuffer);
+    const newVadState = vadScore > this.vadConfidenceThreshold;
+
+    if (this.vadActive && !newVadState) {
+      this.vadJustStopped = true;
+    }
+
+    this.vadActive = newVadState;
+  }
+
+  /**
+   * Handles Whisper processing.
+   * @param whisperAudioData - The audio data for Whisper processing.
+   */
+  private handleWhisper(whisperAudioData: Float32Array) {
+    if (this.vadActive) {
+      // VAD just started, process previous audio buffer
+      if (this.previousWhisperBuffer) {
+        this.whisperService.processAudioBuffer(this.previousWhisperBuffer, false);
+        this.previousWhisperBuffer = null;
+      }
+
+      // Process current audio buffer
+      this.whisperService.processAudioBuffer(whisperAudioData, false);
+    } else {
+      // VAD just stopped, process one more audio buffer
+      if (this.vadJustStopped) {
+        this.whisperService.processAudioBuffer(whisperAudioData, true);
+        this.vadJustStopped = false;
+      }
+
+      // VAD is not active, save the audio buffer for later
+      this.previousWhisperBuffer = whisperAudioData;
+    }
+  }
+
+  /**
+   * Runs Voice Activity Detection (VAD) on the audio buffer.
+   * @param audioBuffer - The audio buffer for VAD processing.
+   * @returns {Promise<number>} - The VAD score.
+   */
+  private async runVAD(audioBuffer: Float32Array): Promise<number> {
+    if (!this.vadSession) {
+      throw new Error('❌ VAD session is not initialized.');
+    }
+    const inputTensor = new ort.Tensor('float32', audioBuffer, [
+      1,
+      audioBuffer.length,
+    ]);
+    const sampleRateTensor = new ort.Tensor(
+      'int64',
+      new BigInt64Array([BigInt(16000)]),
+      [1]
+    );
+    const hiddenStateTensor = new ort.Tensor(
+      'float32',
+      new Float32Array(2 * 64).fill(0),
+      [2, 1, 64]
+    );
+    const cellStateTensor = new ort.Tensor(
+      'float32',
+      new Float32Array(2 * 64).fill(0),
+      [2, 1, 64]
+    );
+    try {
+      const outputMap = await this.vadSession.run({
+        input: inputTensor,
+        sr: sampleRateTensor,
+        h: hiddenStateTensor,
+        c: cellStateTensor,
+      });
+      const vadScore = outputMap[Object.keys(outputMap)[0]]
+        .data as Float32Array;
+      return vadScore[0];
+    } catch (error) {
+      console.error('❌ Error running VAD:', error);
+      return 0;
+    }
+  }
+}

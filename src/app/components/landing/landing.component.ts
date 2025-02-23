@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ChatComponent } from '../chat/chat.component';
@@ -10,13 +10,15 @@ import { AI } from '../../models/ai.model';
 import { User } from '../../models/user.model';
 import { TextMessage } from '../../models/text-message.model';
 import { ButtonMessage } from '../../models/button-message.model';
-import { AudioRecorderService } from '../../services/audio-recorder/audio-recorder.service';
+import { AudioService } from '../../services/audio/audio.service';
 import { LocalStorageService } from '../../services/local-storage/local-storage.service';
 import { IndexedDBService } from '../../services/indexed-db/indexed-db.service';
 import { ModelKey } from '../../enums/model-key.enum';
 import { HttpHandlerService } from '../../services/http-handler/http-handler.service';
 import { ModelUrl } from '../../enums/model-url.enum';
 import { Utilities } from '../../helpers/utilities';
+import { WhisperService } from '../../services/whisper/whisper.service';
+import { AudioProcessor } from '../../enums/audio-processor.enum';
 
 @Component({
   selector: 'app-landing',
@@ -26,6 +28,8 @@ import { Utilities } from '../../helpers/utilities';
   imports: [CommonModule, RouterOutlet, ChatComponent],
 })
 export class LandingComponent {
+  @ViewChild(ChatComponent) chat!: ChatComponent;
+
   private startedListeningFlow = false;
 
   private readonly enableMicrophoneButtonMessage: ButtonMessage;
@@ -39,7 +43,8 @@ export class LandingComponent {
     private conversationService: ConversationService,
     private AIService: AIService,
     private userService: UserService,
-    public audioRecorderService: AudioRecorderService,
+    public audioService: AudioService,
+    public whisperService: WhisperService,
     private localStorageService: LocalStorageService,
     private httpHandlerService: HttpHandlerService,
     private indexedDBService: IndexedDBService,
@@ -56,7 +61,7 @@ export class LandingComponent {
       new Date(),
       'assets/img/microphone.svg',
       'button-1',
-      this.audioRecorderService.requestMicrophoneAccess
+      this.audioService.requestMicrophoneAccess
     );
 
     this.startDownloadingModelButtonMessage = new ButtonMessage(
@@ -80,12 +85,18 @@ export class LandingComponent {
     if (!whisperModel) {
       this.promptDownloadModelFlow();
     } else {
-      await this.loadModelFlow(whisperModel);
+      await this.loadCachedModelFlow(whisperModel);
     }
   }
 
-  private loadModelFlow = async (model: Uint8Array) => {
-    await this.audioRecorderService.loadModel(model);
+  private loadCachedModelFlow = async (model: Uint8Array) => {
+    // Wait for whisper module to be loaded
+    if (!this.whisperService.whisperModule) {
+      console.warn('Waiting for whisper module to be loaded...');
+      await this.whisperService.waitForModule();
+    }
+
+    await this.whisperService.loadModel(model);
     this.conversation.addMessage(
       new TextMessage(
         this.newAI,
@@ -108,7 +119,13 @@ export class LandingComponent {
 
     this.indexedDBService.insertModel(ModelKey.WhisperTinyEn, whisperModel);
 
-    await this.audioRecorderService.loadModel(whisperModel);
+    // Wait for whisper module to be loaded
+    if (!this.whisperService.whisperModule) {
+      console.warn('Waiting for whisper module to be loaded...');
+      await this.whisperService.waitForModule();
+    }
+
+    await this.whisperService.loadModel(whisperModel);
     this.conversation.addMessage(
       new TextMessage(
         this.newAI,
@@ -122,7 +139,7 @@ export class LandingComponent {
 
   private checkMicrophoneAccessFlow = async () => {
     if (
-      await this.audioRecorderService.isMicrophoneEnabled(
+      await this.audioService.isMicrophoneEnabled(
         this.microphoneStatusChangedCallback
       )
     ) {
@@ -164,15 +181,18 @@ export class LandingComponent {
 
   private async startListeningFlow() {
     this.conversation.addMessage(
-      new TextMessage(this.newAI, `Initializing listener...`, new Date())
+      new TextMessage(this.newAI, `Initializing AI...`, new Date())
     );
 
-    await this.audioRecorderService.startListening(
-      this.whisperListeningCallback
-    );
-  }
+    // Initialize audio worklet processing
+    await this.audioService.startListening();
 
-  private whisperListeningCallback = async () => {
+    // Initialize Whisper processing
+    await this.whisperService.initWhisper();
+
+    // Register component
+    this.audioService.registerCallback(this.chat.audioCallbackGuid, AudioProcessor.Whisper, this.chat.transcriptionCallback);
+
     this.conversation.addMessage(
       new TextMessage(
         this.newAI,
@@ -188,14 +208,13 @@ export class LandingComponent {
         new Date()
       )
     );
-    this.cdr.detectChanges(); // Ensure listener status is updated in the UI
-  };
+  }
 
   private microphoneStatusChangedCallback = async (
     permissionStatus: PermissionStatus
   ) => {
     if (permissionStatus.state === 'granted') {
-      if (!this.startedListeningFlow && !this.audioRecorderService.listening) {
+      if (!this.startedListeningFlow && !this.audioService.listening) {
         this.startedListeningFlow = true;
         this.conversation.addMessage(
           new TextMessage(this.newAI, `Microphone access granted!`, new Date())

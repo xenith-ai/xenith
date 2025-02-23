@@ -14,8 +14,9 @@ import { User } from '../../models/user.model';
 import { TextMessage } from '../../models/text-message.model';
 import { ButtonMessage } from '../../models/button-message.model';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
-import { AudioRecorderService } from '../../services/audio-recorder/audio-recorder.service';
+import { AudioService } from '../../services/audio/audio.service';
 import { Transcription } from '../../models/transcription.model';
+import { AudioProcessor } from '../../enums/audio-processor.enum';
 
 @Component({
   selector: 'app-chat',
@@ -39,6 +40,8 @@ export class ChatComponent {
   public TextMessage = TextMessage;
   public ButtonMessage = ButtonMessage;
 
+  public readonly audioCallbackGuid: string = crypto.randomUUID();
+
   private silenceStarted?: Date;
 
   private triggered = false;
@@ -46,13 +49,12 @@ export class ChatComponent {
   private readonly silenceSendDelta = 3000;
   private readonly triggerWord = 'miku';
 
+  private silenceTimer: any = null;
+
   constructor(
     private cdr: ChangeDetectorRef,
-    protected audioRecorderService: AudioRecorderService
-  ) {
-    this.audioRecorderService.transcriptionCallback =
-      this.transcriptionCallback;
-  }
+    protected audioService: AudioService
+  ) { }
 
   public sendMessage(value: string) {
     if (value && this.currentUser) {
@@ -68,12 +70,12 @@ export class ChatComponent {
   }
 
   protected toggleListener() {
-    if (!this.audioRecorderService.microphoneAccess) {
-      this.audioRecorderService.requestMicrophoneAccess();
-    } else if (!this.audioRecorderService.listening) {
-      this.audioRecorderService.startListening(() => {});
-    } else if (this.audioRecorderService.listening) {
-      this.audioRecorderService.stopListening();
+    if (!this.audioService.microphoneAccess) {
+      this.audioService.requestMicrophoneAccess();
+    } else if (!this.audioService.processingStates.get(AudioProcessor.Whisper)) {
+      this.audioService.registerCallback(this.audioCallbackGuid, AudioProcessor.Whisper, this.transcriptionCallback);
+    } else if (this.audioService.processingStates.get(AudioProcessor.Whisper)) {
+      this.audioService.unregisterCallback(this.audioCallbackGuid);
     }
   }
 
@@ -111,23 +113,27 @@ export class ChatComponent {
           this.triggered = true;
         }
       }
+      this.resetSilenceTimer();
     } else {
-      if (this.triggered) {
-        if (!this.silenceStarted) {
-          this.silenceStarted = new Date();
-        } else if (
-          new Date().getTime() - this.silenceStarted.getTime() >
-          this.silenceSendDelta
-        ) {
-          // if transcription is empty, reset trigger and send message if there is any content
-          if (this.chatInput.nativeElement.value.length > 0) {
-            this.sendMessage(this.chatInput.nativeElement.value);
-          }
-
-          this.triggered = false;
-          this.silenceStarted = undefined;
-        }
-      }
+      this.handleSilence();
     }
   };
+
+  private resetSilenceTimer() {
+    if (this.silenceTimer) {
+      clearTimeout(this.silenceTimer);
+    }
+    this.silenceTimer = setTimeout(() => {
+      this.handleSilence();
+    }, this.silenceSendDelta);
+  }
+
+  private handleSilence() {
+    if (this.triggered) {
+      if (this.chatInput.nativeElement.value.length > 0) {
+        this.sendMessage(this.chatInput.nativeElement.value);
+      }
+      this.triggered = false;
+    }
+  }
 }
