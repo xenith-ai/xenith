@@ -7,15 +7,12 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { Conversation } from '../../models/conversation.model';
 import { InstanceOfPipe } from '../../pipes/instance-of.pipe';
-import { AI } from '../../models/ai.model';
+import { Assistant } from '../../models/assistant.model';
 import { User } from '../../models/user.model';
 import { TextMessage } from '../../models/text-message.model';
 import { ButtonMessage } from '../../models/button-message.model';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
-import { AudioService } from '../../services/audio/audio.service';
-import { Transcription } from '../../models/transcription.model';
 import { AudioProcessor } from '../../enums/audio-processor.enum';
 
 @Component({
@@ -29,111 +26,61 @@ export class ChatComponent {
   @ViewChild('chatMessages') chatMessages!: ElementRef;
   @ViewChild('chatInput') chatInput!: ElementRef;
 
-  @Input() conversation?: Conversation;
-  @Input() currentUser?: User;
+  @Input() assistant!: Assistant;
+  @Input() currentUser!: User;
 
-  // Expose IChatParticipant types to template
-  public AI = AI;
   public User = User;
-
-  // Expose IChatMessage types to template
+  public Assistant = Assistant;
   public TextMessage = TextMessage;
   public ButtonMessage = ButtonMessage;
 
-  public readonly audioCallbackGuid: string = crypto.randomUUID();
+  constructor(private cdr: ChangeDetectorRef) {
 
-  private silenceStarted?: Date;
-
-  private triggered = false;
-
-  private readonly silenceSendDelta = 3000;
-  private readonly triggerWord = 'miku';
-
-  private silenceTimer: any = null;
-
-  constructor(
-    private cdr: ChangeDetectorRef,
-    protected audioService: AudioService
-  ) { }
-
-  public sendMessage(value: string) {
-    if (value && this.currentUser) {
-      this.conversation?.addMessage(
-        new TextMessage(this.currentUser, value, new Date())
-      );
-      this.chatInput.nativeElement.value = '';
-
-      this.cdr.detectChanges();
-      this.chatMessages.nativeElement.scrollTop =
-        this.chatMessages.nativeElement.scrollHeight;
-    }
   }
 
-  protected toggleListener() {
-    if (!this.audioService.microphoneAccess) {
-      this.audioService.requestMicrophoneAccess();
-    } else if (!this.audioService.processingStates.get(AudioProcessor.Whisper)) {
-      this.audioService.registerCallback(this.audioCallbackGuid, AudioProcessor.Whisper, this.transcriptionCallback);
-    } else if (this.audioService.processingStates.get(AudioProcessor.Whisper)) {
-      this.audioService.unregisterCallback(this.audioCallbackGuid);
+  ngOnInit() {
+    this.assistant.onMessageSent = () => this.scrollToBottom();
+  }
+
+  public sendMessage(value: string) {
+    if (value?.trim()) {
+      this.assistant.sendMessage(value);
+      this.assistant.draftText = ''; // clear out the input
+
+      this.cdr.detectChanges(); // ✅ force re-render
+
+      setTimeout(() => {
+        this.scrollToBottom(); // ✅ now it actually scrolls after DOM updates
+      }, 0);
     }
   }
 
   protected inputOnEnter(element: HTMLInputElement) {
     this.sendMessage(element.value);
-
-    // Apply visual changes first before updating scroll
     this.cdr.detectChanges();
-    console.log(this.chatMessages.nativeElement.scrollTop);
   }
 
-  protected castType<TOriginal, TCast>(original: TOriginal): TCast {
-    return original as unknown as TCast;
+  public onDraftInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.assistant.draftText = input.value;
   }
 
-  public transcriptionCallback = (transcription: Transcription) => {
-    if (!this.conversation) {
-      console.log(
-        'Transcription callback triggered but there is no conversation to send message to'
-      );
-      return;
-    }
+  private scrollToBottom() {
+    setTimeout(() => {
+      this.chatMessages.nativeElement.scrollTop =
+        this.chatMessages.nativeElement.scrollHeight;
+    }, 50);
+  }
 
-    if (transcription?.indexableTranscription) {
-      if (this.triggered) {
-        this.chatInput.nativeElement.value +=
-          ' ' + transcription.originalTranscription;
-      } else {
-        const triggerIndex = transcription.wordList.indexOf(this.triggerWord);
-        if (triggerIndex != -1) {
-          const relevantString = transcription.wordList
-            .slice(triggerIndex + 1)
-            .join(' ');
-          this.chatInput.nativeElement.value += ' ' + relevantString;
-          this.triggered = true;
-        }
-      }
-      this.resetSilenceTimer();
+  protected toggleListener(): void {
+    const audioService = this.assistant['audioService']; // Not ideal, but okay for now
+
+    if (!audioService.microphoneAccess) {
+      audioService.requestMicrophoneAccess();
+    } else if (!audioService.processingStates.get(AudioProcessor.Whisper)) {
+      audioService.registerCallback(this.assistant.id, AudioProcessor.Whisper, this.assistant['onTranscription'].bind(this.assistant));
     } else {
-      this.handleSilence();
-    }
-  };
-
-  private resetSilenceTimer() {
-    if (this.silenceTimer) {
-      clearTimeout(this.silenceTimer);
-    }
-    this.silenceTimer = setTimeout(() => {
-      this.handleSilence();
-    }, this.silenceSendDelta);
-  }
-
-  private handleSilence() {
-    if (this.triggered) {
-      if (this.chatInput.nativeElement.value.length > 0) {
-        this.sendMessage(this.chatInput.nativeElement.value);
-      }
-      this.triggered = false;
+      audioService.unregisterCallback(this.assistant.id);
     }
   }
 }

@@ -4,9 +4,9 @@ import { RouterOutlet } from '@angular/router';
 import { ChatComponent } from '../chat/chat.component';
 import { Conversation } from '../../models/conversation.model';
 import { ConversationService } from '../../services/conversation/conversation.service';
-import { AIService } from '../../services/ai/ai.service';
+import { AssistantService } from '../../services/assistant/assistant.service';
 import { UserService } from '../../services/user/user.service';
-import { AI } from '../../models/ai.model';
+import { Assistant } from '../../models/assistant.model';
 import { User } from '../../models/user.model';
 import { TextMessage } from '../../models/text-message.model';
 import { ButtonMessage } from '../../models/button-message.model';
@@ -18,7 +18,6 @@ import { HttpHandlerService } from '../../services/http-handler/http-handler.ser
 import { ModelUrl } from '../../enums/model-url.enum';
 import { Utilities } from '../../helpers/utilities';
 import { WhisperService } from '../../services/whisper/whisper.service';
-import { AudioProcessor } from '../../enums/audio-processor.enum';
 
 @Component({
   selector: 'app-landing',
@@ -35,13 +34,12 @@ export class LandingComponent {
   private readonly enableMicrophoneButtonMessage: ButtonMessage;
   private readonly startDownloadingModelButtonMessage: ButtonMessage;
 
-  protected conversation: Conversation;
-  protected newAI: AI;
+  protected newAssistant: Assistant;
   protected newUser: User;
 
   constructor(
     private conversationService: ConversationService,
-    private AIService: AIService,
+    private AssistantService: AssistantService,
     private userService: UserService,
     public audioService: AudioService,
     public whisperService: WhisperService,
@@ -50,13 +48,12 @@ export class LandingComponent {
     private indexedDBService: IndexedDBService,
     private cdr: ChangeDetectorRef
   ) {
-    this.conversation = this.conversationService.createNewConversation();
-
-    this.newAI = this.AIService.createAI();
     this.newUser = this.userService.createUser();
+    this.newAssistant = this.AssistantService.createAssistant('Miku', 'assets/img/miku.svg', 'miku', this.newUser);
+
 
     this.enableMicrophoneButtonMessage = new ButtonMessage(
-      this.newAI,
+      this.newAssistant,
       'Enable Microphone',
       new Date(),
       'assets/img/microphone.svg',
@@ -65,7 +62,7 @@ export class LandingComponent {
     );
 
     this.startDownloadingModelButtonMessage = new ButtonMessage(
-      this.newAI,
+      this.newAssistant,
       'Download Model',
       new Date(),
       'assets/img/download.svg',
@@ -97,9 +94,9 @@ export class LandingComponent {
     }
 
     await this.whisperService.loadModel(model);
-    this.conversation.addMessage(
+    this.newAssistant.conversation.addMessage(
       new TextMessage(
-        this.newAI,
+        this.newAssistant,
         `Speech-to-Text AI model loaded from cache!`,
         new Date()
       )
@@ -110,8 +107,8 @@ export class LandingComponent {
   };
 
   private downloadModelFlow = async () => {
-    this.conversation.addMessage(
-      new TextMessage(this.newAI, `Starting download...`, new Date())
+    this.newAssistant.conversation.addMessage(
+      new TextMessage(this.newAssistant, `Starting download...`, new Date())
     );
     const whisperModel = await this.httpHandlerService.fetchOctetStream(
       ModelUrl.WhisperTinyEn
@@ -126,9 +123,9 @@ export class LandingComponent {
     }
 
     await this.whisperService.loadModel(whisperModel);
-    this.conversation.addMessage(
+    this.newAssistant.conversation.addMessage(
       new TextMessage(
-        this.newAI,
+        this.newAssistant,
         `Done! I also cached it so you won't need to download it again later.`,
         new Date()
       )
@@ -143,9 +140,9 @@ export class LandingComponent {
         this.microphoneStatusChangedCallback
       )
     ) {
-      this.conversation.addMessage(
+      this.newAssistant.conversation.addMessage(
         new TextMessage(
-          this.newAI,
+          this.newAssistant,
           `Microphone access is already granted!`,
           new Date()
         )
@@ -158,30 +155,30 @@ export class LandingComponent {
   };
 
   private promptDownloadModelFlow() {
-    this.conversation.addMessage(
+    this.newAssistant.conversation.addMessage(
       new TextMessage(
-        this.newAI,
+        this.newAssistant,
         `To get started, I need to download OpenAI's Speech-to-Text model.`,
         new Date()
       )
     );
-    this.conversation.addMessage(this.startDownloadingModelButtonMessage);
+    this.newAssistant.conversation.addMessage(this.startDownloadingModelButtonMessage);
   }
 
   private async requestMicrophoneAccessFlow() {
-    this.conversation.addMessage(
+    this.newAssistant.conversation.addMessage(
       new TextMessage(
-        this.newAI,
+        this.newAssistant,
         `You'll need to provide access to your microphone.`,
         new Date()
       )
     );
-    this.conversation.addMessage(this.enableMicrophoneButtonMessage);
+    this.newAssistant.conversation.addMessage(this.enableMicrophoneButtonMessage);
   }
 
   private async startListeningFlow() {
-    this.conversation.addMessage(
-      new TextMessage(this.newAI, `Initializing AI...`, new Date())
+    this.newAssistant.conversation.addMessage(
+      new TextMessage(this.newAssistant, `Initializing AI...`, new Date())
     );
 
     // Initialize audio worklet processing
@@ -190,20 +187,17 @@ export class LandingComponent {
     // Initialize Whisper processing
     await this.whisperService.initWhisper();
 
-    // Register component
-    this.audioService.registerCallback(this.chat.audioCallbackGuid, AudioProcessor.Whisper, this.chat.transcriptionCallback);
-
-    this.conversation.addMessage(
+    this.newAssistant.conversation.addMessage(
       new TextMessage(
-        this.newAI,
+        this.newAssistant,
         `Started listening! Say "Miku" to start interacting.`,
         new Date()
       )
     );
     await Utilities.sleep(300);
-    this.conversation.addMessage(
+    this.newAssistant.conversation.addMessage(
       new TextMessage(
-        this.newAI,
+        this.newAssistant,
         `For instance, you can say "Miku, what's the weather like?"`,
         new Date()
       )
@@ -216,8 +210,8 @@ export class LandingComponent {
     if (permissionStatus.state === 'granted') {
       if (!this.startedListeningFlow && !this.audioService.listening) {
         this.startedListeningFlow = true;
-        this.conversation.addMessage(
-          new TextMessage(this.newAI, `Microphone access granted!`, new Date())
+        this.newAssistant.conversation.addMessage(
+          new TextMessage(this.newAssistant, `Microphone access granted!`, new Date())
         );
         await this.startListeningFlow();
       }

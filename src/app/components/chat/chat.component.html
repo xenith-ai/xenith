@@ -1,28 +1,86 @@
 <div id="chat-container" class="flex flex-col">
+  <!-- Messages -->
   <div #chatMessages id="chat-messages">
-    <div *ngFor="let messageGroup of conversation?.structuredMessages" class="chat-message-group flex flex-row" [class.left]="messageGroup.chatParticipant | instanceOf: AI" [class.right]="messageGroup.chatParticipant | instanceOf: User">
-      <div *ngIf="messageGroup.chatParticipant | instanceOf: AI" class="avatar flex flex-col justify-center items-center">
-        <img crossorigin="anonymous" src="assets/dev/miku.jpg" alt="Avatar">
+    <div
+      *ngFor="let messageGroup of assistant.conversation.structuredMessages"
+      class="chat-message-group flex flex-row"
+      [class.left]="messageGroup.chatParticipant | instanceOf: Assistant"
+      [class.right]="messageGroup.chatParticipant | instanceOf: User"
+    >
+      <!-- Assistant Avatar -->
+      <div
+        *ngIf="messageGroup.chatParticipant | instanceOf: Assistant"
+        class="avatar flex flex-col justify-center items-center"
+      >
+        <img
+          crossorigin="anonymous"
+          [src]="assistant.avatar"
+          [alt]="assistant.name + ' Avatar'"
+        />
       </div>
+
+      <!-- Message Content -->
       <div class="content flex flex-col">
-        <div *ngFor="let message of messageGroup.messages" class="content-item flex flex-col">
+        <div
+          *ngFor="let message of messageGroup.messages"
+          class="content-item flex flex-col"
+        >
           <app-chat-message [message]="message"></app-chat-message>
         </div>
       </div>
-      <div *ngIf="messageGroup.chatParticipant | instanceOf: User" class="avatar flex flex-col justify-center items-center">
-        <img crossorigin="anonymous" src="assets/dev/shane.webp" alt="Avatar">
+
+      <!-- User Avatar -->
+      <div
+        *ngIf="messageGroup.chatParticipant | instanceOf: User"
+        class="avatar flex flex-col justify-center items-center"
+      >
+        <img
+          crossorigin="anonymous"
+          [src]="currentUser.avatar"
+          [alt]="currentUser.name + ' Avatar'"
+        />
       </div>
     </div>
   </div>
+
+  <!-- Input + Mic -->
   <div id="chat-input-container" class="flex flex-row items-start">
+    <!-- Mic Button -->
     <div class="flex h-full aspect-square justify-center align-center">
-      <button id="listening-container" class="flex h-full w-auto items-center justify-center" (click)="toggleListener()">
-        <img [src]="audioService.microphoneAccess ? 'assets/img/microphone.svg' : 'assets/img/no-microphone.svg'" [style.opacity]="(audioService.microphoneAccess && audioService.listening) ? 0 : 1" alt="Microphone" class="h-full w-auto">
-        <div class="loader h-full w-auto" *ngIf="(audioService.microphoneAccess && audioService.listening)"></div>
-        <div id="circle-gradient-container" [class.listening]="audioService.microphoneAccess && audioService.listening" [class.not-listening]="audioService.microphoneAccess && !audioService.listening" [class.microphone-disabled]="!audioService.microphoneAccess">
-        </div>
+      <button
+        id="listening-container"
+        class="flex h-full w-auto items-center justify-center"
+        (click)="toggleListener()"
+      >
+        <img
+          [src]="assistant.isListening ? 'assets/img/microphone.svg' : 'assets/img/no-microphone.svg'"
+          [style.opacity]="assistant.isListening ? 0 : 1"
+          alt="Microphone"
+          class="h-full w-auto"
+        />
+        <div
+          class="loader h-full w-auto"
+          *ngIf="assistant.isListening"
+        ></div>
+        <div
+          id="circle-gradient-container"
+          [class.listening]="assistant.isListening"
+          [class.not-listening]="!assistant.isListening"
+          [class.microphone-disabled]="false"
+        ></div>
       </button>
     </div>
-    <input class="grow" #chatInput id="chat-input" type="text" placeholder="Start talking..." (keydown.enter)="inputOnEnter(chatInput)">
+
+    <!-- Input Box -->
+    <input
+      class="grow"
+      #chatInput
+      id="chat-input"
+      type="text"
+      placeholder="Start talking..."
+      [value]="assistant.draftText"
+      (input)="onDraftInput($event)"
+      (keydown.enter)="inputOnEnter(chatInput)"
+    />
   </div>
 </div>

@@ -4,6 +4,19 @@ import { WhisperService } from '../whisper/whisper.service';
 import { Transcription } from '../../models/transcription.model';
 import * as ort from 'onnxruntime-web';
 
+/**
+ * Audio Worklet sends data chunks here for processing with size/structure based on each
+ * consumer's requirements, separated by event type identifier.
+ *
+ * These chunks are passed to each respective model's service for processing.
+ *
+ * We register each respective model's service callbacks with an arbitrary message,
+ * in notifyAll(), which notifies all registered consumers.
+ *
+ * So, if we have multiple Assistants which are both running the same model (for example,
+ * two Assistant want to process Whisper transcription but have different wake words), then
+ * we can share the single Whisper processing stream for both Assistants.
+ */
 @Injectable({
   providedIn: 'root',
 })

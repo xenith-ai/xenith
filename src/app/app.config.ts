@@ -5,7 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { routes } from './app.routes';
 import { ConversationService } from './services/conversation/conversation.service';
-import { AIService } from './services/ai/ai.service';
+import { AssistantService } from './services/assistant/assistant.service';
 import { UserService } from './services/user/user.service';
 import { InstanceOfPipe } from './pipes/instance-of.pipe';
 import { WhisperService } from './services/whisper/whisper.service';
@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     importProvidersFrom(HttpClientModule),
     ConversationService,
-    AIService,
+    AssistantService,
     UserService,
     InstanceOfPipe,
     WhisperService,

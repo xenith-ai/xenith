@@ -26,14 +26,14 @@ export class ChatMessageComponent implements OnInit {
   protected textMessage?: TextMessage;
 
   ngOnInit() {
-    if (this.message) {
-      if (this.message instanceof TextMessage) {
-        this.textMessage = this.message as TextMessage;
-        this.isTextMessage = true;
-      } else if (this.message instanceof ButtonMessage) {
-        this.buttonMessage = this.message as ButtonMessage;
-        this.isButtonMessage = true;
-      }
+    if (!this.message) return;
+
+    if ('onClick' in this.message && 'styleClass' in this.message) {
+      this.buttonMessage = this.message as ButtonMessage;
+      this.isButtonMessage = true;
+    } else if ('text' in this.message) {
+      this.textMessage = this.message as TextMessage;
+      this.isTextMessage = true;
     }
   }
 }
