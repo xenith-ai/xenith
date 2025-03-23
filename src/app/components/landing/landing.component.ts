@@ -49,7 +49,7 @@ export class LandingComponent {
     private cdr: ChangeDetectorRef
   ) {
     this.newUser = this.userService.createUser();
-    this.newAssistant = this.AssistantService.createAssistant('Miku', 'assets/img/miku.svg', 'miku', this.newUser);
+    this.newAssistant = this.AssistantService.createAssistant('Miku', 'assets/dev/miku.jpg', 'miku', this.newUser);
 
 
     this.enableMicrophoneButtonMessage = new ButtonMessage(

@@ -45,12 +45,12 @@ export class ChatComponent {
   public sendMessage(value: string) {
     if (value?.trim()) {
       this.assistant.sendMessage(value);
-      this.assistant.draftText = ''; // clear out the input
+      this.assistant.draftText = '';
 
-      this.cdr.detectChanges(); // ✅ force re-render
+      this.cdr.detectChanges();
 
       setTimeout(() => {
-        this.scrollToBottom(); // ✅ now it actually scrolls after DOM updates
+        this.scrollToBottom();
       }, 0);
     }
   }
