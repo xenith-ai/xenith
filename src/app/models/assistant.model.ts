@@ -84,14 +84,22 @@ export class Assistant implements IChatParticipant {
     }
   }
 
-  public sendMessage(text: string): void {
-    const userMessage: IChatMessage = {
-      chatParticipant: this.currentUser,
-      text: text,
-      timestamp: new Date(),
-    };
+  public sendMessage(message: IChatMessage): void;
+  public sendMessage(text: string): void;
+  public sendMessage(param: IChatMessage | string): void {
+    let message: IChatMessage;
 
-    this.conversation.addMessage(userMessage);
+    if (typeof param === "string") {
+      message = {
+        chatParticipant: this.currentUser,
+        text: param,
+        timestamp: new Date(),
+      };
+    } else {
+      message = param;
+    }
+
+    this.conversation.addMessage(message);
     this.respondToUser();
 
     this.onMessageSent?.();
@@ -100,16 +108,19 @@ export class Assistant implements IChatParticipant {
   public async respondToUser(): Promise<void> {
     this.isTyping = true;
 
-    //const responseText = await this.llmService.generateResponse(this.conversation.messages);
+    const formattedMessages = this.conversation.messages.map((msg) => ({
+      role: msg.chatParticipant === this ? 'assistant' as const : 'user' as const,
+      content: msg.text,
+    }));
 
-    const responseText = 'This is a placeholder';
+    const responseText = await this.llmService.generateResponse(formattedMessages);
     const assistantMessage: IChatMessage = {
       chatParticipant: this,
       text: responseText,
       timestamp: new Date(),
     };
 
-    this.conversation.addMessage(assistantMessage);
+    this.sendMessage(assistantMessage);
     this.isTyping = false;
   }
 

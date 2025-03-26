@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ChatComponent } from '../chat/chat.component';
-import { Conversation } from '../../models/conversation.model';
 import { ConversationService } from '../../services/conversation/conversation.service';
 import { AssistantService } from '../../services/assistant/assistant.service';
 import { UserService } from '../../services/user/user.service';
@@ -18,6 +17,7 @@ import { HttpHandlerService } from '../../services/http-handler/http-handler.ser
 import { ModelUrl } from '../../enums/model-url.enum';
 import { Utilities } from '../../helpers/utilities';
 import { WhisperService } from '../../services/whisper/whisper.service';
+import { LLMService } from '../../services/llm/llm.service';
 
 @Component({
   selector: 'app-landing',
@@ -32,7 +32,8 @@ export class LandingComponent {
   private startedListeningFlow = false;
 
   private readonly enableMicrophoneButtonMessage: ButtonMessage;
-  private readonly startDownloadingModelButtonMessage: ButtonMessage;
+  private readonly startDownloadingWhisperModelButtonMessage: ButtonMessage;
+  private readonly startDownloadingLLMModelButtonMessage: ButtonMessage;
 
   protected newAssistant: Assistant;
   protected newUser: User;
@@ -46,7 +47,8 @@ export class LandingComponent {
     private localStorageService: LocalStorageService,
     private httpHandlerService: HttpHandlerService,
     private indexedDBService: IndexedDBService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private LLMService: LLMService
   ) {
     this.newUser = this.userService.createUser();
     this.newAssistant = this.AssistantService.createAssistant('Miku', 'assets/dev/miku.jpg', 'miku', this.newUser);
@@ -61,13 +63,22 @@ export class LandingComponent {
       this.audioService.requestMicrophoneAccess
     );
 
-    this.startDownloadingModelButtonMessage = new ButtonMessage(
+    this.startDownloadingWhisperModelButtonMessage = new ButtonMessage(
       this.newAssistant,
       'Download Model',
       new Date(),
       'assets/img/download.svg',
       'button-1',
-      this.downloadModelFlow
+      this.downloadWhisperModelFlow
+    );
+
+    this.startDownloadingLLMModelButtonMessage = new ButtonMessage(
+      this.newAssistant,
+      'Download Model',
+      new Date(),
+      'assets/img/download.svg',
+      'button-1',
+      this.downloadLLMModelFlow
     );
 
     this.initializeChatFlow();
@@ -80,34 +91,65 @@ export class LandingComponent {
     );
 
     if (!whisperModel) {
-      this.promptDownloadModelFlow();
+      this.promptDownloadWhisperModelFlow();
     } else {
-      await this.loadCachedModelFlow(whisperModel);
+      await this.loadCachedWhisperModelFlow(whisperModel);
+    }
+
+    if (await this.LLMService.isModelCached()) {
+      await this.loadCachedLLMModelFlow();
+    } else {
+      await this.promptDownloadLLMModelFlow();
     }
   }
 
-  private loadCachedModelFlow = async (model: Uint8Array) => {
-    // Wait for whisper module to be loaded
+  private loadCachedWhisperModelFlow = async (model: Uint8Array) => {
+    this.newAssistant.sendMessage(
+      new TextMessage(
+        this.newAssistant,
+        `Loading Speech-to-Text AI model from cache...`,
+        new Date()
+      )
+    );
     if (!this.whisperService.whisperModule) {
       console.warn('Waiting for whisper module to be loaded...');
       await this.whisperService.waitForModule();
     }
 
     await this.whisperService.loadModel(model);
-    this.newAssistant.conversation.addMessage(
+    this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
         `Speech-to-Text AI model loaded from cache!`,
         new Date()
       )
     );
+  };
 
-    // Handle microphone access
+  private loadCachedLLMModelFlow = async () => {
+    this.newAssistant.sendMessage(
+      new TextMessage(
+        this.newAssistant,
+        `Loading Llama 8B model from cache...`,
+        new Date()
+      )
+    );
+
+    await this.LLMService.init();
+
+    this.newAssistant.sendMessage(
+      new TextMessage(
+        this.newAssistant,
+        `Llama 8B model loaded from cache!`,
+        new Date()
+      )
+    );
+
     await this.checkMicrophoneAccessFlow();
   };
 
-  private downloadModelFlow = async () => {
-    this.newAssistant.conversation.addMessage(
+  private downloadWhisperModelFlow = async () => {
+    this.newAssistant.sendMessage(
       new TextMessage(this.newAssistant, `Starting download...`, new Date())
     );
     const whisperModel = await this.httpHandlerService.fetchOctetStream(
@@ -123,15 +165,27 @@ export class LandingComponent {
     }
 
     await this.whisperService.loadModel(whisperModel);
-    this.newAssistant.conversation.addMessage(
+    this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
         `Done! I also cached it so you won't need to download it again later.`,
         new Date()
       )
     );
+  };
 
-    await this.checkMicrophoneAccessFlow();
+  private downloadLLMModelFlow = async () => {
+    this.newAssistant.sendMessage(
+      new TextMessage(this.newAssistant, `Starting download...`, new Date())
+    );
+    await this.LLMService.init();
+    this.newAssistant.sendMessage(
+      new TextMessage(
+        this.newAssistant,
+        `Done! I also cached this so you won't need to download it again later.`,
+        new Date()
+      )
+    );
   };
 
   private checkMicrophoneAccessFlow = async () => {
@@ -140,7 +194,7 @@ export class LandingComponent {
         this.microphoneStatusChangedCallback
       )
     ) {
-      this.newAssistant.conversation.addMessage(
+      this.newAssistant.sendMessage(
         new TextMessage(
           this.newAssistant,
           `Microphone access is already granted!`,
@@ -154,30 +208,42 @@ export class LandingComponent {
     }
   };
 
-  private promptDownloadModelFlow() {
-    this.newAssistant.conversation.addMessage(
+  private promptDownloadWhisperModelFlow() {
+    this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
         `To get started, I need to download OpenAI's Speech-to-Text model.`,
         new Date()
       )
     );
-    this.newAssistant.conversation.addMessage(this.startDownloadingModelButtonMessage);
+    this.newAssistant.sendMessage(this.startDownloadingWhisperModelButtonMessage);
+  }
+
+  private promptDownloadLLMModelFlow() {
+    this.newAssistant.sendMessage(
+      new TextMessage(
+        this.newAssistant,
+        `I also need to download Llama LLM model (this might take awhile)`,
+        new Date()
+      )
+    );
+    this.newAssistant.sendMessage(this.startDownloadingLLMModelButtonMessage);
+
   }
 
   private async requestMicrophoneAccessFlow() {
-    this.newAssistant.conversation.addMessage(
+    this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
         `You'll need to provide access to your microphone.`,
         new Date()
       )
     );
-    this.newAssistant.conversation.addMessage(this.enableMicrophoneButtonMessage);
+    this.newAssistant.sendMessage(this.enableMicrophoneButtonMessage);
   }
 
   private async startListeningFlow() {
-    this.newAssistant.conversation.addMessage(
+    this.newAssistant.sendMessage(
       new TextMessage(this.newAssistant, `Initializing AI...`, new Date())
     );
 
@@ -187,7 +253,7 @@ export class LandingComponent {
     // Initialize Whisper processing
     await this.whisperService.initWhisper();
 
-    this.newAssistant.conversation.addMessage(
+    this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
         `Started listening! Say "Miku" to start interacting.`,
@@ -195,7 +261,7 @@ export class LandingComponent {
       )
     );
     await Utilities.sleep(300);
-    this.newAssistant.conversation.addMessage(
+    this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
         `For instance, you can say "Miku, what's the weather like?"`,
@@ -210,7 +276,7 @@ export class LandingComponent {
     if (permissionStatus.state === 'granted') {
       if (!this.startedListeningFlow && !this.audioService.listening) {
         this.startedListeningFlow = true;
-        this.newAssistant.conversation.addMessage(
+        this.newAssistant.sendMessage(
           new TextMessage(this.newAssistant, `Microphone access granted!`, new Date())
         );
         await this.startListeningFlow();
