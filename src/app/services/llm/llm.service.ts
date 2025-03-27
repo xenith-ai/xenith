@@ -6,6 +6,7 @@ export class LLMService {
   private engine: webllm.MLCEngineInterface | null = null;
   private initialized = false;
   private appConfig = webllm.prebuiltAppConfig;
+  private testModel: string = 'TinyLlama-1.1B-Chat-v1.0-q4f32_1-MLC';
 
   constructor() {
     this.appConfig.useIndexedDBCache = true;
@@ -14,7 +15,7 @@ export class LLMService {
   /**
    * Initialize the LLM engine with a given model.
    */
-  public async init(model = 'Llama-3.1-8B-Instruct-q4f32_1-MLC'): Promise<void> {
+  public async init(model = this.testModel): Promise<void> {
     if (this.initialized) return;
 
     try {
@@ -89,7 +90,7 @@ export class LLMService {
   /**
    * Check if the model is already cached
    */
-  public async isModelCached(model: string = 'Llama-3.1-8B-Instruct-q4f32_1-MLC'): Promise<boolean> {
+  public async isModelCached(model: string = this.testModel): Promise<boolean> {
     try {
       return await webllm.hasModelInCache(model, this.appConfig);
     } catch (err) {
@@ -101,7 +102,7 @@ export class LLMService {
   /**
    * Delete all cached data related to the model.
    */
-  public async deleteModelCache(model: string = 'Llama-3.1-8B-Instruct-q4f32_1-MLC'): Promise<void> {
+  public async deleteModelCache(model: string = this.testModel): Promise<void> {
     try {
       await webllm.deleteModelAllInfoInCache(model, this.appConfig);
       console.log(`[Cache Cleared] ${model}`);
