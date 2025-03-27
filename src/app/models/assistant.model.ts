@@ -38,7 +38,11 @@ export class Assistant implements IChatParticipant {
     this.triggerWord = wakeWord; // Just using wakeWord for now
     this.conversation = new Conversation([]);
 
-    this.audioService.registerCallback(this.id, AudioProcessor.Whisper, this.onTranscription.bind(this));
+    this.audioService.registerCallback(
+      this.id,
+      AudioProcessor.Whisper,
+      this.onTranscription.bind(this)
+    );
   }
 
   private onTranscription(transcription: Transcription): void {
@@ -73,23 +77,29 @@ export class Assistant implements IChatParticipant {
     if (this.silenceTimer) {
       clearTimeout(this.silenceTimer);
     }
-    this.silenceTimer = setTimeout(() => this.handleSilence(), this.silenceSendDelta);
+    this.silenceTimer = setTimeout(
+      () => this.handleSilence(),
+      this.silenceSendDelta
+    );
   }
 
   private handleSilence(): void {
     if (this.triggered && this.draftText.length > 0) {
-      this.sendMessage(this.draftText);
+      this.sendMessage(this.draftText, true);
       this.draftText = '';
       this.triggered = false;
     }
   }
 
-  public sendMessage(message: IChatMessage): void;
-  public sendMessage(text: string): void;
-  public sendMessage(param: IChatMessage | string): void {
+  public sendMessage(message: IChatMessage, respondToUser: boolean): void;
+  public sendMessage(text: string, respondToUser: boolean): void;
+  public sendMessage(
+    param: IChatMessage | string,
+    respondToUser: boolean
+  ): void {
     let message: IChatMessage;
 
-    if (typeof param === "string") {
+    if (typeof param === 'string') {
       message = {
         chatParticipant: this.currentUser,
         text: param,
@@ -100,7 +110,10 @@ export class Assistant implements IChatParticipant {
     }
 
     this.conversation.addMessage(message);
-    this.respondToUser();
+
+    if (respondToUser) {
+      this.respondToUser();
+    }
 
     this.onMessageSent?.();
   }
@@ -108,19 +121,33 @@ export class Assistant implements IChatParticipant {
   public async respondToUser(): Promise<void> {
     this.isTyping = true;
 
-    const formattedMessages = this.conversation.messages.map((msg) => ({
-      role: msg.chatParticipant === this ? 'assistant' as const : 'user' as const,
-      content: msg.text,
-    }));
+    const lastMsg = this.conversation.messages.at(-1);
+    const formattedMessages = lastMsg
+      ? [
+          {
+            role: 'system' as const,
+            content: 'You are Hatsune Miku. Keep your responses concise and brief.',
+          },
+          {
+            role:
+              lastMsg.chatParticipant === this
+                ? ('assistant' as const)
+                : ('user' as const),
+            content: lastMsg.text,
+          },
+        ]
+      : [];
 
-    const responseText = await this.llmService.generateResponse(formattedMessages);
+    const responseText = await this.llmService.generateResponse(
+      formattedMessages
+    );
     const assistantMessage: IChatMessage = {
       chatParticipant: this,
       text: responseText,
       timestamp: new Date(),
     };
 
-    this.sendMessage(assistantMessage);
+    this.sendMessage(assistantMessage, false);
     this.isTyping = false;
   }
 

@@ -36,27 +36,14 @@ export class ChatComponent {
 
   constructor(private cdr: ChangeDetectorRef) {
 
-  }
+  }   
 
   ngOnInit() {
     this.assistant.onMessageSent = () => this.scrollToBottom();
   }
 
-  public sendMessage(value: string) {
-    if (value?.trim()) {
-      this.assistant.sendMessage(value);
-      this.assistant.draftText = '';
-
-      this.cdr.detectChanges();
-
-      setTimeout(() => {
-        this.scrollToBottom();
-      }, 0);
-    }
-  }
-
   protected inputOnEnter(element: HTMLInputElement) {
-    this.sendMessage(element.value);
+    this.assistant.sendMessage(element.value, true);
     this.cdr.detectChanges();
   }
 
