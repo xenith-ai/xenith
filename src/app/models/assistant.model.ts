@@ -138,16 +138,19 @@ export class Assistant implements IChatParticipant {
         ]
       : [];
 
-    const responseText = await this.llmService.generateResponse(
-      formattedMessages
-    );
     const assistantMessage: IChatMessage = {
       chatParticipant: this,
-      text: responseText,
+      text: '',
       timestamp: new Date(),
     };
 
     this.sendMessage(assistantMessage, false);
+
+    await this.llmService.streamResponse(formattedMessages, (token, usage) => {
+      assistantMessage.text += token;
+      this.onMessageSent?.();
+    });
+
     this.isTyping = false;
   }
 
