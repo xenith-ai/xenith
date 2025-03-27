@@ -6,7 +6,7 @@ export class LLMService {
   private engine: webllm.MLCEngineInterface | null = null;
   private initialized = false;
   private appConfig = webllm.prebuiltAppConfig;
-  private testModel: string = 'TinyLlama-1.1B-Chat-v1.0-q4f32_1-MLC';
+  private testModel: string = 'Llama-3.1-8B-Instruct-q4f32_1-MLC';
 
   constructor() {
     this.appConfig.useIndexedDBCache = true;
