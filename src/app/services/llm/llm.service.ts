@@ -6,7 +6,7 @@ export class LLMService {
   private engine: webllm.MLCEngineInterface | null = null;
   private initialized = false;
   private appConfig = webllm.prebuiltAppConfig;
-  private testModel: string = 'RedPajama-INCITE-Chat-3B-v1-q4f32_1-MLC';
+  private testModel: string = 'TinyLlama-1.1B-Chat-v1.0-q4f32_1-MLC';
 
   constructor() {
     this.appConfig.useIndexedDBCache = true;
