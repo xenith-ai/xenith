@@ -32,8 +32,7 @@ export class LandingComponent {
   private startedListeningFlow = false;
 
   private readonly enableMicrophoneButtonMessage: ButtonMessage;
-  private readonly startDownloadingWhisperModelButtonMessage: ButtonMessage;
-  private readonly startDownloadingLLMModelButtonMessage: ButtonMessage;
+  private readonly startDownloadingModelsButtonMessage: ButtonMessage;
 
   protected newAssistant: Assistant;
   protected newUser: User;
@@ -67,167 +66,172 @@ export class LandingComponent {
       this.audioService.requestMicrophoneAccess
     );
 
-    this.startDownloadingWhisperModelButtonMessage = new ButtonMessage(
+    this.startDownloadingModelsButtonMessage = new ButtonMessage(
       this.newAssistant,
-      'Download Model',
+      'Download AI Models',
       new Date(),
       'assets/img/download.svg',
       'button-1',
-      this.downloadWhisperModelFlow
-    );
-
-    this.startDownloadingLLMModelButtonMessage = new ButtonMessage(
-      this.newAssistant,
-      'Download Model',
-      new Date(),
-      'assets/img/download.svg',
-      'button-1',
-      this.downloadLLMModelFlow
+      this.downloadModelsFlow
     );
 
     this.initializeChatFlow();
   }
 
   private async initializeChatFlow() {
-    // Handle whisper model
-    const whisperModel = await this.indexedDBService.readModel(
+    const cachedWhisperModel = await this.indexedDBService.readModel(
       ModelKey.WhisperTinyEn
     );
+    const isLLMModelCached = await this.LLMService.isModelCached();
 
-    if (!whisperModel) {
-      this.promptDownloadWhisperModelFlow();
-    } else {
-      await this.loadCachedWhisperModelFlow(whisperModel);
-    }
-  }
-
-  private loadCachedWhisperModelFlow = async (model: Uint8Array) => {
-    this.newAssistant.sendMessage(
-      new TextMessage(
-        this.newAssistant,
-        `Loading Speech-to-Text AI model from cache...`,
-        new Date()
-      ),
-      false
-    );
-    if (!this.whisperService.whisperModule) {
-      console.warn('Waiting for whisper module to be loaded...');
-      await this.whisperService.waitForModule();
-    }
-
-    await this.whisperService.loadModel(model);
-    this.newAssistant.sendMessage(
-      new TextMessage(
-        this.newAssistant,
-        `Speech-to-Text AI model loaded from cache!`,
-        new Date()
-      ),
-      false
-    );
-
-    if (!await this.LLMService.isModelCached()) {
-      await this.promptDownloadLLMModelFlow();
-    } else {
-      await this.loadCachedLLMModelFlow();
-    }
-  };
-
-  private loadCachedLLMModelFlow = async () => {
-    this.newAssistant.sendMessage(
-      new TextMessage(
-        this.newAssistant,
-        `Loading Llama LLM from cache...`,
-        new Date()
-      ),
-      false
-    );
-
-    await this.LLMService.init();
-
-    this.newAssistant.sendMessage(
-      new TextMessage(
-        this.newAssistant,
-        'Llama LLM loaded from cache!',
-        new Date()
-      ),
-      false
-    );
-
-    await this.checkMicrophoneAccessFlow();
-  };
-
-  private downloadWhisperModelFlow = async () => {
-    this.newAssistant.sendMessage(
-      new TextMessage(this.newAssistant, `Starting download...`, new Date()),
-      false
-    );
-    const whisperModel = await this.httpHandlerService.fetchOctetStream(
-      ModelUrl.WhisperTinyEn
-    );
-
-    this.indexedDBService.insertModel(ModelKey.WhisperTinyEn, whisperModel);
-
-    // Wait for whisper module to be loaded
-    if (!this.whisperService.whisperModule) {
-      console.warn('Waiting for whisper module to be loaded...');
-      await this.whisperService.waitForModule();
-    }
-
-    await this.whisperService.loadModel(whisperModel);
-    this.newAssistant.sendMessage(
-      new TextMessage(
-        this.newAssistant,
-        `Done! I also cached it so you won't need to download it again later.`,
-        new Date()
-      ),
-      false
-    );
-
-    if (!await this.LLMService.isModelCached()) {
-      await this.promptDownloadLLMModelFlow();
-    } else {
-      await this.loadCachedLLMModelFlow();
-    }
-  };
-
-  private downloadLLMModelFlow = async () => {
-    this.newAssistant.sendMessage(
-      new TextMessage(this.newAssistant, `Starting download...`, new Date()),
-      false
-    );
-    try {
-      await this.LLMService.init();
-    } catch (error) {
+    if (cachedWhisperModel && isLLMModelCached) {
       this.newAssistant.sendMessage(
         new TextMessage(
           this.newAssistant,
-          'There was a problem downloading the Llama LLM.',
+          `All required AI models are already cached. Starting immediately...`,
           new Date()
         ),
         false
       );
 
+      // Load Whisper model from cache
+      if (!this.whisperService.whisperModule) {
+        console.warn('Waiting for whisper module to be loaded...');
+        await this.whisperService.waitForModule();
+      }
+      await this.whisperService.loadModel(cachedWhisperModel);
+
+      // Initialize LLM
+      await this.LLMService.init();
+
+      // Proceed to microphone access flow
+      await this.checkMicrophoneAccessFlow();
+    } else {
       this.newAssistant.sendMessage(
-        this.startDownloadingLLMModelButtonMessage,
+        new TextMessage(
+          this.newAssistant,
+          `I need to download some AI models to get started.`,
+          new Date()
+        ),
         false
       );
-
-      return;
+      this.newAssistant.sendMessage(this.startDownloadingModelsButtonMessage, false);
     }
+  }
 
+  private downloadModelsFlow = async () => {
     this.newAssistant.sendMessage(
-      new TextMessage(
-        this.newAssistant,
-        `Done! I also cached this so you won't need to download it again later.`,
-        new Date()
-      ),
+      new TextMessage(this.newAssistant, `Starting downloads...`, new Date()),
       false
     );
 
+    // Handle Whisper model
+    const cachedWhisperModel = await this.indexedDBService.readModel(
+      ModelKey.WhisperTinyEn
+    );
+    if (cachedWhisperModel) {
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `Accessing Speech-to-Text model from cache...`,
+          new Date()
+        ),
+        false
+      );
+      if (!this.whisperService.whisperModule) {
+        console.warn('Waiting for whisper module to be loaded...');
+        await this.whisperService.waitForModule();
+      }
+      await this.whisperService.loadModel(cachedWhisperModel);
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `Speech-to-Text model loaded from cache!`,
+          new Date()
+        ),
+        false
+      );
+    } else {
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `Downloading Speech-to-Text model...`,
+          new Date()
+        ),
+        false
+      );
+      const whisperModel = await this.httpHandlerService.fetchOctetStream(
+        ModelUrl.WhisperTinyEn
+      );
+      this.indexedDBService.insertModel(ModelKey.WhisperTinyEn, whisperModel);
+      if (!this.whisperService.whisperModule) {
+        console.warn('Waiting for whisper module to be loaded...');
+        await this.whisperService.waitForModule();
+      }
+      await this.whisperService.loadModel(whisperModel);
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `Speech-to-Text model downloaded and cached!`,
+          new Date()
+        ),
+        false
+      );
+    }
+
+    // Handle LLM model
+    if (await this.LLMService.isModelCached()) {
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `Accessing Gemma LLM from cache...`,
+          new Date()
+        ),
+        false
+      );
+      await this.LLMService.init();
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `Gemma LLM loaded from cache!`,
+          new Date()
+        ),
+        false
+      );
+    } else {
+      this.newAssistant.sendMessage(
+        new TextMessage(this.newAssistant, `Downloading Gemma LLM...`, new Date()),
+        false
+      );
+      try {
+        await this.LLMService.init();
+      } catch (error) {
+        this.newAssistant.sendMessage(
+          new TextMessage(
+            this.newAssistant,
+            `There was a problem downloading the Gemma LLM.`,
+            new Date()
+          ),
+          false
+        );
+        this.newAssistant.sendMessage(this.startDownloadingModelsButtonMessage, false);
+        return;
+      }
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `Gemma LLM downloaded and cached!`,
+          new Date()
+        ),
+        false
+      );
+    }
+
+    // Proceed to microphone access flow
     await this.checkMicrophoneAccessFlow();
   };
 
-  private checkMicrophoneAccessFlow = async () => {
+  private async checkMicrophoneAccessFlow() {
     if (
       await this.audioService.isMicrophoneEnabled(
         this.microphoneStatusChangedCallback
@@ -246,36 +250,6 @@ export class LandingComponent {
     } else {
       await this.requestMicrophoneAccessFlow();
     }
-  };
-
-  private promptDownloadWhisperModelFlow() {
-    this.newAssistant.sendMessage(
-      new TextMessage(
-        this.newAssistant,
-        `To get started, I need to download OpenAI's Speech-to-Text model.`,
-        new Date()
-      ),
-      false
-    );
-    this.newAssistant.sendMessage(
-      this.startDownloadingWhisperModelButtonMessage,
-      false
-    );
-  }
-
-  private promptDownloadLLMModelFlow() {
-    this.newAssistant.sendMessage(
-      new TextMessage(
-        this.newAssistant,
-        `I also need to download Llama LLM model (this might take awhile)`,
-        new Date()
-      ),
-      false
-    );
-    this.newAssistant.sendMessage(
-      this.startDownloadingLLMModelButtonMessage,
-      false
-    );
   }
 
   private async requestMicrophoneAccessFlow() {
