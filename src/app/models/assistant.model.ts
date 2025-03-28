@@ -126,7 +126,7 @@ export class Assistant implements IChatParticipant {
       ? [
           {
             role: 'system' as const,
-            content: 'You are Hatsune Miku. Keep your responses concise and brief.',
+            content: 'You are Hatsune Miku. Your responses should be a couple sentences.',
           },
           {
             role:
