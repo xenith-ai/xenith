@@ -36,7 +36,10 @@
               }
             ],
             "styles": ["src/styles.scss"],
-            "scripts": ["src/assets/whisper/stream.js"]
+            "scripts": [
+              "src/assets/whisper/stream.js"
+            ],
+            "webWorkerTsConfig": "tsconfig.worker.json"
           },
           "configurations": {
             "production": {
@@ -102,7 +105,10 @@
               }
             ],
             "styles": ["src/styles.scss"],
-            "scripts": ["src/assets/whisper/stream.js"]
+            "scripts": [
+              "src/assets/whisper/stream.js"
+            ],
+            "webWorkerTsConfig": "tsconfig.worker.json"
           }
         },
         "lint": {
