@@ -310,7 +310,6 @@ export class LandingComponent {
       ),
       false
     );
-    await Utilities.sleep(300);
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
