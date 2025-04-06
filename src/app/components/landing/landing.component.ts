@@ -84,11 +84,33 @@ export class LandingComponent {
     );
     const isLLMModelCached = await this.LLMService.isModelCached();
 
+    this.newAssistant.sendMessage(
+      new TextMessage(
+        this.newAssistant,
+        `Welcome to Xenith, the first fully local AI assistant, powered with Web Assembly!`,
+        new Date()
+      ),
+      false
+    );
+
+    await Utilities.sleep(500);
+
+    this.newAssistant.sendMessage(
+      new TextMessage(
+        this.newAssistant,
+        `Everything here is running completely on your machine, so you'll probably need a dedicated GPU.`,
+        new Date()
+      ),
+      false
+    );
+
+    await Utilities.sleep(500);
+
     if (cachedWhisperModel && isLLMModelCached) {
       this.newAssistant.sendMessage(
         new TextMessage(
           this.newAssistant,
-          `All required AI models are already cached. Starting immediately...`,
+          `All required AI models are already cached. Initializing models...`,
           new Date()
         ),
         false
@@ -256,7 +278,7 @@ export class LandingComponent {
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
-        `You'll need to provide access to your microphone.`,
+        `You'll need to provide access to your microphone if you want to interact with your voice.`,
         new Date()
       ),
       false
@@ -266,7 +288,7 @@ export class LandingComponent {
 
   private async startListeningFlow() {
     this.newAssistant.sendMessage(
-      new TextMessage(this.newAssistant, `Initializing AI...`, new Date()),
+      new TextMessage(this.newAssistant, `Initializing listener...`, new Date()),
       false
     );
 

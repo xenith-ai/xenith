@@ -128,7 +128,7 @@ export class Assistant implements IChatParticipant {
       ? [
           {
             role: 'system' as const,
-            content: 'You are a virtual assistant. Your responses should be able to be read aloud verbatim.',
+            content: 'You are a virtual assistant. Your responses should be short (2-3 sentences) and be able to be read aloud verbatim.',
           },
           {
             role:

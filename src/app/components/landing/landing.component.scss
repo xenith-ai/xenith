@@ -11,11 +11,13 @@ $content-z: calc($page-container-z + 2);
 #title-container {
   z-index: $content-z;
   text-align: center;
-  font-weight: 600;
 
   > h1 {
     color: $logo-color;
-    font-weight: 400;
+  }
+
+  > h2 {
+    color: $logo-color;
   }
 }
 
