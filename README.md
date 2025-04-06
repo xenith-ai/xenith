@@ -8,7 +8,7 @@
 
 The goal of xenith is to provide a platform for users to create their own custom voice assistants, with their own wake words, voices and LLMs, including the ability to run these all locally. Long term roadmap:
 - Support for a variety of remote APIs for LLM/STT/TTS
-- Deployment to Desktop/Mobile platforms for native hardware support
+- Deployment to desktop/mobile platforms for native hardware support
 - Self-hosted model processing for remote access to your assistants
 - Machine integrations for triggering local automations and workflows from your assistants
 
