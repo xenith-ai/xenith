@@ -1,10 +1,10 @@
-import * as tts from '@diffusionstudio/vits-web';
+import { predict } from "@diffusionstudio/vits-web";
 
 self.onmessage = async (event: MessageEvent) => {
   const { messageOutput, voiceId, guid } = event.data;
 
   try {
-    const wav = await tts.predict({
+    const wav = await predict({
       text: messageOutput,
       voiceId: voiceId ?? 'en_US-hfc_female-medium', // fallback if voiceId is not passed
     });

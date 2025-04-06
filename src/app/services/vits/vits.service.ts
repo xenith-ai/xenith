@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { download, stored, Voice, VoiceId, voices } from '@diffusionstudio/vits-web';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +12,47 @@ export class VitsService {
   private currentGuid: string | null = null;
   private finalCallback: (() => void) | null = null;
   private currentAudio: HTMLAudioElement | null = null;
-  private voiceId: string = 'en_US-hfc_female-medium';
+  public voiceList: { voice: VoiceId; downloaded: boolean }[] = [];
 
   constructor() {
     this.initVitsWorker();
+  }
+
+  public async loadVoices(): Promise<void> {
+    try {
+      const allVoices = await voices();
+      const downloadedVoices = await stored();
+      const downloadedSet = new Set(downloadedVoices);
+
+      this.voiceList = allVoices.map((voice: Voice) => ({
+        voice: voice.key,
+        downloaded: downloadedSet.has(voice.key),
+      }));
+    } catch (err) {
+      console.error('[VITS] Failed to load voices:', err);
+      this.voiceList = [];
+    }
+  }
+
+  public async downloadVoice(voice: VoiceId): Promise<void> {
+    try {
+      await download(voice);
+
+      // Update the specific voice to show it's now downloaded
+      const entry = this.voiceList.find(v => v.voice === voice);
+      if (entry) {
+        entry.downloaded = true;
+      } else {
+        this.voiceList.push({ voice, downloaded: true });
+      }
+    } catch (err) {
+      console.error(`[VITS] Failed to download voice "${voice}":`, err);
+    }
+  }
+
+  public isVoiceDownloaded(voice: string): boolean {
+    const entry = this.voiceList.find(v => v.voice === voice);
+    return entry?.downloaded ?? false;
   }
 
   public initVitsWorker(): void {
@@ -57,7 +95,7 @@ export class VitsService {
     }
   }
 
-  public streamToken(token: string, guid: string, voiceId: string = this.voiceId): void {
+  public streamToken(token: string, guid: string, voiceId: string): void {
     if (!this.vitsWorker) {
       throw new Error('TTS Worker not initialized');
     }
@@ -84,7 +122,7 @@ export class VitsService {
     }
   }
 
-  public complete(guid: string, voiceId: string = this.voiceId, onComplete?: () => void): void {
+  public complete(guid: string, voiceId: string, onComplete?: () => void): void {
     if (this.currentGuid !== guid) return;
 
     if (this.bufferString.trim()) {
@@ -147,7 +185,7 @@ export class VitsService {
     let filteredMessage = this.removeEmojis(message);
 
     // Remove some characters we don't want read
-    filteredMessage = filteredMessage.replace(/[\*:]/g, '');
+    filteredMessage = filteredMessage.replace(/[*:]/g, '');
 
     return filteredMessage;
   }

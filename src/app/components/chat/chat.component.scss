@@ -78,39 +78,74 @@
   }
 }
 
-/* 🔘 Default base circle */
 #circle-gradient-container {
   position: absolute;
   height: 90%;
   aspect-ratio: 1;
   border-radius: 50%;
   z-index: 1;
-  transition: background 0.3s ease;
+  overflow: visible;
   transition:
-    background 0.3s ease-in-out,
-    transform 0.3s ease-in-out,
-    box-shadow 0.3s ease-in-out;
+    background 0.5s ease-in-out,
+    transform 0.4s ease-in-out,
+    box-shadow 0.5s ease-in-out;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 0 12px rgba(255, 255, 255, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
-/* 🎙️ No mic access */
+#circle-gradient-container {
+  position: absolute;
+  height: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  z-index: 1;
+  overflow: visible;
+  transition:
+    background 0.5s ease-in-out,
+    transform 0.4s ease-in-out,
+    box-shadow 0.5s ease-in-out;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 0 12px rgba(255, 255, 255, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.listening::after {
+  content: '';
+  position: absolute;
+  inset: -4%;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  animation: haloGlow 3s ease-in-out infinite;
+}
+
 .microphone-disabled {
-  background: rgb(43, 43, 43);
+  background: radial-gradient(circle at center, #2b2b2b 0%, #1a1a1a 100%);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6);
 }
 
-/* 😐 Not listening */
 .not-listening {
-  background: radial-gradient(circle, #666 0%, #333 100%);
+  background: radial-gradient(circle at center, #444 0%, #1f1f1f 100%);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.3),
+    inset 0 0 4px rgba(255, 255, 255, 0.05);
 }
 
-/* 🎧 Listening (Android-style breathing pulse) */
 @keyframes androidPulse {
   0% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.4);
   }
-  70% {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 12px rgba(0, 200, 255, 0);
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 28px 12px rgba(0, 200, 255, 0.2);
   }
   100% {
     transform: scale(1);
@@ -118,30 +153,66 @@
   }
 }
 
-.listening {
-  background: radial-gradient(circle, #00c8ff 0%, #006b9a 100%);
-  animation: androidPulse 1.8s infinite ease-in-out;
+@keyframes shimmerBlueToPurple {
+  0%   { filter: hue-rotate(0deg); }
+  50%  { filter: hue-rotate(15deg); }
+  100% { filter: hue-rotate(0deg); }
 }
 
-/* ⚡ Triggered (like wake word detected or transcribing) */
+@keyframes haloGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.06),
+                0 0 10px 4px rgba(0, 200, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px 10px rgba(0, 200, 255, 0.15),
+                0 0 14px 4px rgba(0, 255, 255, 0.08);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.06),
+                0 0 10px 4px rgba(0, 200, 255, 0.1);
+  }
+}
+
+.listening {
+  background: radial-gradient(circle at center, #00d2ff 0%, #004e73 100%);
+  animation:
+    androidPulse 2.4s ease-in-out infinite,
+    shimmerBlueToPurple 6s ease-in-out infinite;
+  box-shadow:
+    0 0 36px rgba(0, 200, 255, 0.4),
+    inset 0 0 12px rgba(255, 255, 255, 0.08);
+}
+
 @keyframes glowPulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(0, 255, 100, 0.6);
+    box-shadow: 0 0 0 0 rgba(0, 255, 150, 0.5);
   }
   50% {
-    transform: scale(1.15);
-    box-shadow: 0 0 12px 8px rgba(0, 255, 100, 0.3);
+    transform: scale(1.07);
+    box-shadow: 0 0 40px 14px rgba(0, 255, 150, 0.25);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(0, 255, 100, 0.0);
+    box-shadow: 0 0 0 0 rgba(0, 255, 150, 0);
   }
 }
 
+@keyframes shimmerGreenToBlue {
+  0%   { filter: hue-rotate(0deg); }
+  50%  { filter: hue-rotate(-30deg); }
+  100% { filter: hue-rotate(0deg); }
+}
+
 .triggered {
-  background: radial-gradient(circle at center, #00ff64 0%, #00993c 100%);
-  animation: glowPulse 1.2s ease-in-out infinite;
+  background: radial-gradient(circle at center, #00ffa0 0%, #007f4c 100%);
+  animation:
+    glowPulse 2s ease-in-out infinite,
+    shimmerGreenToBlue 6s ease-in-out infinite;
+  box-shadow:
+    0 0 40px rgba(0, 255, 150, 0.4),
+    inset 0 0 10px rgba(255, 255, 255, 0.05);
 }
 
 .chat-message-group {

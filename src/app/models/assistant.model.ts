@@ -7,6 +7,7 @@ import { AudioProcessor } from '../enums/audio-processor.enum';
 import { Transcription } from './transcription.model';
 import { VitsService } from '../services/vits/vits.service';
 import { v4 as uuidv4 } from 'uuid';
+import { VoiceId } from '@diffusionstudio/vits-web';
 
 export class Assistant implements IChatParticipant {
   wakeWord: string;
@@ -15,7 +16,7 @@ export class Assistant implements IChatParticipant {
   public conversation: Conversation;
   public draftText: string = '';
   public messageColor = 'linear-gradient(320deg, hsl(250, 60%, 40%) 0%, hsl(270, 70%, 35%) 100%)';
-  public voiceId = 'en_US-hfc_female-medium';
+  public voiceId: VoiceId = 'en_US-hfc_female-medium';
 
   private readonly triggerWord: string;
   private readonly silenceSendDelta = 3000;
@@ -150,7 +151,7 @@ export class Assistant implements IChatParticipant {
     const responseGuid = uuidv4();
 
     await this.llmService.streamResponse(formattedMessages, (token, usage) => {
-      this.vitsService.streamToken(token, responseGuid);
+      this.vitsService.streamToken(token, responseGuid, this.voiceId);
       assistantMessage.text += token;
       this.onMessageSent?.();
     });

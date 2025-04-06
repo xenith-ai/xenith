@@ -18,6 +18,7 @@ import { ModelUrl } from '../../enums/model-url.enum';
 import { Utilities } from '../../helpers/utilities';
 import { WhisperService } from '../../services/whisper/whisper.service';
 import { LLMService } from '../../services/llm/llm.service';
+import { VitsService } from '../../services/vits/vits.service';
 
 @Component({
   selector: 'app-landing',
@@ -47,7 +48,8 @@ export class LandingComponent {
     private httpHandlerService: HttpHandlerService,
     private indexedDBService: IndexedDBService,
     private cdr: ChangeDetectorRef,
-    private LLMService: LLMService
+    private LLMService: LLMService,
+    private vitsService: VitsService
   ) {
     this.newUser = this.userService.createUser();
     this.newAssistant = this.AssistantService.createAssistant(
@@ -79,11 +81,6 @@ export class LandingComponent {
   }
 
   private async initializeChatFlow() {
-    const cachedWhisperModel = await this.indexedDBService.readModel(
-      ModelKey.WhisperTinyEn
-    );
-    const isLLMModelCached = await this.LLMService.isModelCached();
-
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
@@ -104,9 +101,16 @@ export class LandingComponent {
       false
     );
 
+    const cachedWhisperModel = await this.indexedDBService.readModel(
+      ModelKey.WhisperTinyEn
+    );
+    const isLLMModelCached = await this.LLMService.isModelCached();
+    await this.vitsService.loadVoices();
+    const isVitsModelCached = this.vitsService.isVoiceDownloaded(this.newAssistant.voiceId);
+
     await Utilities.sleep(500);
 
-    if (cachedWhisperModel && isLLMModelCached) {
+    if (cachedWhisperModel && isLLMModelCached && isVitsModelCached) {
       this.newAssistant.sendMessage(
         new TextMessage(
           this.newAssistant,
@@ -243,6 +247,45 @@ export class LandingComponent {
         new TextMessage(
           this.newAssistant,
           `Gemma LLM downloaded and cached!`,
+          new Date()
+        ),
+        false
+      );
+    }
+
+    // Handle VITS model
+    if (this.vitsService.isVoiceDownloaded(this.newAssistant.voiceId)) {
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `Text-to-Speech model loaded from cache!`,
+          new Date()
+        ),
+        false
+      );
+    } else {
+      this.newAssistant.sendMessage(
+        new TextMessage(this.newAssistant, `Downloading VITS Text-to-Speech model...`, new Date()),
+        false
+      );
+      try {
+        await this.vitsService.downloadVoice(this.newAssistant.voiceId);
+      } catch (error) {
+        this.newAssistant.sendMessage(
+          new TextMessage(
+            this.newAssistant,
+            `There was a problem downloading the VITS Text-to-Speech model.`,
+            new Date()
+          ),
+          false
+        );
+        this.newAssistant.sendMessage(this.startDownloadingModelsButtonMessage, false);
+        return;
+      }
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `VITS Text-to-Speech model downloaded and cached!`,
           new Date()
         ),
         false
