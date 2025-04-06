@@ -309,7 +309,7 @@ export class LandingComponent {
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
-        `For instance, you can say "Assistant, what's the weather like?"`,
+        `For instance, you can say "Assistant, who invented the microchip?"`,
         new Date()
       ),
       false
