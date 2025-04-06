@@ -2,13 +2,17 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/70139d0b-6e4a-4332-9d8d-4809fa0921ee/deploy-status)](https://app.netlify.com/sites/xenith/deploys) ![Discord](https://img.shields.io/discord/1221688220580843550?label=discord&logo=discord)
 
-Create and interact with LLM powered voice assistants with WebAssembly!
+<img align="left" src="https://cdn.shaneduffy.io/shaneduffy/mikudance.gif" width="120"/>
+
+**Create and interact with LLM powered voice assistants with WebAssembly!**
 
 The goal of xenith is to provide a platform for users to create their own custom voice assistants. Long term goals:
 - Support for a variety of remote APIs for LLM/STT/TTS
 - Deployment to Desktop/Mobile platforms for native hardware support
 - Self-hosted model processing for remote access to your assistants
 - Machine integrations for triggering local automations and workflows from your assistants
+
+<div style="clear: both;"></div>
 
 ## Requirements
 
