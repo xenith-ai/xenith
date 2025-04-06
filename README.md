@@ -8,7 +8,7 @@ The goal of xenith is to provide a platform for users to create their own custom
 - Support for a variety of remote APIs for LLM/STT/TTS
 - Deployment to Desktop/Mobile platforms for native hardware support
 - Self-hosted model processing for remote access to your assistants
-- Machine integrations for triggering local automations and workflows from your assistant
+- Machine integrations for triggering local automations and workflows from your assistants
 
 ## Requirements
 
