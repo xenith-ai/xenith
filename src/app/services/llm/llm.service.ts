@@ -8,14 +8,12 @@ export class LLMService {
   private initialized = false;
   private appConfig = webllm.prebuiltAppConfig;
   private testModel: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
+  private ttsWorker: Worker | null = null;
 
   constructor() {
     this.appConfig.useIndexedDBCache = true;
   }
 
-  /**
-   * Initialize the LLM engine with a given model.
-   */
   public async init(model = this.testModel): Promise<void> {
     if (this.initialized) return;
 
@@ -31,6 +29,27 @@ export class LLMService {
       this.initialized = true;
     } catch (err) {
       console.error('[WebLLM Init Error]', err);
+      throw err;
+    }
+
+    try {
+      this.ttsWorker = new Worker(new URL('../../workers/tts.worker.ts', import.meta.url), {
+        type: 'module',
+      });
+
+      this.ttsWorker.onmessage = (event: MessageEvent) => {
+        const { type, wav, error } = event.data;
+
+        if (type === 'tts-result') {
+          const audio = new Audio();
+          audio.src = URL.createObjectURL(wav);
+          audio.play();
+        } else if (type === 'tts-error') {
+          console.error('TTS worker error:', error);
+        }
+      };
+    } catch (err) {
+      console.error('[TTS Init Error]', err);
       throw err;
     }
   }
@@ -80,16 +99,10 @@ export class LLMService {
 
     const messageOutput = await this.engine.getMessage();
 
-    const wav = await tts.predict({
-      text: this.filterMessage(messageOutput),
-      voiceId: 'en_US-hfc_female-medium',
+    this.ttsWorker?.postMessage({
+      messageOutput: this.filterMessage(messageOutput),
+      voiceId: 'en_US-hfc_female-medium', // or any other dynamic voice
     });
-
-    const audio = new Audio();
-    audio.src = URL.createObjectURL(wav);
-    audio.play();
-
-    console.log('Final message:\n', messageOutput);
   }
 
   private filterMessage(message: string): string {
