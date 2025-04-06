@@ -51,9 +51,9 @@ export class LandingComponent {
   ) {
     this.newUser = this.userService.createUser();
     this.newAssistant = this.AssistantService.createAssistant(
-      'Miku',
-      'assets/dev/miku.jpg',
-      'miku',
+      'Assistant',
+      'assets/img/robo.webp',
+      'assistant',
       this.newUser
     );
 
@@ -279,7 +279,7 @@ export class LandingComponent {
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
-        `Started listening! Say "Miku" to start interacting.`,
+        `Started listening! Say "Assistant" to start interacting.`,
         new Date()
       ),
       false
@@ -287,7 +287,7 @@ export class LandingComponent {
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
-        `For instance, you can say "Miku, what's the weather like?"`,
+        `For instance, you can say "Assistant, what's the weather like?"`,
         new Date()
       ),
       false

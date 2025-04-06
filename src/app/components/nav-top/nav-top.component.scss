@@ -43,29 +43,16 @@
 }
 
 #nav-links-container {
-  > #profile-button {
-    $padding: calc($nav-top-height / 4);
-    $border-radius: calc($padding * 2);
-
-    padding: $padding;
-
-    > img {
-      transition: box-shadow 0.2s ease-in-out;
-      border-radius: $border-radius;
-      box-shadow: 0 0 4px $glow-4, 0 0 6px $glow-2, 0 0 8px $glow-1;
-
-      &:hover {
-        box-shadow: 0 0 4px $glow-1, 0 0 6px $glow-2, 0 0 8px $glow-3;
-      }
-    }
-  }
-
   > a {
     $padding-vertical: calc($nav-top-height / 2.5);
     $padding-horizontal: calc($padding-vertical / 2);
 
     position: relative;
     padding: $padding-vertical $padding-horizontal;
+
+    &:last-of-type{
+      padding-right: $padding-horizontal * 2;
+    }
   }
 }
 

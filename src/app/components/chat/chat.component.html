@@ -7,38 +7,16 @@
       [class.left]="messageGroup.chatParticipant | instanceOf: Assistant"
       [class.right]="messageGroup.chatParticipant | instanceOf: User"
     >
-      <!-- Assistant Avatar -->
-      <div
-        *ngIf="messageGroup.chatParticipant | instanceOf: Assistant"
-        class="avatar flex flex-col justify-center items-center"
-      >
-        <img
-          crossorigin="anonymous"
-          [src]="assistant.avatar"
-          [alt]="assistant.name + ' Avatar'"
-        />
-      </div>
 
       <!-- Message Content -->
       <div class="content flex flex-col">
         <div
           *ngFor="let message of messageGroup.messages"
           class="content-item flex flex-col"
+          [style.--message-color]="message.chatParticipant.messageColor"
         >
           <app-chat-message [message]="message"></app-chat-message>
         </div>
-      </div>
-
-      <!-- User Avatar -->
-      <div
-        *ngIf="messageGroup.chatParticipant | instanceOf: User"
-        class="avatar flex flex-col justify-center items-center"
-      >
-        <img
-          crossorigin="anonymous"
-          [src]="currentUser.avatar"
-          [alt]="currentUser.name + ' Avatar'"
-        />
       </div>
     </div>
   </div>

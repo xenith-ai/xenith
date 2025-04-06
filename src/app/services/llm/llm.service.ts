@@ -81,7 +81,7 @@ export class LLMService {
     const messageOutput = await this.engine.getMessage();
 
     const wav = await tts.predict({
-      text: this.removeEmojis(messageOutput),
+      text: this.filterMessage(messageOutput),
       voiceId: 'en_US-hfc_female-medium',
     });
 
@@ -90,6 +90,16 @@ export class LLMService {
     audio.play();
 
     console.log('Final message:\n', messageOutput);
+  }
+
+  private filterMessage(message: string): string {
+    // Remove emojis and special characters
+    let filteredMessage = this.removeEmojis(message);
+
+    // Remove asterisk characters
+    filteredMessage = filteredMessage.replace(/\*/g, '');
+
+    return filteredMessage;
   }
 
   private removeEmojis(str: string): string {

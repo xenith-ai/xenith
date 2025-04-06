@@ -15,6 +15,8 @@ export class Assistant implements IChatParticipant {
   public isTyping = false;
   public conversation: Conversation;
   public draftText: string = '';
+  public messageColor = 'linear-gradient(320deg, hsl(250, 60%, 40%) 0%, hsl(270, 70%, 35%) 100%)';
+
 
   // Voice-related config
   private readonly triggerWord: string;
@@ -126,7 +128,7 @@ export class Assistant implements IChatParticipant {
       ? [
           {
             role: 'system' as const,
-            content: 'You are Hatsune Miku. Your responses should be a couple sentences.',
+            content: 'You are a virtual assistant. Your responses should be able to be read aloud verbatim.',
           },
           {
             role:
