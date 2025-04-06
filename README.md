@@ -12,7 +12,7 @@ The goal of xenith is to provide a platform for users to create their own custom
 
 ## Requirements
 
-- **Dedicated GPU** - This runs LLMs directly on your machine via WebAssembly, meaning you'll need a GPU or it will be extremely slow.
+- **Dedicated GPU** - This runs AI models directly on your machine via WebAssembly, meaning you'll need a GPU or it will be extremely slow.
 - **WebGPU Support** - Your browser must support WebGPU, check [WebGPU Report](https://webgpureport.org/) to see if your browser supports it.
 
 ## Credits
