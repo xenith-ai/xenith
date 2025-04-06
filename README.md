@@ -4,7 +4,10 @@
 
 Create and interact with LLM powered voice assistants with WebAssembly!
 
-The goal of xenith is to provide a platform for users to create their own voice assistants. This means supporting remote _and_ local Speech-to-Text, Text-to-Speech and Large Language Models. I'd also like to deploy this to desktop/mobile applications with native GPU support for better performance at some point.
+The goal of xenith is to provide a platform for users to create their own custom voice assistants. Long term goals:
+- Remote API support for LLM/TTS/STT
+- Deployment to Desktop/Mobile platforms for native hardware support
+- Machine integrations for triggering local automations and workflows from your assistant
 
 ## Requirements
 
