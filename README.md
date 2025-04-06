@@ -6,6 +6,11 @@ Create and interact with LLM powered voice assistants with WebAssembly!
 
 The goal of xenith is to provide a platform for users to create their own voice assistants. This means supporting remote _and_ local Speech-to-Text, Text-to-Speech and Large Language Models. I'd also like to deploy this to desktop/mobile applications with native GPU support for better performance at some point.
 
+## Requirements
+
+- **Dedicated GPU** - This runs LLMs directly on your machine via WebAssembly, meaning you'll need a GPU or it will be extremely slow.
+- **WebGPU Support** - Your browser must support WebGPU, check [WebGPU Report](https://webgpureport.org/) to see if your browser supports it.
+
 ## Credits
 
 - [OpenAI](https://github.com/openai) - Creating (and open sourcing) the [Whisper Model](https://github.com/openai/whisper)
