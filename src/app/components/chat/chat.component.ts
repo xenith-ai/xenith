@@ -14,6 +14,7 @@ import { TextMessage } from '../../models/text-message.model';
 import { ButtonMessage } from '../../models/button-message.model';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
 import { AudioProcessor } from '../../enums/audio-processor.enum';
+import { AudioService } from '../../services/audio/audio.service';
 
 @Component({
   selector: 'app-chat',
@@ -34,9 +35,7 @@ export class ChatComponent {
   public TextMessage = TextMessage;
   public ButtonMessage = ButtonMessage;
 
-  constructor(private cdr: ChangeDetectorRef) {
-
-  }
+  constructor(private cdr: ChangeDetectorRef, public audioService: AudioService) {}
 
   ngOnInit() {
     this.assistant.onMessageSent = () => this.scrollToBottom();

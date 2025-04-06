@@ -66,29 +66,82 @@
     #circle-gradient-container {
       pointer-events: all;
       position: absolute;
-      height: 65%;
-      width: 65%;
+      height: 50%;
+      width: 50%;
       border-radius: 50%;
     }
 
     > img {
       z-index: 99999;
-      padding: 1.7em;
+      padding: 1.8em;
     }
   }
 }
 
+/* 🔘 Default base circle */
+#circle-gradient-container {
+  position: absolute;
+  height: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  z-index: 1;
+  transition: background 0.3s ease;
+  transition:
+    background 0.3s ease-in-out,
+    transform 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
+}
+
+/* 🎙️ No mic access */
 .microphone-disabled {
   background: rgb(43, 43, 43);
 }
 
+/* 😐 Not listening */
 .not-listening {
-  background: radial-gradient(circle, rgba(0, 0, 0, 0) 0%, rgba(175, 175, 175, 0.3) 10%, rgb(136, 136, 136) 100%);
+  background: radial-gradient(circle, #666 0%, #333 100%);
+}
+
+/* 🎧 Listening (Android-style breathing pulse) */
+@keyframes androidPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.4);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 12px rgba(0, 200, 255, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 200, 255, 0);
+  }
 }
 
 .listening {
-  background: radial-gradient(circle, rgba(0, 0, 0, 0) 0%, rgba(80, 67, 196, 0.3) 40%, rgb(80, 67, 196) 100%);
-  animation: pulse 6s infinite cubic-bezier(0.47, 0, 0.745, 0.715);
+  background: radial-gradient(circle, #00c8ff 0%, #006b9a 100%);
+  animation: androidPulse 1.8s infinite ease-in-out;
+}
+
+/* ⚡ Triggered (like wake word detected or transcribing) */
+@keyframes glowPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 255, 100, 0.6);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 0 12px 8px rgba(0, 255, 100, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 255, 100, 0.0);
+  }
+}
+
+.triggered {
+  background: radial-gradient(circle at center, #00ff64 0%, #00993c 100%);
+  animation: glowPulse 1.2s ease-in-out infinite;
 }
 
 .chat-message-group {

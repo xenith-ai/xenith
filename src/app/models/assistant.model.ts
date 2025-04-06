@@ -9,20 +9,15 @@ import { Transcription } from './transcription.model';
 export class Assistant implements IChatParticipant {
   wakeWord: string;
 
-  // Existing fields
-  public isListening = false;
-  public isActivated = false;
   public isTyping = false;
   public conversation: Conversation;
   public draftText: string = '';
   public messageColor = 'linear-gradient(320deg, hsl(250, 60%, 40%) 0%, hsl(270, 70%, 35%) 100%)';
 
-
-  // Voice-related config
   private readonly triggerWord: string;
   private readonly silenceSendDelta = 3000;
   private silenceTimer: any = null;
-  private triggered = false;
+  public triggered = false;
 
   public onMessageSent: (() => void) | null = null;
 

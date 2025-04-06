@@ -31,20 +31,17 @@
         (click)="toggleListener()"
       >
         <img
-          [src]="assistant.isListening ? 'assets/img/microphone.svg' : 'assets/img/no-microphone.svg'"
-          [style.opacity]="assistant.isListening ? 0 : 1"
+          [src]="this.audioService.listening ? 'assets/img/microphone.svg' : 'assets/img/no-microphone.svg'"
+          [style.opacity]="this.audioService.listening ? 0 : 1"
           alt="Microphone"
           class="h-full w-auto"
         />
         <div
-          class="loader h-full w-auto"
-          *ngIf="assistant.isListening"
-        ></div>
-        <div
           id="circle-gradient-container"
-          [class.listening]="assistant.isListening"
-          [class.not-listening]="!assistant.isListening"
-          [class.microphone-disabled]="false"
+          [class.microphone-disabled]="!assistant.triggered && !this.audioService.microphoneAccess"
+          [class.listening]="!assistant.triggered && this.audioService.listening"
+          [class.not-listening]="!assistant.triggered && !this.audioService.listening"
+          [class.triggered]="assistant.triggered"
         ></div>
       </button>
     </div>
