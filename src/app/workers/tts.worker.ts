@@ -1,7 +1,7 @@
 import * as tts from '@diffusionstudio/vits-web';
 
 self.onmessage = async (event: MessageEvent) => {
-  const { messageOutput, voiceId } = event.data;
+  const { messageOutput, voiceId, guid } = event.data;
 
   try {
     const wav = await tts.predict({
@@ -12,6 +12,7 @@ self.onmessage = async (event: MessageEvent) => {
     self.postMessage({
       type: 'tts-result',
       wav,
+      guid,
     });
   } catch (err) {
     self.postMessage({

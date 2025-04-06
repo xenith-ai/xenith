@@ -48,11 +48,6 @@ export class ChatComponent {
     element.value = '';
   }
 
-  public onDraftInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.assistant.draftText = input.value;
-  }
-
   private scrollToBottom() {
     setTimeout(() => {
       this.chatMessages.nativeElement.scrollTop =

@@ -1,6 +1,5 @@
 import * as webllm from '@mlc-ai/web-llm';
 import { Injectable } from '@angular/core';
-import * as tts from '@diffusionstudio/vits-web';
 
 @Injectable({ providedIn: 'root' })
 export class LLMService {
@@ -8,7 +7,6 @@ export class LLMService {
   private initialized = false;
   private appConfig = webllm.prebuiltAppConfig;
   private testModel: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
-  private ttsWorker: Worker | null = null;
 
   constructor() {
     this.appConfig.useIndexedDBCache = true;
@@ -29,27 +27,6 @@ export class LLMService {
       this.initialized = true;
     } catch (err) {
       console.error('[WebLLM Init Error]', err);
-      throw err;
-    }
-
-    try {
-      this.ttsWorker = new Worker(new URL('../../workers/tts.worker.ts', import.meta.url), {
-        type: 'module',
-      });
-
-      this.ttsWorker.onmessage = (event: MessageEvent) => {
-        const { type, wav, error } = event.data;
-
-        if (type === 'tts-result') {
-          const audio = new Audio();
-          audio.src = URL.createObjectURL(wav);
-          audio.play();
-        } else if (type === 'tts-error') {
-          console.error('TTS worker error:', error);
-        }
-      };
-    } catch (err) {
-      console.error('[TTS Init Error]', err);
       throw err;
     }
   }
@@ -96,30 +73,6 @@ export class LLMService {
         onToken(delta, chunk.usage);
       }
     }
-
-    const messageOutput = await this.engine.getMessage();
-
-    this.ttsWorker?.postMessage({
-      messageOutput: this.filterMessage(messageOutput),
-      voiceId: 'en_US-hfc_female-medium', // or any other dynamic voice
-    });
-  }
-
-  private filterMessage(message: string): string {
-    // Remove emojis and special characters
-    let filteredMessage = this.removeEmojis(message);
-
-    // Remove asterisk characters
-    filteredMessage = filteredMessage.replace(/\*/g, '');
-
-    return filteredMessage;
-  }
-
-  private removeEmojis(str: string): string {
-    return str.replace(
-      /([\u{1F3FB}-\u{1F3FF}]|[\u{1F1E6}-\u{1F1FF}]{2}|[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA70}-\u{1FAFF}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20FF}])/gu,
-      ''
-    );
   }
 
   /**

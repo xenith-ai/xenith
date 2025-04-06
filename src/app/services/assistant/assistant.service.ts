@@ -4,6 +4,7 @@ import { AudioService } from '../audio/audio.service';
 import { LLMService } from '../llm/llm.service';
 import { v4 as uuidv4 } from 'uuid';
 import { IChatParticipant } from '../../interfaces/chat-participant.interface';
+import { VitsService } from '../vits/vits.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,8 @@ export class AssistantService {
 
   constructor(
     private audioService: AudioService,
-    private llmService: LLMService
+    private llmService: LLMService,
+    private vitsService: VitsService
   ) {}
 
   public createAssistant(
@@ -29,7 +31,8 @@ export class AssistantService {
       wakeWord,
       this.audioService,
       this.llmService,
-      user
+      user,
+      this.vitsService
     );
 
     this.assistants.push(assistant);

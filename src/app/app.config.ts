@@ -10,6 +10,7 @@ import { UserService } from './services/user/user.service';
 import { InstanceOfPipe } from './pipes/instance-of.pipe';
 import { WhisperService } from './services/whisper/whisper.service';
 import { AudioService } from './services/audio/audio.service';
+import { VitsService } from './services/vits/vits.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,6 +21,7 @@ export const appConfig: ApplicationConfig = {
     UserService,
     InstanceOfPipe,
     WhisperService,
-    AudioService
+    AudioService,
+    VitsService
   ],
 };
