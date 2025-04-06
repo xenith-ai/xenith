@@ -1,4 +1,4 @@
-# Xenith
+# [xenith.ai](https://xenith.ai)
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/70139d0b-6e4a-4332-9d8d-4809fa0921ee/deploy-status)](https://app.netlify.com/sites/xenith/deploys) ![Discord](https://img.shields.io/discord/1221688220580843550?label=discord&logo=discord)
 
