@@ -1,3 +1,3 @@
 export enum ModelUrl {
-  WhisperTinyEn = 'assets/whisper/models/ggml-tiny.en-q5_1.bin',
+  WhisperTinyEn = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin',
 }
