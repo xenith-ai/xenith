@@ -66,38 +66,158 @@
     #circle-gradient-container {
       pointer-events: all;
       position: absolute;
-      height: 65%;
-      width: 65%;
+      height: 50%;
+      width: 50%;
       border-radius: 50%;
     }
 
     > img {
       z-index: 99999;
-      padding: 1.7em;
+      padding: 1.8em;
     }
   }
 }
 
+#circle-gradient-container {
+  position: absolute;
+  height: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  z-index: 1;
+  overflow: visible;
+  transition:
+    background 0.5s ease-in-out,
+    transform 0.4s ease-in-out,
+    box-shadow 0.5s ease-in-out;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 0 12px rgba(255, 255, 255, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+#circle-gradient-container {
+  position: absolute;
+  height: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  z-index: 1;
+  overflow: visible;
+  transition:
+    background 0.5s ease-in-out,
+    transform 0.4s ease-in-out,
+    box-shadow 0.5s ease-in-out;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 0 12px rgba(255, 255, 255, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.listening::after {
+  content: '';
+  position: absolute;
+  inset: -4%;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  animation: haloGlow 3s ease-in-out infinite;
+}
+
 .microphone-disabled {
-  background: rgb(43, 43, 43);
+  background: radial-gradient(circle at center, #2b2b2b 0%, #1a1a1a 100%);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6);
 }
 
 .not-listening {
-  background: radial-gradient(circle, rgba(0, 0, 0, 0) 0%, rgba(175, 175, 175, 0.3) 10%, rgb(136, 136, 136) 100%);
+  background: radial-gradient(circle at center, #444 0%, #1f1f1f 100%);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.3),
+    inset 0 0 4px rgba(255, 255, 255, 0.05);
+}
+
+@keyframes androidPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.4);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 28px 12px rgba(0, 200, 255, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 200, 255, 0);
+  }
+}
+
+@keyframes shimmerBlueToPurple {
+  0%   { filter: hue-rotate(0deg); }
+  50%  { filter: hue-rotate(15deg); }
+  100% { filter: hue-rotate(0deg); }
+}
+
+@keyframes haloGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.06),
+                0 0 10px 4px rgba(0, 200, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px 10px rgba(0, 200, 255, 0.15),
+                0 0 14px 4px rgba(0, 255, 255, 0.08);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.06),
+                0 0 10px 4px rgba(0, 200, 255, 0.1);
+  }
 }
 
 .listening {
-  background: radial-gradient(circle, rgba(0, 0, 0, 0) 0%, rgba(80, 67, 196, 0.3) 40%, rgb(80, 67, 196) 100%);
-  animation: pulse 6s infinite cubic-bezier(0.47, 0, 0.745, 0.715);
+  background: radial-gradient(circle at center, #00d2ff 0%, #004e73 100%);
+  animation:
+    androidPulse 2.4s ease-in-out infinite,
+    shimmerBlueToPurple 6s ease-in-out infinite;
+  box-shadow:
+    0 0 36px rgba(0, 200, 255, 0.4),
+    inset 0 0 12px rgba(255, 255, 255, 0.08);
+}
+
+@keyframes glowPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 255, 150, 0.5);
+  }
+  50% {
+    transform: scale(1.07);
+    box-shadow: 0 0 40px 14px rgba(0, 255, 150, 0.25);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 255, 150, 0);
+  }
+}
+
+@keyframes shimmerGreenToBlue {
+  0%   { filter: hue-rotate(0deg); }
+  50%  { filter: hue-rotate(-30deg); }
+  100% { filter: hue-rotate(0deg); }
+}
+
+.triggered {
+  background: radial-gradient(circle at center, #00ffa0 0%, #007f4c 100%);
+  animation:
+    glowPulse 2s ease-in-out infinite,
+    shimmerGreenToBlue 6s ease-in-out infinite;
+  box-shadow:
+    0 0 40px rgba(0, 255, 150, 0.4),
+    inset 0 0 10px rgba(255, 255, 255, 0.05);
 }
 
 .chat-message-group {
   &.left {
     justify-content: start;
-
-    .avatar {
-      margin-right: 1em;
-    }
 
     .content {
       align-items: start;
@@ -111,10 +231,6 @@
   &.right {
     justify-content: end;
 
-    .avatar {
-      margin-left: 1em;
-    }
-
     .content {
       align-items: end;
 
@@ -124,26 +240,11 @@
     }
   }
 
-  .avatar {
-    width: $message-height;
-    height: $message-height;
-    min-width: $message-height;
-    min-height: $message-height;
-    border-radius: 50%;
-    background: #FFFFFF;
-    overflow: clip;
-
-    img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-
   .content {
-    margin: 0.5em 0;
+    margin: 0 0;
 
     .content-item {
-      background: $ai-message-box-color;
+      background: var(--message-color); // Use CSS variable for dynamic color
       border-radius: $border-radius-1;
       overflow: clip;
       margin: 0 0 0.5em 0;

@@ -5,22 +5,23 @@ import { AudioService } from '../services/audio/audio.service';
 import { LLMService } from '../services/llm/llm.service';
 import { AudioProcessor } from '../enums/audio-processor.enum';
 import { Transcription } from './transcription.model';
+import { VitsService } from '../services/vits/vits.service';
+import { v4 as uuidv4 } from 'uuid';
+import { VoiceId } from '@diffusionstudio/vits-web';
 
 export class Assistant implements IChatParticipant {
   wakeWord: string;
 
-  // Existing fields
-  public isListening = false;
-  public isActivated = false;
   public isTyping = false;
   public conversation: Conversation;
   public draftText: string = '';
+  public messageColor = 'linear-gradient(320deg, hsl(250, 60%, 40%) 0%, hsl(270, 70%, 35%) 100%)';
+  public voiceId: VoiceId = 'en_US-hfc_female-medium';
 
-  // Voice-related config
   private readonly triggerWord: string;
   private readonly silenceSendDelta = 3000;
   private silenceTimer: any = null;
-  private triggered = false;
+  public triggered = false;
 
   public onMessageSent: (() => void) | null = null;
 
@@ -31,7 +32,8 @@ export class Assistant implements IChatParticipant {
     wakeWord: string,
     private audioService: AudioService,
     private llmService: LLMService,
-    private currentUser: IChatParticipant
+    private currentUser: IChatParticipant,
+    private vitsService: VitsService
   ) {
     this.id = id;
     this.wakeWord = wakeWord;
@@ -126,7 +128,7 @@ export class Assistant implements IChatParticipant {
       ? [
           {
             role: 'system' as const,
-            content: 'You are Hatsune Miku. Your responses should be a couple sentences.',
+            content: 'You are a virtual assistant. Your responses should be short (2-3 sentences) and be able to be read aloud verbatim.',
           },
           {
             role:
@@ -146,10 +148,15 @@ export class Assistant implements IChatParticipant {
 
     this.sendMessage(assistantMessage, false);
 
+    const responseGuid = uuidv4();
+
     await this.llmService.streamResponse(formattedMessages, (token, usage) => {
+      this.vitsService.streamToken(token, responseGuid, this.voiceId);
       assistantMessage.text += token;
       this.onMessageSent?.();
     });
+
+    this.vitsService.complete(responseGuid, this.voiceId, () => {});
 
     this.isTyping = false;
   }

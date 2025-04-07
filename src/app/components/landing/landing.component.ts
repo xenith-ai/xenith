@@ -18,6 +18,7 @@ import { ModelUrl } from '../../enums/model-url.enum';
 import { Utilities } from '../../helpers/utilities';
 import { WhisperService } from '../../services/whisper/whisper.service';
 import { LLMService } from '../../services/llm/llm.service';
+import { VitsService } from '../../services/vits/vits.service';
 
 @Component({
   selector: 'app-landing',
@@ -47,13 +48,14 @@ export class LandingComponent {
     private httpHandlerService: HttpHandlerService,
     private indexedDBService: IndexedDBService,
     private cdr: ChangeDetectorRef,
-    private LLMService: LLMService
+    private LLMService: LLMService,
+    private vitsService: VitsService
   ) {
     this.newUser = this.userService.createUser();
     this.newAssistant = this.AssistantService.createAssistant(
-      'Miku',
-      'assets/dev/miku.jpg',
-      'miku',
+      'Assistant',
+      'assets/img/robo.webp',
+      'assistant',
       this.newUser
     );
 
@@ -79,16 +81,40 @@ export class LandingComponent {
   }
 
   private async initializeChatFlow() {
+    this.newAssistant.sendMessage(
+      new TextMessage(
+        this.newAssistant,
+        `Welcome to Xenith, the first fully local AI assistant, powered with Web Assembly!`,
+        new Date()
+      ),
+      false
+    );
+
+    await Utilities.sleep(500);
+
+    this.newAssistant.sendMessage(
+      new TextMessage(
+        this.newAssistant,
+        `Everything here is running completely on your machine, so you'll probably need a dedicated GPU.`,
+        new Date()
+      ),
+      false
+    );
+
     const cachedWhisperModel = await this.indexedDBService.readModel(
       ModelKey.WhisperTinyEn
     );
     const isLLMModelCached = await this.LLMService.isModelCached();
+    await this.vitsService.loadVoices();
+    const isVitsModelCached = this.vitsService.isVoiceDownloaded(this.newAssistant.voiceId);
 
-    if (cachedWhisperModel && isLLMModelCached) {
+    await Utilities.sleep(500);
+
+    if (cachedWhisperModel && isLLMModelCached && isVitsModelCached) {
       this.newAssistant.sendMessage(
         new TextMessage(
           this.newAssistant,
-          `All required AI models are already cached. Starting immediately...`,
+          `All required AI models are already cached. Initializing models...`,
           new Date()
         ),
         false
@@ -227,6 +253,45 @@ export class LandingComponent {
       );
     }
 
+    // Handle VITS model
+    if (this.vitsService.isVoiceDownloaded(this.newAssistant.voiceId)) {
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `Text-to-Speech model loaded from cache!`,
+          new Date()
+        ),
+        false
+      );
+    } else {
+      this.newAssistant.sendMessage(
+        new TextMessage(this.newAssistant, `Downloading VITS Text-to-Speech model...`, new Date()),
+        false
+      );
+      try {
+        await this.vitsService.downloadVoice(this.newAssistant.voiceId);
+      } catch (error) {
+        this.newAssistant.sendMessage(
+          new TextMessage(
+            this.newAssistant,
+            `There was a problem downloading the VITS Text-to-Speech model.`,
+            new Date()
+          ),
+          false
+        );
+        this.newAssistant.sendMessage(this.startDownloadingModelsButtonMessage, false);
+        return;
+      }
+      this.newAssistant.sendMessage(
+        new TextMessage(
+          this.newAssistant,
+          `VITS Text-to-Speech model downloaded and cached!`,
+          new Date()
+        ),
+        false
+      );
+    }
+
     // Proceed to microphone access flow
     await this.checkMicrophoneAccessFlow();
   };
@@ -256,7 +321,7 @@ export class LandingComponent {
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
-        `You'll need to provide access to your microphone.`,
+        `You'll need to provide access to your microphone if you want to interact with your voice.`,
         new Date()
       ),
       false
@@ -266,7 +331,7 @@ export class LandingComponent {
 
   private async startListeningFlow() {
     this.newAssistant.sendMessage(
-      new TextMessage(this.newAssistant, `Initializing AI...`, new Date()),
+      new TextMessage(this.newAssistant, `Initializing listener...`, new Date()),
       false
     );
 
@@ -279,7 +344,7 @@ export class LandingComponent {
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
-        `Started listening! Say "Miku" to start interacting.`,
+        `Started listening! Say "Assistant" to start interacting.`,
         new Date()
       ),
       false
@@ -287,7 +352,7 @@ export class LandingComponent {
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
-        `For instance, you can say "Miku, what's the weather like?"`,
+        `For instance, you can say "Assistant, who invented the microchip?"`,
         new Date()
       ),
       false

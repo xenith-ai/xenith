@@ -11,9 +11,12 @@ $content-z: calc($page-container-z + 2);
 #title-container {
   z-index: $content-z;
   text-align: center;
-  font-weight: 600;
 
   > h1 {
+    color: $logo-color;
+  }
+
+  > h2 {
     color: $logo-color;
   }
 }
@@ -25,6 +28,7 @@ $content-z: calc($page-container-z + 2);
   background: $background-color-3;
   border-radius: $border-radius-1;
   overflow: clip;
+  box-shadow: 0 4px 15px rgba(151, 214, 223, 0.1);
 }
 
 app-chat {

@@ -26,12 +26,12 @@ $button-hover-color-1: #333b96;
 $logo-color: #FFFFFF;
 $text-color: #FFFFFF;
 
-$glow-1: hsl(158, 82%, 57%, 85%);
-$glow-2: hsl(252, 82%, 57%);
-$glow-3: hsl(197, 82%, 57%, 85%);
-$glow-4: hsl(315, 100%, 24%);
+$glow-1: hsl(158, 100%, 65%, 1);
+$glow-2: hsl(252, 100%, 65%, 1);
+$glow-3: hsl(197, 100%, 65%, 1);
+$glow-4: hsl(315, 100%, 45%, 1);
 
-$ai-message-box-color: linear-gradient(
+$assistant-message-box-color: linear-gradient(
     320deg,
     hsl(338deg 63% 57%) 0%,
     hsl(339deg 65% 57%) 19%,

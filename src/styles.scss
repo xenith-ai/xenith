@@ -104,6 +104,16 @@ h1 {
   font-family: 'Montserrat', sans-serif;
   font-size: 3.2rem;
   margin-bottom: 0.2em;
+  font-weight: 400;
+}
+
+h2 {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  margin-bottom: 0.2em;
+  font-weight: 500;
 }
 
 @media screen and (max-width: 480px) {

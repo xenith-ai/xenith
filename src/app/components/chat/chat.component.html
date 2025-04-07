@@ -7,38 +7,16 @@
       [class.left]="messageGroup.chatParticipant | instanceOf: Assistant"
       [class.right]="messageGroup.chatParticipant | instanceOf: User"
     >
-      <!-- Assistant Avatar -->
-      <div
-        *ngIf="messageGroup.chatParticipant | instanceOf: Assistant"
-        class="avatar flex flex-col justify-center items-center"
-      >
-        <img
-          crossorigin="anonymous"
-          [src]="assistant.avatar"
-          [alt]="assistant.name + ' Avatar'"
-        />
-      </div>
 
       <!-- Message Content -->
       <div class="content flex flex-col">
         <div
           *ngFor="let message of messageGroup.messages"
           class="content-item flex flex-col"
+          [style.--message-color]="message.chatParticipant.messageColor"
         >
           <app-chat-message [message]="message"></app-chat-message>
         </div>
-      </div>
-
-      <!-- User Avatar -->
-      <div
-        *ngIf="messageGroup.chatParticipant | instanceOf: User"
-        class="avatar flex flex-col justify-center items-center"
-      >
-        <img
-          crossorigin="anonymous"
-          [src]="currentUser.avatar"
-          [alt]="currentUser.name + ' Avatar'"
-        />
       </div>
     </div>
   </div>
@@ -53,20 +31,17 @@
         (click)="toggleListener()"
       >
         <img
-          [src]="assistant.isListening ? 'assets/img/microphone.svg' : 'assets/img/no-microphone.svg'"
-          [style.opacity]="assistant.isListening ? 0 : 1"
+          [src]="this.audioService.listening ? 'assets/img/microphone.svg' : 'assets/img/no-microphone.svg'"
+          [style.opacity]="this.audioService.listening ? 0 : 1"
           alt="Microphone"
           class="h-full w-auto"
         />
         <div
-          class="loader h-full w-auto"
-          *ngIf="assistant.isListening"
-        ></div>
-        <div
           id="circle-gradient-container"
-          [class.listening]="assistant.isListening"
-          [class.not-listening]="!assistant.isListening"
-          [class.microphone-disabled]="false"
+          [class.microphone-disabled]="!assistant.triggered && !this.audioService.microphoneAccess"
+          [class.listening]="!assistant.triggered && this.audioService.listening"
+          [class.not-listening]="!assistant.triggered && !this.audioService.listening"
+          [class.triggered]="assistant.triggered"
         ></div>
       </button>
     </div>
@@ -79,7 +54,6 @@
       type="text"
       placeholder="Start talking..."
       [value]="assistant.draftText"
-      (input)="onDraftInput($event)"
       (keydown.enter)="inputOnEnter(chatInput)"
     />
   </div>

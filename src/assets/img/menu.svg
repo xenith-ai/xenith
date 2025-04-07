@@ -1,0 +1,14 @@
+<svg width="90" height="90" xmlns="http://www.w3.org/2000/svg">
+  <!-- Grid of 3x3 mid-small squares with generous spacing -->
+  <rect x="0"  y="0"  width="15" height="15" fill="#ccc" stroke="#000"/>
+  <rect x="30" y="0"  width="15" height="15" fill="#ccc" stroke="#000"/>
+  <rect x="60" y="0"  width="15" height="15" fill="#ccc" stroke="#000"/>
+
+  <rect x="0"  y="30" width="15" height="15" fill="#ccc" stroke="#000"/>
+  <rect x="30" y="30" width="15" height="15" fill="#ccc" stroke="#000"/>
+  <rect x="60" y="30" width="15" height="15" fill="#ccc" stroke="#000"/>
+
+  <rect x="0"  y="60" width="15" height="15" fill="#ccc" stroke="#000"/>
+  <rect x="30" y="60" width="15" height="15" fill="#ccc" stroke="#000"/>
+  <rect x="60" y="60" width="15" height="15" fill="#ccc" stroke="#000"/>
+</svg>

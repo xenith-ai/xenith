@@ -1,6 +1,5 @@
 import * as webllm from '@mlc-ai/web-llm';
 import { Injectable } from '@angular/core';
-import * as tts from '@diffusionstudio/vits-web';
 
 @Injectable({ providedIn: 'root' })
 export class LLMService {
@@ -13,9 +12,6 @@ export class LLMService {
     this.appConfig.useIndexedDBCache = true;
   }
 
-  /**
-   * Initialize the LLM engine with a given model.
-   */
   public async init(model = this.testModel): Promise<void> {
     if (this.initialized) return;
 
@@ -77,26 +73,6 @@ export class LLMService {
         onToken(delta, chunk.usage);
       }
     }
-
-    const messageOutput = await this.engine.getMessage();
-
-    const wav = await tts.predict({
-      text: this.removeEmojis(messageOutput),
-      voiceId: 'en_US-hfc_female-medium',
-    });
-
-    const audio = new Audio();
-    audio.src = URL.createObjectURL(wav);
-    audio.play();
-
-    console.log('Final message:\n', messageOutput);
-  }
-
-  private removeEmojis(str: string): string {
-    return str.replace(
-      /([\u{1F3FB}-\u{1F3FF}]|[\u{1F1E6}-\u{1F1FF}]{2}|[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA70}-\u{1FAFF}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20FF}])/gu,
-      ''
-    );
   }
 
   /**
