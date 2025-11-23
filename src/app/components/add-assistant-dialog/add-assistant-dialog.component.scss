@@ -103,8 +103,16 @@
     }
   }
 
-  select.voice-select {
+  select.voice-select,
+  select.model-select {
     cursor: pointer;
+    color: $text-color;
+    background-color: rgba(255, 255, 255, 0.05);
+
+    option {
+      background-color: $background-color-2;
+      color: $text-color;
+    }
   }
 
   .form-hint {

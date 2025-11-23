@@ -94,10 +94,15 @@
   background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
+  position: relative;
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: translateX(4px);
+
+    .edit-button {
+      opacity: 1;
+    }
   }
 
   &:active {
@@ -135,6 +140,44 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}
+
+.assistant-model {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edit-button {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: $text-color;
+  font-size: 1rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+  padding: 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &:active {
+    transform: translateY(-50%) scale(0.95);
+  }
 }
 
 .empty-state {

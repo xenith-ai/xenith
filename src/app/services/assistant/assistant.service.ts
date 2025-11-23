@@ -22,7 +22,8 @@ export class AssistantService {
     name: string,
     avatar: string,
     wakeWord: string,
-    user: IChatParticipant
+    user: IChatParticipant,
+    modelId: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC'
   ): Assistant {
     const assistant = new Assistant(
       uuidv4(),
@@ -32,7 +33,8 @@ export class AssistantService {
       this.audioService,
       this.llmService,
       user,
-      this.vitsService
+      this.vitsService,
+      modelId
     );
 
     this.assistants.push(assistant);

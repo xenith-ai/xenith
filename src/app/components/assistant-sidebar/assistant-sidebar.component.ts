@@ -15,6 +15,7 @@ export class AssistantSidebarComponent {
   @Output() isOpenChange = new EventEmitter<boolean>();
   @Output() assistantSelected = new EventEmitter<Assistant>();
   @Output() addAssistantRequested = new EventEmitter<void>();
+  @Output() assistantEditRequested = new EventEmitter<Assistant>();
 
   constructor(public assistantService: AssistantService) {}
 
@@ -33,6 +34,28 @@ export class AssistantSidebarComponent {
 
   addAssistant(): void {
     this.addAssistantRequested.emit();
+  }
+
+  editAssistant(event: Event, assistant: Assistant): void {
+    event.stopPropagation(); // Prevent triggering selectAssistant
+    this.assistantEditRequested.emit(assistant);
+  }
+
+  getModelDisplayName(modelId: string): string {
+    // Common model display names
+    const modelNames: { [key: string]: string } = {
+      'gemma-2-2b-jpn-it-q4f16_1-MLC': 'Gemma 2 2B (Japanese)',
+      'gemma-2-2b-it-q4f16_1-MLC': 'Gemma 2 2B',
+      'gemma-2-9b-it-q4f16_1-MLC': 'Gemma 2 9B',
+      'Llama-3.1-8B-Instruct-q4f16_1-MLC': 'Llama 3.1 8B',
+      'Llama-3.1-70B-Instruct-q4f16_1-MLC': 'Llama 3.1 70B',
+      'Phi-3-mini-4k-instruct-q4f16_1-MLC': 'Phi-3 Mini',
+      'Qwen2.5-0.5B-Instruct-q4f16_1-MLC': 'Qwen2.5 0.5B',
+      'Qwen2.5-1.5B-Instruct-q4f16_1-MLC': 'Qwen2.5 1.5B',
+      'Qwen2.5-3B-Instruct-q4f16_1-MLC': 'Qwen2.5 3B',
+      'TinyLlama-1.1B-Chat-v0.4-q4f16_1-MLC': 'TinyLlama 1.1B',
+    };
+    return modelNames[modelId] || modelId;
   }
 }
 

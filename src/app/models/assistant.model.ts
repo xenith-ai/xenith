@@ -11,6 +11,7 @@ import { VoiceId } from '@diffusionstudio/vits-web';
 
 export class Assistant implements IChatParticipant {
   wakeWord: string;
+  public modelId: string;
 
   public isTyping = false;
   public conversation: Conversation;
@@ -27,17 +28,21 @@ export class Assistant implements IChatParticipant {
 
   constructor(
     public readonly id: string,
-    public readonly name: string,
-    public readonly avatar: string,
+    public name: string,
+    public avatar: string,
     wakeWord: string,
     private audioService: AudioService,
     private llmService: LLMService,
     private currentUser: IChatParticipant,
-    private vitsService: VitsService
+    private vitsService: VitsService,
+    modelId: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC'
   ) {
     this.id = id;
+    this.name = name;
+    this.avatar = avatar;
     this.wakeWord = wakeWord;
     this.triggerWord = wakeWord; // Just using wakeWord for now
+    this.modelId = modelId;
     this.conversation = new Conversation([]);
 
     this.audioService.registerCallback(
@@ -59,7 +64,9 @@ export class Assistant implements IChatParticipant {
       // Append full transcription once triggered
       this.appendToDraft(transcription.originalTranscription);
     } else {
-      const triggerIndex = wordList.indexOf(this.triggerWord);
+      // Update triggerWord if wakeWord changed
+      const currentTriggerWord = this.wakeWord.toLowerCase();
+      const triggerIndex = wordList.indexOf(currentTriggerWord);
       if (triggerIndex !== -1) {
         // Get everything AFTER trigger word
         const relevantString = wordList.slice(triggerIndex + 1).join(' ');
@@ -122,6 +129,9 @@ export class Assistant implements IChatParticipant {
 
   public async respondToUser(): Promise<void> {
     this.isTyping = true;
+
+    // Ensure the correct model is loaded for this assistant
+    await this.llmService.ensureModel(this.modelId);
 
     const lastMsg = this.conversation.messages.at(-1);
     const formattedMessages = lastMsg

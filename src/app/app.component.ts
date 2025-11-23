@@ -27,6 +27,7 @@ export const routes: Routes = [{ path: '', component: LandingComponent }];
 export class AppComponent {
   sidebarOpen = false;
   addDialogOpen = false;
+  editingAssistant: Assistant | null = null;
   selectedAssistant: Assistant | null = null;
 
   openSidebar(): void {
@@ -43,11 +44,24 @@ export class AppComponent {
   }
 
   onAddAssistantRequested(): void {
+    this.editingAssistant = null;
+    this.addDialogOpen = true;
+  }
+
+  onAssistantEditRequested(assistant: Assistant): void {
+    this.editingAssistant = assistant;
     this.addDialogOpen = true;
   }
 
   onAssistantCreated(assistant: Assistant): void {
     this.selectedAssistant = assistant;
+    this.editingAssistant = null;
+    // Future: Could switch chat view to this assistant
+  }
+
+  onAssistantUpdated(assistant: Assistant): void {
+    this.selectedAssistant = assistant;
+    this.editingAssistant = null;
     // Future: Could switch chat view to this assistant
   }
 }

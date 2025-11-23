@@ -16,13 +16,30 @@ import { VoiceId } from '@diffusionstudio/vits-web';
 })
 export class AddAssistantDialogComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
+  @Input() editingAssistant: Assistant | null = null;
   @Output() isOpenChange = new EventEmitter<boolean>();
   @Output() assistantCreated = new EventEmitter<Assistant>();
+  @Output() assistantUpdated = new EventEmitter<Assistant>();
 
   assistantName: string = '';
   wakeWord: string = '';
   avatar: string = 'assets/img/robo.webp';
   selectedVoice: VoiceId = 'en_US-hfc_female-medium';
+  selectedModel: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
+
+  // List of available models (common WebLLM models)
+  availableModels = [
+    { id: 'gemma-2-2b-jpn-it-q4f16_1-MLC', name: 'Gemma 2 2B (Japanese, Q4)' },
+    { id: 'gemma-2-2b-it-q4f16_1-MLC', name: 'Gemma 2 2B (Q4)' },
+    { id: 'gemma-2-9b-it-q4f16_1-MLC', name: 'Gemma 2 9B (Q4)' },
+    { id: 'Llama-3.1-8B-Instruct-q4f16_1-MLC', name: 'Llama 3.1 8B Instruct (Q4)' },
+    { id: 'Llama-3.1-70B-Instruct-q4f16_1-MLC', name: 'Llama 3.1 70B Instruct (Q4)' },
+    { id: 'Phi-3-mini-4k-instruct-q4f16_1-MLC', name: 'Phi-3 Mini 4K Instruct (Q4)' },
+    { id: 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC', name: 'Qwen2.5 0.5B Instruct (Q4)' },
+    { id: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', name: 'Qwen2.5 1.5B Instruct (Q4)' },
+    { id: 'Qwen2.5-3B-Instruct-q4f16_1-MLC', name: 'Qwen2.5 3B Instruct (Q4)' },
+    { id: 'TinyLlama-1.1B-Chat-v0.4-q4f16_1-MLC', name: 'TinyLlama 1.1B Chat (Q4)' },
+  ];
 
   constructor(
     private assistantService: AssistantService,
@@ -37,7 +54,29 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
     if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
       await this.loadVoicesIfNeeded();
+      if (this.editingAssistant) {
+        this.loadAssistantData();
+      } else {
+        this.resetForm();
+      }
     }
+    if (changes['editingAssistant']) {
+      if (this.editingAssistant && this.isOpen) {
+        this.loadAssistantData();
+      } else if (!this.editingAssistant && this.isOpen) {
+        this.resetForm();
+      }
+    }
+  }
+
+  private loadAssistantData(): void {
+    if (!this.editingAssistant) return;
+
+    this.assistantName = this.editingAssistant.name;
+    this.wakeWord = this.editingAssistant.wakeWord;
+    this.avatar = this.editingAssistant.avatar;
+    this.selectedVoice = this.editingAssistant.voiceId;
+    this.selectedModel = this.editingAssistant.modelId;
   }
 
   private async loadVoicesIfNeeded(): Promise<void> {
@@ -60,6 +99,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
     this.wakeWord = '';
     this.avatar = 'assets/img/robo.webp';
     this.selectedVoice = 'en_US-hfc_female-medium';
+    this.selectedModel = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
   }
 
   createAssistant(): void {
@@ -67,18 +107,31 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
       return;
     }
 
-    const user = this.userService.createUser();
-    const assistant = this.assistantService.createAssistant(
-      this.assistantName.trim(),
-      this.avatar,
-      this.wakeWord.trim().toLowerCase(),
-      user
-    );
+    if (this.editingAssistant) {
+      // Update existing assistant
+      this.editingAssistant.name = this.assistantName.trim();
+      this.editingAssistant.wakeWord = this.wakeWord.trim().toLowerCase();
+      this.editingAssistant.avatar = this.avatar;
+      this.editingAssistant.voiceId = this.selectedVoice;
+      this.editingAssistant.modelId = this.selectedModel;
+      this.assistantUpdated.emit(this.editingAssistant);
+    } else {
+      // Create new assistant
+      const user = this.userService.createUser();
+      const assistant = this.assistantService.createAssistant(
+        this.assistantName.trim(),
+        this.avatar,
+        this.wakeWord.trim().toLowerCase(),
+        user,
+        this.selectedModel
+      );
 
-    // Set the voice ID
-    assistant.voiceId = this.selectedVoice;
+      // Set the voice ID
+      assistant.voiceId = this.selectedVoice;
 
-    this.assistantCreated.emit(assistant);
+      this.assistantCreated.emit(assistant);
+    }
+
     this.closeDialog();
   }
 

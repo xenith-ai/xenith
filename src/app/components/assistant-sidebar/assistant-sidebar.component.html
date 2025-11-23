@@ -32,7 +32,15 @@
         <div class="assistant-info">
           <div class="assistant-name">{{ assistant.name }}</div>
           <div class="assistant-wake-word">Wake word: "{{ assistant.wakeWord }}"</div>
+          <div class="assistant-model">Model: {{ getModelDisplayName(assistant.modelId) }}</div>
         </div>
+        <button
+          class="edit-button"
+          (click)="editAssistant($event, assistant)"
+          title="Edit Assistant"
+        >
+          ✎
+        </button>
       </div>
 
       <div *ngIf="assistants.length === 0" class="empty-state">

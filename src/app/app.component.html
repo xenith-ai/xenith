@@ -4,10 +4,13 @@
   (isOpenChange)="sidebarOpen = $event"
   (assistantSelected)="onAssistantSelected($event)"
   (addAssistantRequested)="onAddAssistantRequested()"
+  (assistantEditRequested)="onAssistantEditRequested($event)"
 ></app-assistant-sidebar>
 <app-add-assistant-dialog
   [isOpen]="addDialogOpen"
-  (isOpenChange)="addDialogOpen = $event"
+  [editingAssistant]="editingAssistant"
+  (isOpenChange)="addDialogOpen = $event; editingAssistant = null"
   (assistantCreated)="onAssistantCreated($event)"
+  (assistantUpdated)="onAssistantUpdated($event)"
 ></app-add-assistant-dialog>
 <router-outlet></router-outlet>
