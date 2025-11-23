@@ -1,0 +1,11 @@
+<div class="chat-page-container">
+  <app-chat
+    *ngIf="assistant"
+    [assistant]="assistant"
+    [currentUser]="currentUser"
+  ></app-chat>
+  <div *ngIf="!assistant" class="loading-container">
+    <p>Loading assistant...</p>
+  </div>
+</div>
+

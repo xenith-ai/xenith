@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Routes } from '@angular/router';
+import { Router, RouterOutlet, Routes } from '@angular/router';
 import { NavTopComponent } from './components/nav-top/nav-top.component';
 import { ChatComponent } from './components/chat/chat.component';
 import { LandingComponent } from './components/landing/landing.component';
@@ -30,6 +30,8 @@ export class AppComponent {
   editingAssistant: Assistant | null = null;
   selectedAssistant: Assistant | null = null;
 
+  constructor(private router: Router) {}
+
   openSidebar(): void {
     this.sidebarOpen = true;
   }
@@ -40,7 +42,8 @@ export class AppComponent {
 
   onAssistantSelected(assistant: Assistant): void {
     this.selectedAssistant = assistant;
-    // Future: Could switch chat view to this assistant
+    // Navigate to chat page for this assistant
+    this.router.navigate(['/chat', assistant.id]);
   }
 
   onAddAssistantRequested(): void {

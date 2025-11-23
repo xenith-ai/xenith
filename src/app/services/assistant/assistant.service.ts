@@ -45,6 +45,10 @@ export class AssistantService {
     return [...this.assistants];
   }
 
+  public getAssistantById(id: string): Assistant | undefined {
+    return this.assistants.find(a => a.id === id);
+  }
+
   public removeAssistant(id: string): void {
     const index = this.assistants.findIndex(a => a.id === id);
     if (index !== -1) {
