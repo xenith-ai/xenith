@@ -7,7 +7,8 @@
   button,
   a {
     overflow: clip;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
 
     > img {
       pointer-events: auto;

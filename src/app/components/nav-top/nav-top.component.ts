@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 
@@ -10,5 +10,9 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './nav-top.component.scss',
 })
 export class NavTopComponent {
-  constructor() {}
+  @Output() menuClick = new EventEmitter<void>();
+
+  onMenuClick(): void {
+    this.menuClick.emit();
+  }
 }

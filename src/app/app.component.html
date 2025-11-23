@@ -1,2 +1,13 @@
-<app-nav-top></app-nav-top>
+<app-nav-top (menuClick)="openSidebar()"></app-nav-top>
+<app-assistant-sidebar
+  [isOpen]="sidebarOpen"
+  (isOpenChange)="sidebarOpen = $event"
+  (assistantSelected)="onAssistantSelected($event)"
+  (addAssistantRequested)="onAddAssistantRequested()"
+></app-assistant-sidebar>
+<app-add-assistant-dialog
+  [isOpen]="addDialogOpen"
+  (isOpenChange)="addDialogOpen = $event"
+  (assistantCreated)="onAssistantCreated($event)"
+></app-add-assistant-dialog>
 <router-outlet></router-outlet>
