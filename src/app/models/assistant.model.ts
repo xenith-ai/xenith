@@ -26,6 +26,7 @@ export class Assistant implements IChatParticipant {
 
   public onMessageSent: (() => void) | null = null;
   public onConversationChanged: (() => void) | null = null;
+  public onTriggered: ((assistantId: string | null) => void) | null = null;
 
   constructor(
     public readonly id: string,
@@ -73,6 +74,8 @@ export class Assistant implements IChatParticipant {
         const relevantString = wordList.slice(triggerIndex + 1).join(' ');
         this.appendToDraft(relevantString);
         this.triggered = true;
+        // Notify that this assistant was triggered
+        this.onTriggered?.(this.id);
       }
     }
 
@@ -98,6 +101,8 @@ export class Assistant implements IChatParticipant {
       this.sendMessage(this.draftText, true);
       this.draftText = '';
       this.triggered = false;
+      // Notify that this assistant is no longer triggered
+      this.onTriggered?.(null as any);
     }
   }
 
@@ -132,8 +137,20 @@ export class Assistant implements IChatParticipant {
   public async respondToUser(): Promise<void> {
     this.isTyping = true;
 
-    // Ensure the correct model is loaded for this assistant
-    await this.llmService.ensureModel(this.modelId);
+    // Notify that we're initializing the model
+    if ((this as any).onModelInitializing) {
+      (this as any).onModelInitializing(this.id, true);
+    }
+
+    try {
+      // Ensure the correct model is loaded for this assistant
+      await this.llmService.ensureModel(this.modelId);
+    } finally {
+      // Notify that initialization is complete
+      if ((this as any).onModelInitializing) {
+        (this as any).onModelInitializing(this.id, false);
+      }
+    }
 
     const lastMsg = this.conversation.messages.at(-1);
     const formattedMessages = lastMsg

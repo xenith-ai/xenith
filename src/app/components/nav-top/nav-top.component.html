@@ -1,6 +1,11 @@
 <div id="nav-top-container" class="w-full h-full flex flex-row justify-between">
   <div id="nav-menu-container" class="flex flex-row items-center">
-    <button id="menu-button" class="h-full" (click)="onMenuClick()">
+    <button
+      id="menu-button"
+      class="h-full"
+      [class.triggered]="isAnyTriggered()"
+      (click)="onMenuClick()"
+    >
       <img src="../../../assets/img/menu.svg" alt="Menu button"/>
     </button>
     <h1>xenith</h1>

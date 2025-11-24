@@ -126,10 +126,20 @@
 .dialog-actions {
   display: flex;
   gap: 1rem;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  .dialog-actions-left {
+    flex: 1;
+  }
+
+  .dialog-actions-right {
+    display: flex;
+    gap: 1rem;
+  }
 
   button {
     padding: 0.75rem 1.5rem;
@@ -143,6 +153,17 @@
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+  }
+
+  .delete-button {
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+
+    &:hover {
+      background: rgba(255, 0, 0, 0.3);
+      border-color: rgba(255, 0, 0, 0.5);
     }
   }
 

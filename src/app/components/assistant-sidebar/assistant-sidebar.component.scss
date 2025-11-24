@@ -9,6 +9,11 @@
   background: rgba(0, 0, 0, 0.5);
   z-index: $sidebar-backdrop-z;
   animation: fadeIn 0.2s ease-out;
+
+  // Hide backdrop on desktop (sidebar always visible)
+  @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+    display: none;
+  }
 }
 
 .sidebar-container {
@@ -31,8 +36,17 @@
     transform: translateX(0);
   }
 
-  &:not(.open) {
-    pointer-events: none;
+  // On mobile, disable pointer events when closed
+  @media screen and (max-width: $mobile-collapse-width) {
+    &:not(.open) {
+      pointer-events: none;
+    }
+  }
+
+  // Always visible and clickable on desktop
+  @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+    transform: translateX(0);
+    pointer-events: auto !important;
   }
 }
 
@@ -69,6 +83,11 @@
     &:hover {
       opacity: 1;
     }
+
+    // Hide close button on desktop (sidebar always visible)
+    @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+      display: none;
+    }
   }
 }
 
@@ -93,7 +112,7 @@
   border-radius: $border-radius-1;
   background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.3s;
   position: relative;
 
   &:hover {
@@ -107,6 +126,21 @@
 
   &:active {
     transform: translateX(2px);
+  }
+
+  &.triggered {
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.6), 0 0 40px rgba(0, 255, 0, 0.4);
+    background: rgba(0, 255, 0, 0.1);
+    animation: glow-pulse 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.6), 0 0 40px rgba(0, 255, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.8), 0 0 60px rgba(0, 255, 0, 0.6);
   }
 }
 
@@ -132,6 +166,30 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loading-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: $button-color-1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .assistant-wake-word {
@@ -153,14 +211,13 @@
 
 .edit-button {
   position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 0.5rem;
+  top: 0.5rem;
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  border-radius: 4px;
+  border-radius: $border-radius-1;
   color: $text-color;
-  font-size: 1rem;
+  font-size: 0.875rem;
   width: 28px;
   height: 28px;
   display: flex;
@@ -173,10 +230,11 @@
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
+    opacity: 1;
   }
 
   &:active {
-    transform: translateY(-50%) scale(0.95);
+    transform: scale(0.95);
   }
 }
 

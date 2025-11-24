@@ -1,10 +1,13 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AssistantService } from '../../services/assistant/assistant.service';
 import { UserService } from '../../services/user/user.service';
 import { VitsService } from '../../services/vits/vits.service';
+import { LLMService } from '../../services/llm/llm.service';
 import { Assistant } from '../../models/assistant.model';
+import { TextMessage } from '../../models/text-message.model';
 import { VoiceId } from '@diffusionstudio/vits-web';
 
 @Component({
@@ -20,6 +23,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
   @Output() isOpenChange = new EventEmitter<boolean>();
   @Output() assistantCreated = new EventEmitter<Assistant>();
   @Output() assistantUpdated = new EventEmitter<Assistant>();
+  @Output() assistantDeleted = new EventEmitter<Assistant>();
 
   assistantName: string = '';
   wakeWord: string = '';
@@ -44,7 +48,9 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
   constructor(
     private assistantService: AssistantService,
     private userService: UserService,
-    public vitsService: VitsService
+    public vitsService: VitsService,
+    private llmService: LLMService,
+    private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -129,15 +135,66 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
       // Set the voice ID
       assistant.voiceId = this.selectedVoice;
 
+      // Add intro message about model downloading
+      this.addIntroMessage(assistant);
+
       this.assistantCreated.emit(assistant);
+
+      // Navigate to the chat page for this assistant
+      this.closeDialog();
+      this.router.navigate(['/chat', assistant.id]);
     }
 
-    this.closeDialog();
+    if (this.editingAssistant) {
+      this.closeDialog();
+    }
+  }
+
+  private async addIntroMessage(assistant: Assistant): Promise<void> {
+    const modelName = this.availableModels.find(m => m.id === this.selectedModel)?.name || this.selectedModel;
+
+    // Check if models are cached
+    const isLLMCached = await this.llmService.isModelCached(this.selectedModel);
+    const isVitsCached = this.vitsService.isVoiceDownloaded(this.selectedVoice);
+
+    let message = `Hello! I'm ${assistant.name}. `;
+
+    if (isLLMCached && isVitsCached) {
+      message += `All required models are ready. I'm using the ${modelName} model. You can start talking to me using my wake word "${assistant.wakeWord}"!`;
+    } else {
+      message += `I'm setting up my AI models. `;
+      const missingModels: string[] = [];
+      if (!isLLMCached) {
+        missingModels.push(`the ${modelName} language model`);
+      }
+      if (!isVitsCached) {
+        missingModels.push('the voice synthesis model');
+      }
+      message += `I need to download ${missingModels.join(' and ')}. This may take a few minutes depending on your connection. Once downloaded, I'll be ready to chat!`;
+    }
+
+    assistant.sendMessage(
+      new TextMessage(
+        assistant,
+        message,
+        new Date()
+      ),
+      false
+    );
   }
 
   onBackdropClick(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('dialog-backdrop')) {
       this.closeDialog();
+    }
+  }
+
+  deleteAssistant(): void {
+    if (this.editingAssistant) {
+      if (confirm(`Are you sure you want to delete "${this.editingAssistant.name}"? This action cannot be undone.`)) {
+        this.assistantDeleted.emit(this.editingAssistant);
+        this.closeDialog();
+      }
     }
   }
 }

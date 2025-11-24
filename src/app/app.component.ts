@@ -34,7 +34,12 @@ export class AppComponent {
   constructor(
     private router: Router,
     private assistantService: AssistantService
-  ) {}
+  ) {
+    // On desktop, sidebar should be open by default
+    if (window.innerWidth > 624) { // 39em = 624px
+      this.sidebarOpen = true;
+    }
+  }
 
   openSidebar(): void {
     this.sidebarOpen = true;
@@ -71,5 +76,15 @@ export class AppComponent {
     this.selectedAssistant = assistant;
     this.editingAssistant = null;
     // Future: Could switch chat view to this assistant
+  }
+
+  onAssistantDeleted(assistant: Assistant): void {
+    this.assistantService.removeAssistant(assistant.id);
+    this.editingAssistant = null;
+    // If the deleted assistant was selected, navigate to landing page
+    if (this.selectedAssistant?.id === assistant.id) {
+      this.selectedAssistant = null;
+      this.router.navigate(['/']);
+    }
   }
 }

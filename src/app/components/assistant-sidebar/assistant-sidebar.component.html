@@ -22,6 +22,7 @@
       <div
         *ngFor="let assistant of assistants"
         class="assistant-item"
+        [class.triggered]="isTriggered(assistant)"
         (click)="selectAssistant(assistant)"
       >
         <img
@@ -30,7 +31,12 @@
           class="assistant-avatar"
         />
         <div class="assistant-info">
-          <div class="assistant-name">{{ assistant.name }}</div>
+          <div class="assistant-name">
+            {{ assistant.name }}
+            <span *ngIf="isInitializing(assistant)" class="loading-indicator" title="Initializing model...">
+              <span class="spinner"></span>
+            </span>
+          </div>
           <div class="assistant-wake-word">Wake word: "{{ assistant.wakeWord }}"</div>
           <div class="assistant-model">Model: {{ getModelDisplayName(assistant.modelId) }}</div>
         </div>
@@ -39,7 +45,7 @@
           (click)="editAssistant($event, assistant)"
           title="Edit Assistant"
         >
-          ✎
+          ⚙
         </button>
       </div>
 

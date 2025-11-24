@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AssistantService } from '../../services/assistant/assistant.service';
 import { Assistant } from '../../models/assistant.model';
@@ -10,14 +10,32 @@ import { Assistant } from '../../models/assistant.model';
   templateUrl: './assistant-sidebar.component.html',
   styleUrl: './assistant-sidebar.component.scss',
 })
-export class AssistantSidebarComponent {
+export class AssistantSidebarComponent implements OnInit, OnDestroy {
   @Input() isOpen: boolean = false;
   @Output() isOpenChange = new EventEmitter<boolean>();
   @Output() assistantSelected = new EventEmitter<Assistant>();
   @Output() addAssistantRequested = new EventEmitter<void>();
   @Output() assistantEditRequested = new EventEmitter<Assistant>();
 
-  constructor(public assistantService: AssistantService) {}
+  private checkInterval: any = null;
+
+  constructor(
+    public assistantService: AssistantService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    // Poll for triggered assistant changes (since we can't use observables easily)
+    this.checkInterval = setInterval(() => {
+      this.cdr.detectChanges();
+    }, 100);
+  }
+
+  ngOnDestroy(): void {
+    if (this.checkInterval) {
+      clearInterval(this.checkInterval);
+    }
+  }
 
   get assistants(): Assistant[] {
     return this.assistantService.getAssistants();
@@ -56,6 +74,18 @@ export class AssistantSidebarComponent {
       'TinyLlama-1.1B-Chat-v0.4-q4f16_1-MLC': 'TinyLlama 1.1B',
     };
     return modelNames[modelId] || modelId;
+  }
+
+  isTriggered(assistant: Assistant): boolean {
+    return this.assistantService.getTriggeredAssistantId() === assistant.id;
+  }
+
+  isAnyTriggered(): boolean {
+    return this.assistantService.isAnyAssistantTriggered();
+  }
+
+  isInitializing(assistant: Assistant): boolean {
+    return this.assistantService.isInitializingModel(assistant.id);
   }
 }
 

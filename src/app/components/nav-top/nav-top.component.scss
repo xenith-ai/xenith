@@ -34,12 +34,28 @@
 #nav-menu-container {
   > #menu-button {
     padding: calc($nav-top-height / 3);
+    transition: box-shadow 0.3s;
+    border-radius: 4px;
+
+    &.triggered {
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.8), 0 0 30px rgba(0, 255, 0, 0.6);
+      animation: menu-glow-pulse 1.5s ease-in-out infinite;
+    }
   }
 
   > h1 {
     display: none;
     color: $logo-color;
     font-size: 1.4rem;
+  }
+}
+
+@keyframes menu-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.8), 0 0 30px rgba(0, 255, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(0, 255, 0, 1), 0 0 50px rgba(0, 255, 0, 0.8);
   }
 }
 

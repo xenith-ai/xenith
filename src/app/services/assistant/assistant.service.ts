@@ -41,6 +41,8 @@ export class AssistantService {
   private userService: UserService;
   private saveTimeout: any = null;
   private readonly SAVE_DEBOUNCE_MS = 1000; // Save 1 second after last change
+  private triggeredAssistantId: string | null = null;
+  private initializingModels: Set<string> = new Set(); // Track which assistants are initializing models
 
   constructor(
     private audioService: AudioService,
@@ -49,7 +51,10 @@ export class AssistantService {
     userService: UserService
   ) {
     this.userService = userService;
-    this.loadAssistantsFromStorage();
+    // Load assistants asynchronously to avoid blocking UI
+    setTimeout(() => {
+      this.loadAssistantsFromStorage();
+    }, 0);
 
     // Save before page unload (immediate, not debounced)
     window.addEventListener('beforeunload', () => {
@@ -77,10 +82,17 @@ export class AssistantService {
       modelId
     );
 
-    // Set up callback to save when conversation changes (only if persisting)
+    // Set up callbacks (only if persisting)
     if (persist) {
       assistant.onConversationChanged = () => {
         this.saveAssistantsToStorage();
+      };
+      assistant.onTriggered = (assistantId: string | null) => {
+        this.setTriggeredAssistant(assistantId);
+      };
+      // Track model initialization
+      (assistant as any).onModelInitializing = (assistantId: string, initializing: boolean) => {
+        this.setInitializingModel(assistantId, initializing);
       };
       this.assistants.push(assistant);
       this.saveAssistantsToStorage();
@@ -115,6 +127,30 @@ export class AssistantService {
   public updateAssistant(assistant: Assistant): void {
     // Assistant is updated in place, save immediately (not debounced)
     this.saveAssistantsToStorageImmediate();
+  }
+
+  public setTriggeredAssistant(assistantId: string | null): void {
+    this.triggeredAssistantId = assistantId;
+  }
+
+  public getTriggeredAssistantId(): string | null {
+    return this.triggeredAssistantId;
+  }
+
+  public isAnyAssistantTriggered(): boolean {
+    return this.triggeredAssistantId !== null;
+  }
+
+  public isInitializingModel(assistantId: string): boolean {
+    return this.initializingModels.has(assistantId);
+  }
+
+  public setInitializingModel(assistantId: string, initializing: boolean): void {
+    if (initializing) {
+      this.initializingModels.add(assistantId);
+    } else {
+      this.initializingModels.delete(assistantId);
+    }
   }
 
   private saveAssistantsToStorageImmediate(): void {
@@ -224,7 +260,33 @@ export class AssistantService {
 
       const user = this.userService.createUser();
 
-      assistantsToLoad.forEach(data => {
+      // Load assistants in batches to avoid blocking UI
+      this.loadAssistantsBatch(assistantsToLoad, user, 0);
+    } catch (error) {
+      console.error('Failed to load assistants from localStorage:', error);
+    }
+  }
+
+  private loadAssistantsBatch(
+    dataArray: SerializableAssistant[],
+    user: User,
+    index: number
+  ): void {
+    if (index >= dataArray.length) {
+      return;
+    }
+
+    // Process one assistant at a time, yielding to UI thread
+    const data = dataArray[index];
+    this.loadSingleAssistant(data, user);
+
+    // Schedule next assistant to load after a small delay
+    setTimeout(() => {
+      this.loadAssistantsBatch(dataArray, user, index + 1);
+    }, 0);
+  }
+
+  private loadSingleAssistant(data: SerializableAssistant, user: User): void {
         // Recreate messages
         const messages = data.messages.map(msgData => {
           // Determine if this is a user message or assistant message
@@ -278,15 +340,18 @@ export class AssistantService {
         // Restore conversation (constructor will automatically populate structured messages)
         assistant.conversation = new Conversation(messages);
 
-        // Set up callback to save when conversation changes
+        // Set up callbacks
         assistant.onConversationChanged = () => {
           this.saveAssistantsToStorage();
         };
+        assistant.onTriggered = (assistantId: string | null) => {
+          this.setTriggeredAssistant(assistantId);
+        };
+        // Track model initialization
+        (assistant as any).onModelInitializing = (assistantId: string, initializing: boolean) => {
+          this.setInitializingModel(assistantId, initializing);
+        };
 
         this.assistants.push(assistant);
-      });
-    } catch (error) {
-      console.error('Failed to load assistants from localStorage:', error);
-    }
   }
 }

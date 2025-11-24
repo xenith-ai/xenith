@@ -36,6 +36,14 @@ app-chat {
   height: 100%;
 }
 
+// Adjust for sidebar on desktop
+@media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+  .page-container {
+    left: 320px;
+    width: calc(100% - 320px);
+  }
+}
+
 @media screen and (max-width: $mobile-collapse-width) {
   #gradient-1, #gradient-2 {
     display: none;

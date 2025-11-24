@@ -1,6 +1,7 @@
 @import '../variables.scss';
 
 $file-drop-border-width: 15px;
+$sidebar-width: 320px;
 
 app-nav-top {
   z-index: $nav-top-z;
@@ -8,4 +9,17 @@ app-nav-top {
   position: absolute;
   width: 100%;
   max-width: 100%;
+
+  // Adjust for sidebar on desktop
+  @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+    left: $sidebar-width;
+    width: calc(100% - $sidebar-width);
+  }
+}
+
+router-outlet + * {
+  // Adjust content for sidebar on desktop
+  @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+    margin-left: $sidebar-width;
+  }
 }

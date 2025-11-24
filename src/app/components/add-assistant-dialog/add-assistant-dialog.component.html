@@ -85,16 +85,28 @@
         </div>
 
         <div class="dialog-actions">
-          <button type="button" class="cancel-button" (click)="closeDialog()">
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="create-button"
-            [disabled]="!assistantName.trim() || !wakeWord.trim()"
-          >
-            {{ editingAssistant ? 'Update Assistant' : 'Create Assistant' }}
-          </button>
+          <div class="dialog-actions-left">
+            <button
+              *ngIf="editingAssistant"
+              type="button"
+              class="delete-button"
+              (click)="deleteAssistant()"
+            >
+              Delete
+            </button>
+          </div>
+          <div class="dialog-actions-right">
+            <button type="button" class="cancel-button" (click)="closeDialog()">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="create-button"
+              [disabled]="!assistantName.trim() || !wakeWord.trim()"
+            >
+              {{ editingAssistant ? 'Update Assistant' : 'Create Assistant' }}
+            </button>
+          </div>
         </div>
       </form>
     </div>
