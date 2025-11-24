@@ -9,6 +9,7 @@
 <div
   class="sidebar-container"
   [class.open]="isOpen"
+  (click)="$event.stopPropagation()"
 >
   <div class="sidebar-header">
     <h2>Assistants</h2>

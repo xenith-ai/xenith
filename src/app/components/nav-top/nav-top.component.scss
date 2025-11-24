@@ -47,6 +47,15 @@
   }
 }
 
+// Hide menu button on desktop when NOT on landing page
+#nav-top-container:not(.is-landing-page) {
+  @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+    #nav-menu-container > #menu-button {
+      display: none;
+    }
+  }
+}
+
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

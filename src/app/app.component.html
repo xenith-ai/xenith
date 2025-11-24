@@ -1,4 +1,7 @@
-<app-nav-top (menuClick)="openSidebar()"></app-nav-top>
+<app-nav-top 
+  [isLandingPage]="isOnLandingPage"
+  (menuClick)="openSidebar()">
+</app-nav-top>
 <app-assistant-sidebar
   [isOpen]="sidebarOpen"
   (isOpenChange)="sidebarOpen = $event"

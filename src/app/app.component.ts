@@ -38,6 +38,11 @@ export class AppComponent implements OnInit, OnDestroy {
   selectedAssistant: Assistant | null = null;
   isLandingPage = true;
   private routerSubscription?: Subscription;
+  private closeSidebarHandler?: () => void;
+
+  get isOnLandingPage(): boolean {
+    return this.isLandingPage;
+  }
 
   constructor(
     private router: Router,
@@ -56,11 +61,22 @@ export class AppComponent implements OnInit, OnDestroy {
     // Check initial route
     this.isLandingPage = this.router.url === '/' || this.router.url === '';
     this.updateSidebarVisibility();
+
+    // Listen for close sidebar event from landing page
+    this.closeSidebarHandler = () => {
+      if (this.isLandingPage && this.sidebarOpen) {
+        this.closeSidebar();
+      }
+    };
+    window.addEventListener('close-sidebar', this.closeSidebarHandler);
   }
 
   ngOnDestroy(): void {
     if (this.routerSubscription) {
       this.routerSubscription.unsubscribe();
+    }
+    if (this.closeSidebarHandler) {
+      window.removeEventListener('close-sidebar', this.closeSidebarHandler);
     }
   }
 

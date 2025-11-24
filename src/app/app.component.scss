@@ -9,14 +9,4 @@ app-nav-top {
   position: absolute;
   width: 100%;
   max-width: 100%;
-
-  // Adjust for sidebar on desktop only when sidebar is open
-  @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
-    transition: left 0.3s ease-out, width 0.3s ease-out;
-
-    .sidebar-open & {
-      left: $sidebar-width;
-      width: calc(100% - $sidebar-width);
-    }
-  }
 }

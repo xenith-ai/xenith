@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ChatComponent } from '../chat/chat.component';
@@ -380,4 +380,28 @@ export class LandingComponent {
       }
     }
   };
+
+  @HostListener('document:click', ['$event'])
+  onPageClick(event: MouseEvent): void {
+    // Only close sidebar on desktop when clicking on landing page content
+    // (not on mobile, and not when clicking inside sidebar or nav)
+    if (window.innerWidth > 624) { // 39em = 624px
+      const target = event.target as HTMLElement;
+      
+      // Don't close if clicking inside sidebar, nav, or dialog
+      if (target.closest('.sidebar-container') || 
+          target.closest('app-nav-top') || 
+          target.closest('app-add-assistant-dialog')) {
+        return;
+      }
+      
+      // Check if sidebar is open
+      const sidebarElement = document.querySelector('.sidebar-container.open');
+      if (sidebarElement) {
+        // Close the sidebar by dispatching a custom event
+        // The app component will listen for this
+        window.dispatchEvent(new CustomEvent('close-sidebar'));
+      }
+    }
+  }
 }

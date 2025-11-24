@@ -43,10 +43,12 @@
     }
   }
 
-  // On desktop, only always visible when open (not on landing page)
+  // On desktop, overlay when open (especially on landing page)
   @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
     &.open {
       pointer-events: auto !important;
+      // On landing page, sidebar should overlay, not push content
+      // This is handled by not adjusting the landing page layout
     }
   }
 }
