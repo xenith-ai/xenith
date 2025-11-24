@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet, Routes } from '@angular/router';
+import { Router, RouterOutlet, Routes, NavigationEnd } from '@angular/router';
 import { NavTopComponent } from './components/nav-top/nav-top.component';
 import { ChatComponent } from './components/chat/chat.component';
 import { LandingComponent } from './components/landing/landing.component';
@@ -8,6 +8,8 @@ import { AssistantSidebarComponent } from './components/assistant-sidebar/assist
 import { AddAssistantDialogComponent } from './components/add-assistant-dialog/add-assistant-dialog.component';
 import { Assistant } from './models/assistant.model';
 import { AssistantService } from './services/assistant/assistant.service';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 export const routes: Routes = [{ path: '', component: LandingComponent }];
 
@@ -25,19 +27,49 @@ export const routes: Routes = [{ path: '', component: LandingComponent }];
     AddAssistantDialogComponent,
   ],
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
+  @HostBinding('class.sidebar-open') get sidebarOpenClass() {
+    return this.sidebarOpen;
+  }
+
   sidebarOpen = false;
   addDialogOpen = false;
   editingAssistant: Assistant | null = null;
   selectedAssistant: Assistant | null = null;
+  isLandingPage = true;
+  private routerSubscription?: Subscription;
 
   constructor(
     private router: Router,
     private assistantService: AssistantService
-  ) {
-    // On desktop, sidebar should be open by default
-    if (window.innerWidth > 624) { // 39em = 624px
+  ) {}
+
+  ngOnInit(): void {
+    // Track route changes
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        this.isLandingPage = event.url === '/' || event.url === '';
+        this.updateSidebarVisibility();
+      });
+
+    // Check initial route
+    this.isLandingPage = this.router.url === '/' || this.router.url === '';
+    this.updateSidebarVisibility();
+  }
+
+  ngOnDestroy(): void {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
+
+  private updateSidebarVisibility(): void {
+    // On desktop, sidebar should be open by default, but NOT on landing page
+    if (window.innerWidth > 624 && !this.isLandingPage) { // 39em = 624px
       this.sidebarOpen = true;
+    } else {
+      this.sidebarOpen = false;
     }
   }
 

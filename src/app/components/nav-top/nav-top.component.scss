@@ -38,11 +38,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
-    // Hide on desktop (sidebar always visible)
-    @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
-      display: none;
-    }
   }
 
   > h1 {

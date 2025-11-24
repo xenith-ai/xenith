@@ -43,10 +43,11 @@
     }
   }
 
-  // Always visible and clickable on desktop
+  // On desktop, only always visible when open (not on landing page)
   @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
-    transform: translateX(0);
-    pointer-events: auto !important;
+    &.open {
+      pointer-events: auto !important;
+    }
   }
 }
 
@@ -129,7 +130,7 @@
   }
 
   &.triggered {
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.6), 0 0 40px rgba(0, 255, 0, 0.4);
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.6), 0 0 12px rgba(0, 255, 0, 0.4);
     background: rgba(0, 255, 0, 0.1);
     animation: glow-pulse 1.5s ease-in-out infinite;
   }
@@ -137,10 +138,10 @@
 
 @keyframes glow-pulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.6), 0 0 40px rgba(0, 255, 0, 0.4);
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.6), 0 0 12px rgba(0, 255, 0, 0.4);
   }
   50% {
-    box-shadow: 0 0 30px rgba(0, 255, 0, 0.8), 0 0 60px rgba(0, 255, 0, 0.6);
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.8), 0 0 18px rgba(0, 255, 0, 0.6);
   }
 }
 
@@ -192,21 +193,13 @@
   }
 }
 
-.assistant-wake-word {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.875rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 0.25rem;
-}
-
 .assistant-model {
   color: rgba(255, 255, 255, 0.5);
   font-size: 0.75rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: 0.25rem;
 }
 
 .edit-button {

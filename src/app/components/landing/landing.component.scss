@@ -36,9 +36,9 @@ app-chat {
   height: 100%;
 }
 
-// Adjust for sidebar on desktop
-@media screen and (min-width: calc($mobile-collapse-width + 1px)) {
-  .page-container {
+// Adjust for sidebar on desktop only when sidebar is open
+:host-context(.sidebar-open) .page-container {
+  @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
     left: 320px;
     width: calc(100% - 320px);
   }

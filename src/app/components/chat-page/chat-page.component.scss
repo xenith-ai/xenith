@@ -10,11 +10,14 @@
   flex-direction: column;
   overflow: hidden;
   padding-top: $nav-top-height;
+  transition: left 0.3s ease-out, width 0.3s ease-out;
 
-  // Adjust for sidebar on desktop
-  @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
-    left: 320px;
-    width: calc(100% - 320px);
+  // Adjust for sidebar on desktop only when sidebar is open
+  :host-context(.sidebar-open) & {
+    @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+      left: 320px;
+      width: calc(100% - 320px);
+    }
   }
 }
 
