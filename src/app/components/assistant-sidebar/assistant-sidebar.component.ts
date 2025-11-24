@@ -47,7 +47,11 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
 
   selectAssistant(assistant: Assistant): void {
     this.assistantSelected.emit(assistant);
-    this.closeSidebar();
+    // Only close sidebar on mobile, or if navigating to a different assistant
+    // On desktop chat pages, keep sidebar open
+    if (window.innerWidth <= 624) { // 39em = 624px (mobile)
+      this.closeSidebar();
+    }
   }
 
   addAssistant(): void {
