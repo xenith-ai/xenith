@@ -7,6 +7,7 @@ import { LandingComponent } from './components/landing/landing.component';
 import { AssistantSidebarComponent } from './components/assistant-sidebar/assistant-sidebar.component';
 import { AddAssistantDialogComponent } from './components/add-assistant-dialog/add-assistant-dialog.component';
 import { Assistant } from './models/assistant.model';
+import { AssistantService } from './services/assistant/assistant.service';
 
 export const routes: Routes = [{ path: '', component: LandingComponent }];
 
@@ -30,7 +31,10 @@ export class AppComponent {
   editingAssistant: Assistant | null = null;
   selectedAssistant: Assistant | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private assistantService: AssistantService
+  ) {}
 
   openSidebar(): void {
     this.sidebarOpen = true;
@@ -63,6 +67,7 @@ export class AppComponent {
   }
 
   onAssistantUpdated(assistant: Assistant): void {
+    this.assistantService.updateAssistant(assistant);
     this.selectedAssistant = assistant;
     this.editingAssistant = null;
     // Future: Could switch chat view to this assistant

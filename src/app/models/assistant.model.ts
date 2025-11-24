@@ -25,6 +25,7 @@ export class Assistant implements IChatParticipant {
   public triggered = false;
 
   public onMessageSent: (() => void) | null = null;
+  public onConversationChanged: (() => void) | null = null;
 
   constructor(
     public readonly id: string,
@@ -119,6 +120,7 @@ export class Assistant implements IChatParticipant {
     }
 
     this.conversation.addMessage(message);
+    this.onConversationChanged?.();
 
     if (respondToUser) {
       this.respondToUser();

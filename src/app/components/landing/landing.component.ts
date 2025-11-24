@@ -52,11 +52,14 @@ export class LandingComponent {
     private vitsService: VitsService
   ) {
     this.newUser = this.userService.createUser();
+    // Create demo assistant without persisting it (persist: false)
     this.newAssistant = this.AssistantService.createAssistant(
       'Assistant',
       'assets/img/robo.webp',
       'assistant',
-      this.newUser
+      this.newUser,
+      'gemma-2-2b-jpn-it-q4f16_1-MLC',
+      false // Don't persist the demo assistant
     );
 
     this.enableMicrophoneButtonMessage = new ButtonMessage(
