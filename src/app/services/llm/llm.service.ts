@@ -14,13 +14,21 @@ export class LLMService {
   }
 
   public async init(model = this.testModel): Promise<void> {
-    if (this.initialized && this.currentModel === model) return;
+    if (this.initialized && this.currentModel === model) {
+      console.log('[WebLLM] Already initialized with model:', model);
+      return;
+    }
 
     try {
       if (!this.initialized) {
+        console.log('[WebLLM] Initializing worker and engine...');
         const worker = new Worker(new URL('../../workers/llm.worker.ts', import.meta.url), {
           type: 'module',
         });
+
+        worker.onerror = (error) => {
+          console.error('[LLM Worker Error]', error);
+        };
 
         this.engine = await webllm.CreateWebWorkerMLCEngine(worker, model, {
           appConfig: this.appConfig,
@@ -28,6 +36,7 @@ export class LLMService {
 
         this.initialized = true;
         this.currentModel = model;
+        console.log('[WebLLM] Initialized successfully with model:', model);
       } else if (this.currentModel !== model) {
         // Switch to a different model
         await this.ensureModel(model);

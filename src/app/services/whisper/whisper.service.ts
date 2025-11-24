@@ -98,12 +98,28 @@ export class WhisperService {
   }
 
   public async initWhisper() {
+    // If already initialized, don't initialize again
+    if (this.whisperInstance) {
+      console.log('Whisper instance already initialized, skipping initialization.');
+      // Ensure polling is running
+      if (!this.polling) {
+        this.startPolling();
+      }
+      return;
+    }
+
     await this.initInstance();
     this.startPolling();
   }
 
   private async initInstance(): Promise<void> {
     try {
+      // Double-check in case of race condition
+      if (this.whisperInstance) {
+        console.log('Whisper instance already exists, skipping initialization.');
+        return;
+      }
+
       if (!this.whisperModule) {
         throw new Error('Whisper module is not loaded.');
       }

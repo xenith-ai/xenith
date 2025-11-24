@@ -56,10 +56,20 @@ export class VitsService {
   }
 
   public initVitsWorker(): void {
+    // If worker already exists, don't re-initialize
+    if (this.vitsWorker) {
+      console.log('VITS worker already initialized, skipping initialization.');
+      return;
+    }
+
     try {
       this.vitsWorker = new Worker(new URL('../../workers/tts.worker.ts', import.meta.url), {
         type: 'module',
       });
+
+      this.vitsWorker.onerror = (error) => {
+        console.error('[TTS Worker Error]', error);
+      };
 
       this.vitsWorker.onmessage = (event: MessageEvent) => {
         const { type, wav, error, guid } = event.data;
