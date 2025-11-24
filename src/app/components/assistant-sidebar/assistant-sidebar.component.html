@@ -1,0 +1,63 @@
+<!-- Backdrop -->
+<div
+  *ngIf="isOpen"
+  class="sidebar-backdrop"
+  (click)="closeSidebar()"
+></div>
+
+<!-- Sidebar -->
+<div
+  class="sidebar-container"
+  [class.open]="isOpen"
+  (click)="$event.stopPropagation()"
+>
+  <div class="sidebar-header">
+    <h2>Assistants</h2>
+    <button class="close-button" (click)="closeSidebar()">
+      ×
+    </button>
+  </div>
+
+  <div class="sidebar-content">
+    <div class="assistants-list">
+      <div
+        *ngFor="let assistant of assistants"
+        class="assistant-item"
+        [class.triggered]="isTriggered(assistant)"
+        (click)="selectAssistant(assistant)"
+      >
+        <img
+          [src]="assistant.avatar"
+          [alt]="assistant.name"
+          class="assistant-avatar"
+        />
+        <div class="assistant-info">
+          <div class="assistant-name">
+            {{ assistant.name }}
+            <span *ngIf="isInitializing(assistant)" class="loading-indicator" title="Initializing model...">
+              <span class="spinner"></span>
+            </span>
+          </div>
+          <div class="assistant-model">{{ getModelDisplayName(assistant.modelId) }}</div>
+        </div>
+        <button
+          class="edit-button"
+          (click)="editAssistant($event, assistant)"
+          title="Edit Assistant"
+        >
+          ⚙
+        </button>
+      </div>
+
+      <div *ngIf="assistants.length === 0" class="empty-state">
+        <p>No assistants yet</p>
+        <p class="empty-state-hint">Add your first assistant to get started</p>
+      </div>
+    </div>
+
+    <button class="add-assistant-button" (click)="addAssistant()">
+      <span>+ Add Assistant</span>
+    </button>
+  </div>
+</div>
+

@@ -1,2 +1,20 @@
-<app-nav-top></app-nav-top>
+<app-nav-top 
+  [isLandingPage]="isOnLandingPage"
+  (menuClick)="openSidebar()">
+</app-nav-top>
+<app-assistant-sidebar
+  [isOpen]="sidebarOpen"
+  (isOpenChange)="sidebarOpen = $event"
+  (assistantSelected)="onAssistantSelected($event)"
+  (addAssistantRequested)="onAddAssistantRequested()"
+  (assistantEditRequested)="onAssistantEditRequested($event)"
+></app-assistant-sidebar>
+<app-add-assistant-dialog
+  [isOpen]="addDialogOpen"
+  [editingAssistant]="editingAssistant"
+  (isOpenChange)="addDialogOpen = $event; editingAssistant = null"
+  (assistantCreated)="onAssistantCreated($event)"
+  (assistantUpdated)="onAssistantUpdated($event)"
+  (assistantDeleted)="onAssistantDeleted($event)"
+></app-add-assistant-dialog>
 <router-outlet></router-outlet>

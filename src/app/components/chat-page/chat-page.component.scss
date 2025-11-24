@@ -1,0 +1,44 @@
+@import '../../../variables.scss';
+
+.chat-page-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: $nav-top-height;
+  transition: left 0.3s ease-out, width 0.3s ease-out;
+
+  // Adjust for sidebar on desktop only when sidebar is open
+  :host-context(.sidebar-open) & {
+    @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+      left: 320px;
+      width: calc(100% - 320px);
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: $text-color;
+}
+
+app-chat {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+@media screen and (max-width: $mobile-collapse-width) {
+  .chat-page-container {
+    padding-top: 0;
+  }
+}
+

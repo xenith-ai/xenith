@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 export class LLMService {
   private engine: webllm.MLCEngineInterface | null = null;
   private initialized = false;
+  private currentModel: string | null = null;
   private appConfig = webllm.prebuiltAppConfig;
   private testModel: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
 
@@ -13,20 +14,58 @@ export class LLMService {
   }
 
   public async init(model = this.testModel): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized && this.currentModel === model) {
+      console.log('[WebLLM] Already initialized with model:', model);
+      return;
+    }
 
     try {
-      const worker = new Worker(new URL('../../workers/llm.worker.ts', import.meta.url), {
-        type: 'module',
-      });
+      if (!this.initialized) {
+        console.log('[WebLLM] Initializing worker and engine...');
+        const worker = new Worker(new URL('../../workers/llm.worker.ts', import.meta.url), {
+          type: 'module',
+        });
 
-      this.engine = await webllm.CreateWebWorkerMLCEngine(worker, model, {
-        appConfig: this.appConfig,
-      });
+        worker.onerror = (error) => {
+          console.error('[LLM Worker Error]', error);
+        };
 
-      this.initialized = true;
+        this.engine = await webllm.CreateWebWorkerMLCEngine(worker, model, {
+          appConfig: this.appConfig,
+        });
+
+        this.initialized = true;
+        this.currentModel = model;
+        console.log('[WebLLM] Initialized successfully with model:', model);
+      } else if (this.currentModel !== model) {
+        // Switch to a different model
+        await this.ensureModel(model);
+      }
     } catch (err) {
       console.error('[WebLLM Init Error]', err);
+      throw err;
+    }
+  }
+
+  /**
+   * Ensures the specified model is loaded. Switches models if needed.
+   */
+  public async ensureModel(model: string): Promise<void> {
+    if (!this.engine) {
+      await this.init(model);
+      return;
+    }
+
+    if (this.currentModel === model) {
+      return; // Already using this model
+    }
+
+    try {
+      await this.engine.reload(model);
+      this.currentModel = model;
+      console.log(`[WebLLM] Switched to model: ${model}`);
+    } catch (err) {
+      console.error('[WebLLM Model Switch Error]', err);
       throw err;
     }
   }

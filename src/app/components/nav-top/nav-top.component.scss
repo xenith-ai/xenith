@@ -7,7 +7,8 @@
   button,
   a {
     overflow: clip;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
 
     > img {
       pointer-events: auto;
@@ -33,12 +34,72 @@
 #nav-menu-container {
   > #menu-button {
     padding: calc($nav-top-height / 3);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   > h1 {
     display: none;
     color: $logo-color;
     font-size: 1.4rem;
+  }
+}
+
+// Hide menu button on desktop when NOT on landing page
+#nav-top-container:not(.is-landing-page) {
+  @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+    #nav-menu-container > #menu-button {
+      display: none;
+    }
+  }
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+  width: 24px;
+  height: 24px;
+}
+
+.grid-square {
+  width: 6px;
+  height: 6px;
+  background-color: $text-color;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+
+  // Glow effect when triggered
+  #menu-button.triggered & {
+    background-color: rgba(0, 255, 0, 0.9);
+    box-shadow: 0 0 4px rgba(0, 255, 0, 0.8), 0 0 8px rgba(0, 255, 0, 0.6);
+    animation: square-glow-pulse 1.5s ease-in-out infinite;
+  }
+
+  // Staggered animation for each square
+  #menu-button.triggered &:nth-child(1) { animation-delay: 0s; }
+  #menu-button.triggered &:nth-child(2) { animation-delay: 0.1s; }
+  #menu-button.triggered &:nth-child(3) { animation-delay: 0.2s; }
+  #menu-button.triggered &:nth-child(4) { animation-delay: 0.15s; }
+  #menu-button.triggered &:nth-child(5) { animation-delay: 0.25s; }
+  #menu-button.triggered &:nth-child(6) { animation-delay: 0.1s; }
+  #menu-button.triggered &:nth-child(7) { animation-delay: 0.2s; }
+  #menu-button.triggered &:nth-child(8) { animation-delay: 0.05s; }
+  #menu-button.triggered &:nth-child(9) { animation-delay: 0.15s; }
+}
+
+@keyframes square-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(0, 255, 0, 0.8), 0 0 8px rgba(0, 255, 0, 0.6);
+    opacity: 0.9;
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(0, 255, 0, 1), 0 0 16px rgba(0, 255, 0, 0.8);
+    opacity: 1;
   }
 }
 

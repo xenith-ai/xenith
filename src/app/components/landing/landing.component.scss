@@ -36,6 +36,9 @@ app-chat {
   height: 100%;
 }
 
+// On landing page, sidebar should overlay and not shift the chat window
+// No adjustment needed - sidebar will overlay on top
+
 @media screen and (max-width: $mobile-collapse-width) {
   #gradient-1, #gradient-2 {
     display: none;
