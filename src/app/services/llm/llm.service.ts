@@ -80,7 +80,7 @@ export class LLMService {
 
     const result = await this.engine.chat.completions.create({
       messages,
-      temperature: 0.7,
+      temperature: 0.701,
       max_tokens: 256,
     });
 
