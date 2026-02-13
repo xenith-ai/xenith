@@ -7,7 +7,7 @@ export class LLMService {
   private initialized = false;
   private currentModel: string | null = null;
   private appConfig = webllm.prebuiltAppConfig;
-  private testModel: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
+  private testModel: string = 'Qwen2.5-3B-Instruct-q4f16_1-MLC';
 
   constructor() {
     this.appConfig.useIndexedDBCache = true;

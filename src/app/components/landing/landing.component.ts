@@ -58,7 +58,7 @@ export class LandingComponent {
       'assets/img/robo.webp',
       'assistant',
       this.newUser,
-      'gemma-2-2b-jpn-it-q4f16_1-MLC',
+      'Qwen2.5-3B-Instruct-q4f16_1-MLC',
       false // Don't persist the demo assistant
     );
 
@@ -215,21 +215,23 @@ export class LandingComponent {
       );
     }
 
-    // Handle LLM model
-    if (await this.LLMService.isModelCached()) {
+    // Handle LLM model (use demo assistant's model)
+    const llmModelId = this.newAssistant.modelId;
+    const llmDisplayName = this.LLMService.getModelDisplayName(llmModelId);
+    if (await this.LLMService.isModelCached(llmModelId)) {
       this.newAssistant.sendMessage(
         new TextMessage(
           this.newAssistant,
-          `Accessing Gemma LLM from cache...`,
+          `Accessing ${llmDisplayName} from cache...`,
           new Date()
         ),
         false
       );
-      await this.LLMService.init();
+      await this.LLMService.init(llmModelId);
       this.newAssistant.sendMessage(
         new TextMessage(
           this.newAssistant,
-          `Gemma LLM loaded from cache!`,
+          `${llmDisplayName} loaded from cache!`,
           new Date()
         ),
         false
@@ -237,14 +239,14 @@ export class LandingComponent {
     } else {
       const llmProgressMsg = new TextMessage(
         this.newAssistant,
-        `Downloading Gemma LLM...`,
+        `Downloading ${llmDisplayName}...`,
         new Date(),
         0
       );
       this.newAssistant.sendMessage(llmProgressMsg, false);
       try {
         await this.LLMService.init(
-          undefined,
+          llmModelId,
           (report) => {
             llmProgressMsg.progress = Math.round(report.progress * 100);
             this.cdr.detectChanges();
@@ -256,7 +258,7 @@ export class LandingComponent {
         this.newAssistant.sendMessage(
           new TextMessage(
             this.newAssistant,
-            `There was a problem downloading the Gemma LLM.`,
+            `There was a problem downloading the language model.`,
             new Date()
           ),
           false
@@ -267,7 +269,7 @@ export class LandingComponent {
       this.newAssistant.sendMessage(
         new TextMessage(
           this.newAssistant,
-          `Gemma LLM downloaded and cached!`,
+          `${llmDisplayName} downloaded and cached!`,
           new Date()
         ),
         false
