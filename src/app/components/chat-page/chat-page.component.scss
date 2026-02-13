@@ -36,9 +36,3 @@ app-chat {
   flex-direction: column;
 }
 
-@media screen and (max-width: $mobile-collapse-width) {
-  .chat-page-container {
-    padding-top: 0;
-  }
-}
-

@@ -8,8 +8,8 @@ import { AssistantSidebarComponent } from './components/assistant-sidebar/assist
 import { AddAssistantDialogComponent } from './components/add-assistant-dialog/add-assistant-dialog.component';
 import { Assistant } from './models/assistant.model';
 import { AssistantService } from './services/assistant/assistant.service';
-import { filter } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { filter, debounceTime } from 'rxjs/operators';
+import { Subscription, fromEvent } from 'rxjs';
 
 export const routes: Routes = [{ path: '', component: LandingComponent }];
 
@@ -38,6 +38,7 @@ export class AppComponent implements OnInit, OnDestroy {
   selectedAssistant: Assistant | null = null;
   isLandingPage = true;
   private routerSubscription?: Subscription;
+  private resizeSubscription?: Subscription;
   private closeSidebarHandler?: () => void;
 
   get isOnLandingPage(): boolean {
@@ -69,12 +70,16 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     };
     window.addEventListener('close-sidebar', this.closeSidebarHandler);
+
+    // Re-run sidebar visibility when crossing mobile/desktop breakpoint
+    this.resizeSubscription = fromEvent(window, 'resize')
+      .pipe(debounceTime(100))
+      .subscribe(() => this.updateSidebarVisibility());
   }
 
   ngOnDestroy(): void {
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
-    }
+    this.routerSubscription?.unsubscribe();
+    this.resizeSubscription?.unsubscribe();
     if (this.closeSidebarHandler) {
       window.removeEventListener('close-sidebar', this.closeSidebarHandler);
     }
