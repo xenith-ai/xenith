@@ -13,7 +13,10 @@ export class LLMService {
     this.appConfig.useIndexedDBCache = true;
   }
 
-  public async init(model = this.testModel): Promise<void> {
+  public async init(
+    model = this.testModel,
+    initProgressCallback?: (report: webllm.InitProgressReport) => void
+  ): Promise<void> {
     if (this.initialized && this.currentModel === model) {
       console.log('[WebLLM] Already initialized with model:', model);
       return;
@@ -32,6 +35,7 @@ export class LLMService {
 
         this.engine = await webllm.CreateWebWorkerMLCEngine(worker, model, {
           appConfig: this.appConfig,
+          initProgressCallback,
         });
 
         this.initialized = true;
@@ -49,10 +53,14 @@ export class LLMService {
 
   /**
    * Ensures the specified model is loaded. Switches models if needed.
+   * @param progressCallback Optional callback for download/load progress (0-1).
    */
-  public async ensureModel(model: string): Promise<void> {
+  public async ensureModel(
+    model: string,
+    progressCallback?: (report: webllm.InitProgressReport) => void
+  ): Promise<void> {
     if (!this.engine) {
-      await this.init(model);
+      await this.init(model, progressCallback);
       return;
     }
 
@@ -60,14 +68,35 @@ export class LLMService {
       return; // Already using this model
     }
 
+    if (progressCallback) {
+      this.engine.setInitProgressCallback(progressCallback);
+    }
     try {
       await this.engine.reload(model);
       this.currentModel = model;
       console.log(`[WebLLM] Switched to model: ${model}`);
-    } catch (err) {
-      console.error('[WebLLM Model Switch Error]', err);
-      throw err;
+    } finally {
+      if (progressCallback) {
+        this.engine.setInitProgressCallback(() => {});
+      }
     }
+  }
+
+  /** Human-readable model name for UI. */
+  public getModelDisplayName(modelId: string): string {
+    const names: Record<string, string> = {
+      'gemma-2-2b-jpn-it-q4f16_1-MLC': 'Gemma 2 2B (Japanese)',
+      'gemma-2-2b-it-q4f16_1-MLC': 'Gemma 2 2B',
+      'gemma-2-9b-it-q4f16_1-MLC': 'Gemma 2 9B (Q4)',
+      'Llama-3.1-8B-Instruct-q4f16_1-MLC': 'Llama 3.1 8B',
+      'Llama-3.1-70B-Instruct-q4f16_1-MLC': 'Llama 3.1 70B',
+      'Phi-3-mini-4k-instruct-q4f16_1-MLC': 'Phi-3 Mini',
+      'Qwen2.5-0.5B-Instruct-q4f16_1-MLC': 'Qwen2.5 0.5B',
+      'Qwen2.5-1.5B-Instruct-q4f16_1-MLC': 'Qwen2.5 1.5B',
+      'Qwen2.5-3B-Instruct-q4f16_1-MLC': 'Qwen2.5 3B',
+      'TinyLlama-1.1B-Chat-v0.4-q4f16_1-MLC': 'TinyLlama 1.1B',
+    };
+    return names[modelId] ?? modelId;
   }
 
   /**

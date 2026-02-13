@@ -11,14 +11,25 @@ $content-z: calc($page-container-z + 2);
 #title-container {
   z-index: $content-z;
   text-align: center;
+  margin-bottom: 1.5em;
 
   > h1 {
     color: $logo-color;
+    margin-bottom: 0.0em;
   }
 
   > h2 {
     color: $logo-color;
+    margin: 0;
   }
+}
+
+#landing-footer {
+  z-index: $content-z;
+  margin-top: 1em;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 #primary-chat-container {

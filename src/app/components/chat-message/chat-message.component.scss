@@ -4,6 +4,31 @@
   padding: 1em;
 }
 
+.progress-message {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+
+  .progress-label {
+    margin: 0;
+    font-size: 0.95em;
+  }
+
+  .progress-bar-track {
+    height: 0.5em;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 0.25em;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: hsl(200, 85%, 65%);
+    border-radius: 0.25em;
+    transition: width 0.2s ease-out;
+  }
+}
+
 .button-message {
   padding: 1em;
 

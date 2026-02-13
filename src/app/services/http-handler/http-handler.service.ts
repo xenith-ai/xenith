@@ -5,7 +5,13 @@ import axios from 'axios';
   providedIn: 'root',
 })
 export class HttpHandlerService {
-  public async fetchOctetStream(url: string): Promise<Uint8Array> {
+  /**
+   * @param onProgress Optional callback with (loadedBytes, totalBytes?) for progress. totalBytes may be missing if unknown.
+   */
+  public async fetchOctetStream(
+    url: string,
+    onProgress?: (loaded: number, total?: number) => void
+  ): Promise<Uint8Array> {
     try {
       const response = await axios({
         method: 'get',
@@ -13,6 +19,13 @@ export class HttpHandlerService {
         responseType: 'arraybuffer',
         headers: {
           'Content-Type': 'application/octet-stream',
+        },
+        onDownloadProgress: (event) => {
+          if (onProgress && event.total) {
+            onProgress(event.loaded, event.total);
+          } else if (onProgress) {
+            onProgress(event.loaded);
+          }
         },
       });
 

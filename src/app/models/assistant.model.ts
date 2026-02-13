@@ -1,6 +1,7 @@
 import { IChatParticipant } from '../interfaces/chat-participant.interface';
 import { IChatMessage } from '../interfaces/chat-message.interface';
 import { Conversation } from './conversation.model';
+import { TextMessage } from './text-message.model';
 import { AudioService } from '../services/audio/audio.service';
 import { LLMService } from '../services/llm/llm.service';
 import { AudioProcessor } from '../enums/audio-processor.enum';
@@ -143,8 +144,31 @@ export class Assistant implements IChatParticipant {
     }
 
     try {
-      // Ensure the correct model is loaded for this assistant
-      await this.llmService.ensureModel(this.modelId);
+      const isCached = await this.llmService.isModelCached(this.modelId);
+      let progressMsg: TextMessage | null = null;
+
+      if (!isCached) {
+        const modelName = this.llmService.getModelDisplayName(this.modelId);
+        progressMsg = new TextMessage(
+          this,
+          `Downloading ${modelName}...`,
+          new Date(),
+          0
+        );
+        this.sendMessage(progressMsg, false);
+      }
+
+      await this.llmService.ensureModel(this.modelId, (report) => {
+        if (progressMsg !== null) {
+          progressMsg.progress = Math.round(report.progress * 100);
+          this.onMessageSent?.();
+        }
+      });
+
+      if (progressMsg !== null) {
+        progressMsg.progress = 100;
+        this.onMessageSent?.();
+      }
     } finally {
       // Notify that initialization is complete
       if ((this as any).onModelInitializing) {

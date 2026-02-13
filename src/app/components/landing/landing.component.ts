@@ -87,7 +87,7 @@ export class LandingComponent {
     this.newAssistant.sendMessage(
       new TextMessage(
         this.newAssistant,
-        `Welcome to Xenith, the first fully local AI assistant, powered with Web Assembly!`,
+        `Welcome to Xenith, the first fully local AI assistant powered by Web Assembly! 100% in-browser, nothing leaves your device.`,
         new Date()
       ),
       false
@@ -181,17 +181,24 @@ export class LandingComponent {
         false
       );
     } else {
-      this.newAssistant.sendMessage(
-        new TextMessage(
-          this.newAssistant,
-          `Downloading Speech-to-Text model...`,
-          new Date()
-        ),
-        false
+      const whisperProgressMsg = new TextMessage(
+        this.newAssistant,
+        `Downloading Speech-to-Text model...`,
+        new Date(),
+        0
       );
+      this.newAssistant.sendMessage(whisperProgressMsg, false);
       const whisperModel = await this.httpHandlerService.fetchOctetStream(
-        ModelUrl.WhisperTinyEn
+        ModelUrl.WhisperTinyEn,
+        (loaded, total) => {
+          if (total !== undefined) {
+            whisperProgressMsg.progress = Math.round((loaded / total) * 100);
+            this.cdr.detectChanges();
+          }
+        }
       );
+      whisperProgressMsg.progress = 100;
+      this.cdr.detectChanges();
       this.indexedDBService.insertModel(ModelKey.WhisperTinyEn, whisperModel);
       if (!this.whisperService.whisperModule) {
         console.warn('Waiting for whisper module to be loaded...');
@@ -228,12 +235,23 @@ export class LandingComponent {
         false
       );
     } else {
-      this.newAssistant.sendMessage(
-        new TextMessage(this.newAssistant, `Downloading Gemma LLM...`, new Date()),
-        false
+      const llmProgressMsg = new TextMessage(
+        this.newAssistant,
+        `Downloading Gemma LLM...`,
+        new Date(),
+        0
       );
+      this.newAssistant.sendMessage(llmProgressMsg, false);
       try {
-        await this.LLMService.init();
+        await this.LLMService.init(
+          undefined,
+          (report) => {
+            llmProgressMsg.progress = Math.round(report.progress * 100);
+            this.cdr.detectChanges();
+          }
+        );
+        llmProgressMsg.progress = 100;
+        this.cdr.detectChanges();
       } catch (error) {
         this.newAssistant.sendMessage(
           new TextMessage(
@@ -387,14 +405,14 @@ export class LandingComponent {
     // (not on mobile, and not when clicking inside sidebar or nav)
     if (window.innerWidth > 624) { // 39em = 624px
       const target = event.target as HTMLElement;
-      
+
       // Don't close if clicking inside sidebar, nav, or dialog
-      if (target.closest('.sidebar-container') || 
-          target.closest('app-nav-top') || 
+      if (target.closest('.sidebar-container') ||
+          target.closest('app-nav-top') ||
           target.closest('app-add-assistant-dialog')) {
         return;
       }
-      
+
       // Check if sidebar is open
       const sidebarElement = document.querySelector('.sidebar-container.open');
       if (sidebarElement) {

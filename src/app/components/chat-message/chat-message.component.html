@@ -1,4 +1,12 @@
-<p *ngIf="isTextMessage && textMessage" class="text-message">{{ textMessage.text }}</p>
+<div *ngIf="isTextMessage && textMessage" class="text-message">
+  <p *ngIf="textMessage.progress === undefined">{{ textMessage.text }}</p>
+  <div *ngIf="textMessage.progress !== undefined" class="progress-message">
+    <p class="progress-label">{{ textMessage.text }}</p>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" [style.width.%]="textMessage.progress"></div>
+    </div>
+  </div>
+</div>
 <button *ngIf="isButtonMessage && buttonMessage" class="button-message flex flex-row items-center" [class]="buttonMessage.styleClass" (click)="buttonMessage.onClick()">
   <img [src]="buttonMessage.image" alt="Enable microphone button image">
   <p>{{ message }}</p>

@@ -38,7 +38,10 @@ export class ChatComponent {
   constructor(private cdr: ChangeDetectorRef, public audioService: AudioService) {}
 
   ngOnInit() {
-    this.assistant.onMessageSent = () => this.scrollToBottom();
+    this.assistant.onMessageSent = () => {
+      this.cdr.detectChanges();
+      this.scrollToBottom();
+    };
   }
 
   protected inputOnEnter(element: HTMLInputElement) {
