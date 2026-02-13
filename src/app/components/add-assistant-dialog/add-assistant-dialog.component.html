@@ -1,9 +1,9 @@
 <div
   *ngIf="isOpen"
   class="dialog-backdrop"
-  (click)="onBackdropClick($event)"
+  (mousedown)="onBackdropMousedown($event)"
 >
-  <div class="dialog-container" (click)="$event.stopPropagation()">
+  <div class="dialog-container" (mousedown)="$event.stopPropagation()">
     <div class="dialog-header">
       <h2>{{ editingAssistant ? 'Edit Assistant' : 'Add Assistant' }}</h2>
       <button class="close-button" (click)="closeDialog()">×</button>
@@ -18,7 +18,7 @@
             type="text"
             [(ngModel)]="assistantName"
             name="assistantName"
-            placeholder="e.g., My Assistant"
+            placeholder="e.g. My Assistant"
             required
           />
         </div>
@@ -30,7 +30,7 @@
             type="text"
             [(ngModel)]="wakeWord"
             name="wakeWord"
-            placeholder="e.g., assistant"
+            placeholder="e.g. assistant"
             required
           />
           <small class="form-hint">The word that will trigger this assistant</small>
@@ -41,9 +41,9 @@
           <input
             id="avatar"
             type="text"
-            [(ngModel)]="avatar"
+            [(ngModel)]="avatarDisplay"
             name="avatar"
-            placeholder="assets/img/robo.webp"
+            placeholder=""
           />
         </div>
 

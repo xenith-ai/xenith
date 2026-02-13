@@ -25,9 +25,12 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
   @Output() assistantUpdated = new EventEmitter<Assistant>();
   @Output() assistantDeleted = new EventEmitter<Assistant>();
 
+  readonly DEFAULT_AVATAR = 'assets/img/robo.webp';
+
   assistantName: string = '';
   wakeWord: string = '';
-  avatar: string = 'assets/img/robo.webp';
+  /** Value shown in the avatar input; empty means use default (not shown to user). */
+  avatarDisplay: string = '';
   selectedVoice: VoiceId = 'en_US-hfc_female-medium';
   selectedModel: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
 
@@ -80,9 +83,13 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
 
     this.assistantName = this.editingAssistant.name;
     this.wakeWord = this.editingAssistant.wakeWord;
-    this.avatar = this.editingAssistant.avatar;
+    this.avatarDisplay = this.editingAssistant.avatar === this.DEFAULT_AVATAR ? '' : this.editingAssistant.avatar;
     this.selectedVoice = this.editingAssistant.voiceId;
     this.selectedModel = this.editingAssistant.modelId;
+  }
+
+  private getEffectiveAvatar(): string {
+    return this.avatarDisplay?.trim() || this.DEFAULT_AVATAR;
   }
 
   private async loadVoicesIfNeeded(): Promise<void> {
@@ -103,7 +110,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
   resetForm(): void {
     this.assistantName = '';
     this.wakeWord = '';
-    this.avatar = 'assets/img/robo.webp';
+    this.avatarDisplay = '';
     this.selectedVoice = 'en_US-hfc_female-medium';
     this.selectedModel = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
   }
@@ -117,7 +124,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
       // Update existing assistant
       this.editingAssistant.name = this.assistantName.trim();
       this.editingAssistant.wakeWord = this.wakeWord.trim().toLowerCase();
-      this.editingAssistant.avatar = this.avatar;
+      this.editingAssistant.avatar = this.getEffectiveAvatar();
       this.editingAssistant.voiceId = this.selectedVoice;
       this.editingAssistant.modelId = this.selectedModel;
       this.assistantUpdated.emit(this.editingAssistant);
@@ -126,7 +133,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
       const user = this.userService.createUser();
       const assistant = this.assistantService.createAssistant(
         this.assistantName.trim(),
-        this.avatar,
+        this.getEffectiveAvatar(),
         this.wakeWord.trim().toLowerCase(),
         user,
         this.selectedModel
@@ -183,7 +190,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
     );
   }
 
-  onBackdropClick(event: MouseEvent): void {
+  onBackdropMousedown(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('dialog-backdrop')) {
       this.closeDialog();
     }
