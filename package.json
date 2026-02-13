@@ -1,6 +1,9 @@
 {
   "name": "xenith",
   "version": "0.0.1",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -11,14 +14,14 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^17.0.0",
-    "@angular/common": "^17.0.0",
-    "@angular/compiler": "^17.0.0",
-    "@angular/core": "^17.0.0",
-    "@angular/forms": "^17.0.0",
-    "@angular/platform-browser": "^17.0.0",
-    "@angular/platform-browser-dynamic": "^17.0.0",
-    "@angular/router": "^17.0.0",
+    "@angular/animations": "^18.2.14",
+    "@angular/common": "^18.2.14",
+    "@angular/compiler": "^18.2.14",
+    "@angular/core": "^18.2.14",
+    "@angular/forms": "^18.2.14",
+    "@angular/platform-browser": "^18.2.14",
+    "@angular/platform-browser-dynamic": "^18.2.14",
+    "@angular/router": "^18.2.14",
     "@diffusionstudio/vits-web": "^1.0.3",
     "@mlc-ai/web-llm": "^0.2.78",
     "@types/uuid": "^9.0.7",
@@ -27,21 +30,23 @@
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "uuid": "^9.0.1",
-    "zone.js": "~0.14.2"
+    "zone.js": "~0.14.10"
   },
   "devDependencies": {
-    "@angular-builders/custom-webpack": "^17.0.2",
-    "@angular-devkit/build-angular": "^17.0.10",
-    "@angular-eslint/builder": "17.3.0",
-    "@angular-eslint/eslint-plugin": "17.3.0",
-    "@angular-eslint/eslint-plugin-template": "17.3.0",
-    "@angular-eslint/schematics": "17.3.0",
-    "@angular-eslint/template-parser": "17.3.0",
-    "@angular/cli": "^17.0.10",
-    "@angular/compiler-cli": "^17.0.0",
+    "@angular-builders/custom-webpack": "^18.0.0",
+    "@angular-devkit/build-angular": "^18.2.21",
+    "@angular-eslint/builder": "18.4.3",
+    "@angular-eslint/eslint-plugin": "18.4.3",
+    "@angular-eslint/eslint-plugin-template": "18.4.3",
+    "@angular-eslint/schematics": "18.4.3",
+    "@angular-eslint/template-parser": "18.4.3",
+    "@angular/cli": "^18.2.21",
+    "@angular/compiler-cli": "^18.2.14",
     "@types/jasmine": "~5.1.0",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
+    "@typescript-eslint/types": "^7.18.0",
+    "@typescript-eslint/utils": "^7.18.0",
     "autoprefixer": "^10.4.17",
     "eslint": "^8.57.0",
     "jasmine-core": "~5.1.0",
@@ -53,6 +58,6 @@
     "path-browserify": "^1.0.1",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
-    "typescript": "~5.2.2"
+    "typescript": "~5.5.4"
   }
 }
