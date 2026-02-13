@@ -108,7 +108,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
     this.selectedModel = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
   }
 
-  createAssistant(): void {
+  async createAssistant(): Promise<void> {
     if (!this.assistantName.trim() || !this.wakeWord.trim()) {
       return;
     }
@@ -135,8 +135,38 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
       // Set the voice ID
       assistant.voiceId = this.selectedVoice;
 
-      // Add intro message about model downloading
-      this.addIntroMessage(assistant);
+      // Add intro message first, then loading + completion messages
+      await this.addIntroMessage(assistant);
+
+      const modelName = this.availableModels.find(m => m.id === this.selectedModel)?.name ?? this.selectedModel;
+      const loadingMsg = new TextMessage(
+        assistant,
+        `Downloading ${modelName}...`,
+        new Date(),
+        0
+      );
+      assistant.sendMessage(loadingMsg, false);
+
+      this.llmService
+        .ensureModel(this.selectedModel, (report) => {
+          loadingMsg.progress = Math.round(report.progress * 100);
+          assistant.onMessageSent?.();
+        })
+        .then(() => {
+          loadingMsg.progress = 100;
+          assistant.onMessageSent?.();
+          assistant.sendMessage(
+            new TextMessage(assistant, 'Model ready! You can start chatting.', new Date()),
+            false
+          );
+        })
+        .catch((err: unknown) => {
+          console.error('[AddAssistant] Model download failed:', err);
+          assistant.sendMessage(
+            new TextMessage(assistant, 'Model download failed. You can try again later.', new Date()),
+            false
+          );
+        });
 
       this.assistantCreated.emit(assistant);
 
