@@ -287,6 +287,10 @@ export class AudioService {
    * @param whisperAudioData - The audio data for Whisper processing.
    */
   private handleWhisper(whisperAudioData: Float32Array) {
+    // Skip until Whisper is initialized (e.g. user went to chat without doing "Download AI Models" on landing)
+    if (!this.whisperService.whisperInstance) {
+      return;
+    }
     if (this.vadActive) {
       // VAD just started, process previous audio buffer
       if (this.previousWhisperBuffer) {
