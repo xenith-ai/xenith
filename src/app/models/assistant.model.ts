@@ -21,7 +21,7 @@ export class Assistant implements IChatParticipant {
   public voiceId: VoiceId = 'en_US-hfc_female-medium';
 
   private readonly triggerWord: string;
-  private readonly silenceSendDelta = 3000;
+  private readonly silenceSendDelta = 1000;
   private silenceTimer: any = null;
   public triggered = false;
 
