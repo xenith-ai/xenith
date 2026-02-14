@@ -8,6 +8,7 @@ import { VitsService } from '../../services/vits/vits.service';
 import { LLMService } from '../../services/llm/llm.service';
 import { Assistant } from '../../models/assistant.model';
 import { TextMessage } from '../../models/text-message.model';
+import { ButtonMessage } from '../../models/button-message.model';
 import { VoiceId } from '@diffusionstudio/vits-web';
 
 @Component({
@@ -315,6 +316,8 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
       // Intro only; chat page will autostart download and show progress when user lands there
       await this.addIntroMessage(assistant);
 
+      await this.checkModelCacheAndNotify(assistant, this.selectedModel);
+
       this.assistantCreated.emit(assistant);
 
       // Navigate to the chat page for this assistant
@@ -323,6 +326,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
     }
 
     if (this.editingAssistant) {
+      await this.checkModelCacheAndNotify(this.editingAssistant, this.selectedModel);
       this.closeDialog();
     }
   }
@@ -358,6 +362,74 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
       ),
       false
     );
+  }
+
+  /**
+   * Check cache for the model and send a status message. If not cached, start download and message when done.
+   */
+  private async checkModelCacheAndNotify(assistant: Assistant, modelId: string): Promise<void> {
+    const modelName = this.allAvailableModels.find((m) => m.id === modelId)?.name ?? modelId;
+    const isCached = await this.llmService.isModelCached(modelId);
+
+    if (isCached) {
+      assistant.sendMessage(
+        new TextMessage(
+          assistant,
+          `The language model "${modelName}" is in cache and ready to use.`,
+          new Date()
+        ),
+        false
+      );
+      return;
+    }
+    if (this.llmService.isModelInitInProgress(modelId)) return;
+
+    const progressMsg = new TextMessage(
+      assistant,
+      `The language model "${modelName}" is not in cache. Starting download...`,
+      new Date(),
+      0
+    );
+    assistant.sendMessage(progressMsg, false);
+
+    this.llmService
+      .init(modelId, (report) => {
+        progressMsg.progress = Math.round(report.progress * 100);
+        assistant.onMessageSent?.();
+      })
+      .then(() => {
+        progressMsg.progress = 100;
+        assistant.onMessageSent?.();
+        assistant.sendMessage(
+          new TextMessage(
+            assistant,
+            `"${modelName}" has been downloaded and is ready.`,
+            new Date()
+          ),
+          false
+        );
+      })
+      .catch(() => {
+        assistant.sendMessage(
+          new TextMessage(
+            assistant,
+            `There was a problem downloading the language model.`,
+            new Date()
+          ),
+          false
+        );
+        assistant.sendMessage(
+          new ButtonMessage(
+            assistant,
+            'Download Model',
+            new Date(),
+            'assets/img/download.svg',
+            'button-1',
+            () => this.checkModelCacheAndNotify(assistant, modelId)
+          ),
+          false
+        );
+      });
   }
 
   onBackdropMousedown(event: MouseEvent): void {

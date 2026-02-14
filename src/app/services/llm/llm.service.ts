@@ -9,6 +9,10 @@ export class LLMService {
   private appConfig = webllm.prebuiltAppConfig;
   private testModel: string = 'Qwen2.5-3B-Instruct-q4f16_1-MLC';
 
+  /** When set, another caller is already initializing this model; await this to avoid duplicate inits. */
+  private pendingInitPromise: Promise<void> | null = null;
+  private modelBeingInited: string | null = null;
+
   constructor() {
     this.appConfig.useIndexedDBCache = true;
   }
@@ -22,33 +26,43 @@ export class LLMService {
       return;
     }
 
-    try {
-      if (!this.initialized) {
-        console.log('[WebLLM] Initializing worker and engine...');
-        const worker = new Worker(new URL('../../workers/llm.worker.ts', import.meta.url), {
-          type: 'module',
-        });
-
-        worker.onerror = (error) => {
-          console.error('[LLM Worker Error]', error);
-        };
-
-        this.engine = await webllm.CreateWebWorkerMLCEngine(worker, model, {
-          appConfig: this.appConfig,
-          initProgressCallback,
-        });
-
-        this.initialized = true;
-        this.currentModel = model;
-        console.log('[WebLLM] Initialized successfully with model:', model);
-      } else if (this.currentModel !== model) {
-        // Switch to a different model
-        await this.ensureModel(model);
-      }
-    } catch (err) {
-      console.error('[WebLLM Init Error]', err);
-      throw err;
+    if (this.modelBeingInited === model && this.pendingInitPromise) {
+      await this.pendingInitPromise;
+      return;
     }
+
+    const runInit = async (): Promise<void> => {
+      try {
+        if (!this.initialized) {
+          console.log('[WebLLM] Initializing worker and engine...');
+          const worker = new Worker(new URL('../../workers/llm.worker.ts', import.meta.url), {
+            type: 'module',
+          });
+
+          worker.onerror = (error) => {
+            console.error('[LLM Worker Error]', error);
+          };
+
+          this.engine = await webllm.CreateWebWorkerMLCEngine(worker, model, {
+            appConfig: this.appConfig,
+            initProgressCallback,
+          });
+
+          this.initialized = true;
+          this.currentModel = model;
+          console.log('[WebLLM] Initialized successfully with model:', model);
+        } else if (this.currentModel !== model) {
+          await this.ensureModel(model, initProgressCallback);
+        }
+      } finally {
+        this.pendingInitPromise = null;
+        this.modelBeingInited = null;
+      }
+    };
+
+    this.modelBeingInited = model;
+    this.pendingInitPromise = runInit();
+    await this.pendingInitPromise;
   }
 
   /**
@@ -148,6 +162,13 @@ export class LLMService {
    */
   public interrupt(): void {
     this.engine?.interruptGenerate();
+  }
+
+  /**
+   * True if this model is currently being downloaded/initialized (another flow already started it).
+   */
+  public isModelInitInProgress(model: string): boolean {
+    return this.modelBeingInited === model;
   }
 
   /**

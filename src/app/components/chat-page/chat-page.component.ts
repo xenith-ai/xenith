@@ -60,15 +60,118 @@ export class ChatPageComponent implements OnInit {
     const assistant = this.assistantService.getAssistantById(id);
     if (assistant) {
       this.assistant = assistant;
-      await this.initializeAudio();
+      const startedFullDownloadFlow = await this.initializeAudio();
+      if (!startedFullDownloadFlow) {
+        void this.ensureAssistantLlmCachedOrDownloading();
+      }
     } else {
       // Assistant not found, redirect to landing page
       this.router.navigate(['/']);
     }
   }
 
-  private async initializeAudio(): Promise<void> {
+  /**
+   * When switching to an assistant, check if their LLM model is cached.
+   * If not, send a notice and show "Download Models" button; user starts the download by clicking.
+   */
+  private ensureAssistantLlmCachedOrDownloading = async (): Promise<void> => {
     if (!this.assistant) return;
+
+    const assistant = this.assistant;
+    const modelId = assistant.modelId;
+    const modelName = this.llmService.getModelDisplayName(modelId);
+
+    const isCached = await this.llmService.isModelCached(modelId);
+    if (isCached) return;
+    if (this.llmService.isModelInitInProgress(modelId)) return;
+
+    assistant.sendMessage(
+      new TextMessage(
+        assistant,
+        `The language model "${modelName}" is not in cache.`,
+        new Date()
+      ),
+      false
+    );
+    assistant.sendMessage(
+      new ButtonMessage(
+        assistant,
+        'Download Model',
+        new Date(),
+        'assets/img/download.svg',
+        'button-1',
+        () => void this.startAssistantModelDownload()
+      ),
+      false
+    );
+    this.cdr.detectChanges();
+  };
+
+  /**
+   * Start downloading the current assistant's LLM (progress bar, then completion/error + retry button).
+   * Called when the user clicks "Download Models".
+   */
+  private startAssistantModelDownload = async (): Promise<void> => {
+    if (!this.assistant) return;
+
+    const assistant = this.assistant;
+    const modelId = assistant.modelId;
+    const modelName = this.llmService.getModelDisplayName(modelId);
+
+    if (await this.llmService.isModelCached(modelId)) return;
+    if (this.llmService.isModelInitInProgress(modelId)) return;
+
+    const progressMsg = new TextMessage(
+      assistant,
+      `The language model "${modelName}" is not in cache. Starting download...`,
+      new Date(),
+      0
+    );
+    assistant.sendMessage(progressMsg, false);
+    this.cdr.detectChanges();
+
+    try {
+      await this.llmService.init(modelId, (report) => {
+        progressMsg.progress = Math.round(report.progress * 100);
+        this.cdr.detectChanges();
+      });
+      progressMsg.progress = 100;
+      this.cdr.detectChanges();
+      assistant.sendMessage(
+        new TextMessage(
+          assistant,
+          `"${modelName}" has been downloaded and is ready.`,
+          new Date()
+        ),
+        false
+      );
+    } catch {
+      assistant.sendMessage(
+        new TextMessage(
+          assistant,
+          `There was a problem downloading the language model.`,
+          new Date()
+        ),
+        false
+      );
+      assistant.sendMessage(
+        new ButtonMessage(
+          assistant,
+          'Download Model',
+          new Date(),
+          'assets/img/download.svg',
+          'button-1',
+          () => void this.startAssistantModelDownload()
+        ),
+        false
+      );
+      this.cdr.detectChanges();
+    }
+  };
+
+  /** Returns true if the full download flow was started (caller should not also run LLM check). */
+  private async initializeAudio(): Promise<boolean> {
+    if (!this.assistant) return false;
 
     const cachedWhisperModel = await this.indexedDBService.readModel(
       ModelKey.WhisperTinyEn
@@ -77,7 +180,7 @@ export class ChatPageComponent implements OnInit {
     // If Whisper is not cached, autostart the download flow (progress/completion messages only)
     if (!cachedWhisperModel) {
       void this.runDownloadModelsFlow();
-      return;
+      return true;
     }
 
     // Check if microphone access is granted
@@ -107,6 +210,7 @@ export class ChatPageComponent implements OnInit {
         );
       }
     }
+    return false;
   }
 
   /** Run from a specific step when retrying after a failure; undefined = full flow from start. */
