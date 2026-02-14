@@ -313,10 +313,10 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
       // Set the voice ID
       assistant.voiceId = this.selectedVoice;
 
-      // Intro only; chat page will autostart download and show progress when user lands there
+      // Intro only; chat page will autostart download and show progress when user lands there.
+      // Do not run checkModelCacheAndNotify here—runDownloadModelsFlow on the chat page will
+      // handle Whisper + LLM + VITS in one flow and avoid duplicate download messages.
       await this.addIntroMessage(assistant);
-
-      await this.checkModelCacheAndNotify(assistant, this.selectedModel);
 
       this.assistantCreated.emit(assistant);
 
