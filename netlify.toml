@@ -5,6 +5,16 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# SPA fallback: serve index.html for client routes so direct URLs and refresh work
+[[redirects]]
+  from = "/chat/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/chat"
+  to = "/index.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
