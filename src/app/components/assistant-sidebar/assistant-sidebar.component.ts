@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { AssistantService } from '../../services/assistant/assistant.service';
 import { Assistant } from '../../models/assistant.model';
 
 @Component({
   selector: 'app-assistant-sidebar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './assistant-sidebar.component.html',
   styleUrl: './assistant-sidebar.component.scss',
 })
@@ -43,6 +44,12 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
 
   closeSidebar(): void {
     this.isOpenChange.emit(false);
+  }
+
+  closeSidebarOnMobile(): void {
+    if (window.innerWidth <= 624) {
+      this.closeSidebar();
+    }
   }
 
   selectAssistant(assistant: Assistant): void {

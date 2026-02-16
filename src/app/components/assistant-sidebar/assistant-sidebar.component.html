@@ -12,13 +12,21 @@
   (click)="$event.stopPropagation()"
 >
   <div class="sidebar-header">
-    <h2>Assistants</h2>
+    <img src="assets/favicon/favicon-32x32.png" alt="" class="sidebar-logo" />
+    <h1 class="sidebar-title">xenith</h1>
     <button class="close-button" (click)="closeSidebar()">
       ×
     </button>
   </div>
 
+  <nav class="sidebar-nav">
+    <a routerLink="/about" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">about</a>
+    <a routerLink="/video" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">video</a>
+    <a routerLink="/audio" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">audio</a>
+  </nav>
+
   <div class="sidebar-content">
+    <h3 class="sidebar-section-title">Assistants</h3>
     <div class="assistants-list">
       <div
         *ngFor="let assistant of assistants"
