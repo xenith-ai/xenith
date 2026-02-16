@@ -20,7 +20,7 @@ export class Assistant implements IChatParticipant {
   public messageColor = 'linear-gradient(320deg, hsl(250, 60%, 40%) 0%, hsl(270, 70%, 35%) 100%)';
   public voiceId: VoiceId = 'en_US-hfc_female-medium';
 
-  private readonly silenceSendDelta = 1000;
+  private readonly silenceSendDelta = 2000;
   private silenceTimer: any = null;
   public triggered = false;
 
