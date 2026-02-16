@@ -20,7 +20,6 @@ export class Assistant implements IChatParticipant {
   public messageColor = 'linear-gradient(320deg, hsl(250, 60%, 40%) 0%, hsl(270, 70%, 35%) 100%)';
   public voiceId: VoiceId = 'en_US-hfc_female-medium';
 
-  private readonly triggerWord: string;
   private readonly silenceSendDelta = 1000;
   private silenceTimer: any = null;
   public triggered = false;
@@ -44,7 +43,6 @@ export class Assistant implements IChatParticipant {
     this.name = name;
     this.avatar = avatar;
     this.wakeWord = wakeWord;
-    this.triggerWord = wakeWord; // Just using wakeWord for now
     this.modelId = modelId;
     this.conversation = new Conversation([]);
 

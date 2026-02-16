@@ -6,11 +6,7 @@
 
 **Create and interact with LLM powered voice assistants with Web Assembly!**
 
-The goal of xenith is to provide a platform for users to create their own custom voice assistants, with their own wake words, voices and LLMs, including the ability to run these all locally. Long term roadmap:
-- Support for a variety of remote APIs for LLM/STT/TTS
-- Deployment to desktop/mobile platforms for native hardware support
-- Self-hosted model processing for remote access to your assistants
-- Machine integrations for triggering local automations and workflows from your assistants
+The goal of xenith is to provide a platform to create your own highly configurable voice assistants, with their own wake words, voices, LLMs and MCP connections, all running fully in-browser.
 
 <div style="clear: both;"></div>
 
@@ -25,3 +21,4 @@ The goal of xenith is to provide a platform for users to create their own custom
 - [Georgi Gerganov](https://github.com/ggerganov) - Writing the C++ and WebAssembly [Whisper Port](https://github.com/ggerganov/whisper.cpp)
 - [Alexander Veysov](https://github.com/snakers4) - Creating the very capable voice detection model [Silero VAD](https://github.com/snakers4/silero-vad).
 - [Diffusion Studio](https://github.com/diffusionstudio) - Compiling the VITS models into an accessible WebAssembly framework [vits-web](https://github.com/diffusionstudio/vits-web)
+- [MLC AI](https://github.com/mlc-ai) - Creating the engine for running LLMs in the browser [WebLLM](https://github.com/mlc-ai/web-llm)
