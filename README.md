@@ -8,6 +8,11 @@
 
 The goal of xenith is to provide a platform to create your own highly configurable voice assistants, with their own wake words, voices, LLMs and MCP connections, all running fully in-browser.
 
+Long term, I'd like to add a variety of other AI capabilities to the platform as well:
+- Video editing
+- Audio editing
+
+
 <div style="clear: both;"></div>
 
 ## Requirements
