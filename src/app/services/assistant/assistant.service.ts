@@ -153,10 +153,11 @@ export class AssistantService {
     }
   }
 
-  /** Stop microphone and unregister all assistants from audio (STT). */
+  /** Stop microphone, unregister all assistants from audio (STT), and unload WebLLM. */
   public stopListeningAndDeactivate(): void {
     this.assistants.forEach(a => a.unregisterFromAudio());
     this.audioService.stopListening();
+    this.llmService.unload().catch((err) => console.error('[AssistantService] WebLLM unload failed', err));
   }
 
   /** Start microphone and re-register all assistants for audio (STT). */

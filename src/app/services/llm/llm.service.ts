@@ -203,4 +203,22 @@ export class LLMService {
     await this.engine.reload(model);
     console.log(`[Model Reloaded] ${model}`);
   }
+
+  /**
+   * Unload the current model and release WebGPU/engine resources. Call when
+   * deactivating listening to reduce memory use. Next use will require init() again.
+   */
+  public async unload(): Promise<void> {
+    if (!this.engine) return;
+    try {
+      await this.engine.unload();
+      console.log('[WebLLM] Unloaded model and released resources');
+    } finally {
+      this.engine = null;
+      this.initialized = false;
+      this.currentModel = null;
+      this.pendingInitPromise = null;
+      this.modelBeingInited = null;
+    }
+  }
 }
