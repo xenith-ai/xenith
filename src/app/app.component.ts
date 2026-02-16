@@ -103,13 +103,13 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   onAssistantSelected(assistant: Assistant): void {
-    // Only navigate if we're not already on this assistant's chat page
-    if (this.selectedAssistant?.id !== assistant.id) {
+    // Navigate unless we're already on this assistant's chat page (check URL, not just selectedAssistant,
+    // so that clicking the same assistant after visiting About/Video/Audio still navigates back)
+    const alreadyOnThisChat = this.router.url.startsWith(`/chat/${assistant.id}`);
+    if (!alreadyOnThisChat) {
       this.selectedAssistant = assistant;
-      // Navigate to chat page for this assistant
       this.router.navigate(['/chat', assistant.id]);
     }
-    // If already on this assistant's page, do nothing (don't close sidebar)
   }
 
   onAddAssistantRequested(): void {
