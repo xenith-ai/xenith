@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ChangeDetect
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AssistantService } from '../../services/assistant/assistant.service';
+import { AudioService } from '../../services/audio/audio.service';
 import { Assistant } from '../../models/assistant.model';
 
 @Component({
@@ -18,10 +19,12 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
   @Output() addAssistantRequested = new EventEmitter<void>();
   @Output() assistantEditRequested = new EventEmitter<Assistant>();
 
+  isStartingListening = false;
   private checkInterval: any = null;
 
   constructor(
     public assistantService: AssistantService,
+    public audioService: AudioService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -97,6 +100,24 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
 
   isInitializing(assistant: Assistant): boolean {
     return this.assistantService.isInitializingModel(assistant.id);
+  }
+
+  stopListening(): void {
+    this.assistantService.stopListeningAndDeactivate();
+    this.cdr.detectChanges();
+  }
+
+  async startListening(): Promise<void> {
+    this.isStartingListening = true;
+    this.cdr.detectChanges();
+    try {
+      await this.assistantService.startListeningAndActivate();
+    } catch (err) {
+      console.error('Failed to start listening', err);
+    } finally {
+      this.isStartingListening = false;
+      this.cdr.detectChanges();
+    }
   }
 }
 

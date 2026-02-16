@@ -212,6 +212,20 @@ export class Assistant implements IChatParticipant {
     this.isTyping = false;
   }
 
+  /** Unregister from audio processing (e.g. when globally pausing listening). */
+  public unregisterFromAudio(): void {
+    this.audioService.unregisterCallback(this.id);
+  }
+
+  /** Re-register for audio processing after globally resuming listening. */
+  public reregisterWithAudio(): void {
+    this.audioService.registerCallback(
+      this.id,
+      AudioProcessor.Whisper,
+      this.onTranscription.bind(this)
+    );
+  }
+
   public destroy(): void {
     this.audioService.unregisterCallback(this.id);
     clearTimeout(this.silenceTimer);

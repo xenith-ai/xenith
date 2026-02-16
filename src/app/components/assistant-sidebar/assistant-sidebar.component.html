@@ -26,7 +26,45 @@
   </nav>
 
   <div class="sidebar-content">
-    <h3 class="sidebar-section-title">Assistants</h3>
+    <div class="sidebar-section-header">
+      <div class="section-title-row">
+        <span
+          class="listening-indicator-dot"
+          [class.active]="audioService.listening"
+          [class.loading]="isStartingListening"
+          [title]="audioService.listening ? 'Listening active' : (isStartingListening ? 'Loading...' : 'Listening disabled')"
+        ></span>
+        <h3 class="sidebar-section-title">Assistants</h3>
+      </div>
+      <div class="section-title-actions">
+        <ng-container *ngIf="isStartingListening">
+          <span class="loading-models">
+            <span class="spinner"></span>
+            <span>Loading models...</span>
+          </span>
+        </ng-container>
+        <ng-container *ngIf="!isStartingListening">
+          <button
+            *ngIf="audioService.listening"
+            type="button"
+            class="listening-toggle stop"
+            (click)="stopListening()"
+            title="Stop listening"
+          >
+            Stop
+          </button>
+          <button
+            *ngIf="!audioService.listening"
+            type="button"
+            class="listening-toggle start"
+            (click)="startListening()"
+            title="Start listening"
+          >
+            Start
+          </button>
+        </ng-container>
+      </div>
+    </div>
     <div class="assistants-list">
       <div
         *ngFor="let assistant of assistants"

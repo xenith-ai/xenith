@@ -153,6 +153,18 @@ export class AssistantService {
     }
   }
 
+  /** Stop microphone and unregister all assistants from audio (STT). */
+  public stopListeningAndDeactivate(): void {
+    this.assistants.forEach(a => a.unregisterFromAudio());
+    this.audioService.stopListening();
+  }
+
+  /** Start microphone and re-register all assistants for audio (STT). */
+  public async startListeningAndActivate(): Promise<void> {
+    await this.audioService.startListening();
+    this.assistants.forEach(a => a.reregisterWithAudio());
+  }
+
   private saveAssistantsToStorageImmediate(): void {
     // Clear any pending debounced save
     if (this.saveTimeout) {
