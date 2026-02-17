@@ -32,6 +32,7 @@ interface SerializableAssistant {
 }
 
 const STORAGE_KEY = 'xenith_assistants';
+const LAST_ASSISTANT_KEY = 'xenith_last_assistant_id';
 
 @Injectable({
   providedIn: 'root',
@@ -107,6 +108,26 @@ export class AssistantService {
 
   public getAssistantById(id: string): Assistant | undefined {
     return this.assistants.find(a => a.id === id);
+  }
+
+  getLastSelectedAssistantId(): string | null {
+    try {
+      return localStorage.getItem(LAST_ASSISTANT_KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  setLastSelectedAssistantId(id: string | null): void {
+    try {
+      if (id == null) {
+        localStorage.removeItem(LAST_ASSISTANT_KEY);
+      } else {
+        localStorage.setItem(LAST_ASSISTANT_KEY, id);
+      }
+    } catch {
+      // ignore
+    }
   }
 
   public removeAssistant(id: string): void {

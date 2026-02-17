@@ -125,11 +125,17 @@
 
 .sidebar-nav-link {
   display: block;
+  width: 100%;
   padding: 0.5rem 1rem;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
+  font: inherit;
   font-size: 0.95rem;
+  text-align: left;
+  background: none;
+  border: none;
   border-left: 3px solid transparent;
+  cursor: pointer;
   transition: color 0.2s, background 0.15s;
 
   &:hover {
@@ -295,6 +301,11 @@
     box-shadow: 0 0 8px rgba(0, 255, 0, 0.6), 0 0 12px rgba(0, 255, 0, 0.4);
     background: rgba(0, 255, 0, 0.1);
     animation: glow-pulse 1.5s ease-in-out infinite;
+  }
+
+  &.selected {
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
   }
 }
 

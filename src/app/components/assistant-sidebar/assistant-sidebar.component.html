@@ -20,7 +20,7 @@
   </div>
 
   <nav class="sidebar-nav">
-    <a routerLink="/chat" class="sidebar-nav-link" [class.active]="showAssistants" (click)="closeSidebarOnMobile()">chat</a>
+    <button type="button" class="sidebar-nav-link" [class.active]="showAssistants" (click)="navigateToChat(); closeSidebarOnMobile()">chat</button>
     <a routerLink="/video" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">video</a>
     <a routerLink="/audio" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">audio</a>
     <a routerLink="/mission" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">mission</a>
@@ -71,6 +71,7 @@
         *ngFor="let assistant of assistants"
         class="assistant-item"
         [class.triggered]="isTriggered(assistant)"
+        [class.selected]="isCurrentAssistant(assistant)"
         (click)="selectAssistant(assistant)"
       >
         <img

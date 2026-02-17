@@ -36,6 +36,28 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
     return url === '/' || url === '' || url.startsWith('/chat');
   }
 
+  get currentAssistantId(): string | null {
+    const m = this.router.url.match(/^\/chat\/([^/]+)$/);
+    return m ? m[1] : null;
+  }
+
+  navigateToChat(): void {
+    const list = this.assistants;
+    if (list.length === 0) {
+      this.router.navigate(['/']);
+      return;
+    }
+    const lastId = this.assistantService.getLastSelectedAssistantId();
+    const target = lastId
+      ? list.find(a => a.id === lastId) ?? list[0]
+      : list[0];
+    this.router.navigate(['/chat', target.id]);
+  }
+
+  isCurrentAssistant(assistant: Assistant): boolean {
+    return this.currentAssistantId === assistant.id;
+  }
+
   ngOnInit(): void {
     // Poll for triggered assistant changes (since we can't use observables easily)
     this.checkInterval = setInterval(() => {

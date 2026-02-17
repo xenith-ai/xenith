@@ -56,6 +56,10 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
         this.isLandingPage = event.url === '/' || event.url === '';
+        const chatMatch = event.url.match(/^\/chat\/([^/]+)$/);
+        if (chatMatch) {
+          this.assistantService.setLastSelectedAssistantId(chatMatch[1]);
+        }
         this.updateSidebarVisibility();
       });
 
@@ -138,6 +142,9 @@ export class AppComponent implements OnInit, OnDestroy {
   onAssistantDeleted(assistant: Assistant): void {
     this.assistantService.removeAssistant(assistant.id);
     this.editingAssistant = null;
+    if (this.assistantService.getLastSelectedAssistantId() === assistant.id) {
+      this.assistantService.setLastSelectedAssistantId(null);
+    }
     // If the deleted assistant was selected, navigate to landing page
     if (this.selectedAssistant?.id === assistant.id) {
       this.selectedAssistant = null;

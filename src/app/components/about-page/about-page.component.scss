@@ -20,10 +20,32 @@ $sidebar-width: 320px;
   }
 }
 
-.about-page {
+.mission-page {
   padding: 2rem;
   max-width: 42rem;
   color: $text-color;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+.credits-list {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  line-height: 1.7;
+  opacity: 0.9;
+
+  a {
+    color: $button-color-1;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 .page-title {
