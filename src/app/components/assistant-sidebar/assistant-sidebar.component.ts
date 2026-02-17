@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AssistantService } from '../../services/assistant/assistant.service';
 import { AudioService } from '../../services/audio/audio.service';
+import { LLMService } from '../../services/llm/llm.service';
 import { Assistant } from '../../models/assistant.model';
 
 @Component({
@@ -25,6 +26,7 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
   constructor(
     public assistantService: AssistantService,
     public audioService: AudioService,
+    private llmService: LLMService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -74,20 +76,7 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
   }
 
   getModelDisplayName(modelId: string): string {
-    // Common model display names
-    const modelNames: { [key: string]: string } = {
-      'gemma-2-2b-jpn-it-q4f16_1-MLC': 'Gemma 2 2B (Japanese)',
-      'gemma-2-2b-it-q4f16_1-MLC': 'Gemma 2 2B',
-      'gemma-2-9b-it-q4f16_1-MLC': 'Gemma 2 9B',
-      'Llama-3.1-8B-Instruct-q4f16_1-MLC': 'Llama 3.1 8B',
-      'Llama-3.1-70B-Instruct-q4f16_1-MLC': 'Llama 3.1 70B',
-      'Phi-3-mini-4k-instruct-q4f16_1-MLC': 'Phi-3 Mini',
-      'Qwen2.5-0.5B-Instruct-q4f16_1-MLC': 'Qwen2.5 0.5B',
-      'Qwen2.5-1.5B-Instruct-q4f16_1-MLC': 'Qwen2.5 1.5B',
-      'Qwen2.5-3B-Instruct-q4f16_1-MLC': 'Qwen2.5 3B',
-      'TinyLlama-1.1B-Chat-v0.4-q4f16_1-MLC': 'TinyLlama 1.1B',
-    };
-    return modelNames[modelId] || modelId;
+    return this.llmService.getModelDisplayName(modelId);
   }
 
   isTriggered(assistant: Assistant): boolean {

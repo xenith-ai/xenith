@@ -37,7 +37,7 @@ export class Assistant implements IChatParticipant {
     private llmService: LLMService,
     private currentUser: IChatParticipant,
     private vitsService: VitsService,
-    modelId: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC'
+    modelId: string = 'gemma-2-2b-it-q4f16_1-MLC'
   ) {
     this.id = id;
     this.name = name;

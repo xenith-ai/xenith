@@ -77,7 +77,7 @@
               *ngFor="let modelOption of allAvailableModels"
               [value]="modelOption.id"
             >
-              {{ modelOption.name }}
+              {{ getModelDisplayName(modelOption.id) }}
             </option>
           </select>
           <small class="form-hint">Model will be downloaded automatically when needed</small>

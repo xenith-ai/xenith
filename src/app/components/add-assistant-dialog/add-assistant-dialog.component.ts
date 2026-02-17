@@ -33,7 +33,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
   /** Value shown in the avatar input; empty means use default (not shown to user). */
   avatarDisplay: string = '';
   selectedVoice: VoiceId = 'en_US-hfc_female-medium';
-  selectedModel: string = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
+  selectedModel: string = 'gemma-2-2b-it-q4f16_1-MLC';
 
   // WebLLM available models by family (flattened for dropdown via allAvailableModels) (from prebuiltAppConfig)
   availableModelGroups: { family: string; models: { id: string; name: string }[] }[] = [
@@ -273,6 +273,10 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
     return this.vitsService.voiceList;
   }
 
+  getModelDisplayName(modelId: string): string {
+    return this.llmService.getModelDisplayName(modelId);
+  }
+
   closeDialog(): void {
     this.isOpenChange.emit(false);
     this.resetForm();
@@ -283,7 +287,7 @@ export class AddAssistantDialogComponent implements OnInit, OnChanges {
     this.wakeWord = '';
     this.avatarDisplay = '';
     this.selectedVoice = 'en_US-hfc_female-medium';
-    this.selectedModel = 'gemma-2-2b-jpn-it-q4f16_1-MLC';
+    this.selectedModel = 'gemma-2-2b-it-q4f16_1-MLC';
   }
 
   async createAssistant(): Promise<void> {
