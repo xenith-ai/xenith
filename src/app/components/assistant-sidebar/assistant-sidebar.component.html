@@ -20,12 +20,13 @@
   </div>
 
   <nav class="sidebar-nav">
-    <a routerLink="/about" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">about</a>
+    <a routerLink="/chat" class="sidebar-nav-link" [class.active]="showAssistants" (click)="closeSidebarOnMobile()">chat</a>
     <a routerLink="/video" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">video</a>
     <a routerLink="/audio" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">audio</a>
+    <a routerLink="/mission" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">mission</a>
   </nav>
 
-  <div class="sidebar-content">
+  <div class="sidebar-content" *ngIf="showAssistants">
     <div class="sidebar-section-header">
       <div class="section-title-row">
         <span

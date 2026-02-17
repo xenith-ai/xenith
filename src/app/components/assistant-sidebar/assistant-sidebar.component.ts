@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AssistantService } from '../../services/assistant/assistant.service';
 import { AudioService } from '../../services/audio/audio.service';
 import { LLMService } from '../../services/llm/llm.service';
@@ -27,8 +27,14 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
     public assistantService: AssistantService,
     public audioService: AudioService,
     private llmService: LLMService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public router: Router
   ) {}
+
+  get showAssistants(): boolean {
+    const url = this.router.url;
+    return url === '/' || url === '' || url.startsWith('/chat');
+  }
 
   ngOnInit(): void {
     // Poll for triggered assistant changes (since we can't use observables easily)

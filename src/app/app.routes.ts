@@ -7,8 +7,10 @@ import { AudioPageComponent } from './components/audio-page/audio-page.component
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
-  { path: 'about', component: AboutPageComponent },
+  { path: 'chat', pathMatch: 'full', redirectTo: '' },
+  { path: 'chat/:assistantId', component: ChatPageComponent },
   { path: 'video', component: VideoPageComponent },
   { path: 'audio', component: AudioPageComponent },
-  { path: 'chat/:assistantId', component: ChatPageComponent },
+  { path: 'mission', component: AboutPageComponent },
+  { path: 'about', component: AboutPageComponent },
 ];
