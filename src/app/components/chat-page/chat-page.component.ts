@@ -196,10 +196,7 @@ export class ChatPageComponent implements OnInit {
         }
       }
 
-      // Start listening if not already started
-      if (!this.audioService.listening) {
-        await this.audioService.startListening();
-      }
+      // Do not auto-start listening when switching to chat; user must click Start if they want it on.
 
       // Ensure the assistant is registered and processor is started
       if (!this.audioService.processingStates.get(AudioProcessor.Whisper)) {
@@ -408,14 +405,11 @@ export class ChatPageComponent implements OnInit {
       );
     }
 
-    // All models ready: start listening and register Whisper
+    // All models ready: register Whisper (do not auto-start listening; user clicks Start when ready)
     assistant.sendMessage(
       new TextMessage(assistant, `Initializing listener...`, new Date()),
       false
     );
-    if (!this.audioService.listening) {
-      await this.audioService.startListening();
-    }
     await this.whisperService.initWhisper();
     if (!this.audioService.processingStates.get(AudioProcessor.Whisper)) {
       this.audioService.registerCallback(

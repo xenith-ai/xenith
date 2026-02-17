@@ -4,13 +4,9 @@
 
 <img align="left" src="https://cdn.shaneduffy.io/shaneduffy/mikudance.gif" width="120"/>
 
-**Create and interact with LLM powered voice assistants with Web Assembly!**
+**Bring AI to the web via WebAssembly.**
 
-The goal of xenith is to provide a platform to create your own highly configurable voice assistants, with their own wake words, voices, LLMs and MCP connections, all running fully in-browser.
-
-Long term, I'd like to add a variety of other AI capabilities to the platform as well:
-- Video editing
-- Audio editing
+Xenith is a platform to run AI fully in-browser—voice assistants with custom wake words, voices, and LLMs, plus MCP connections, all powered by WebAssembly and WebGPU. The goal is to expand beyond LLMs and add more on-device AI capabilities over time, including video and audio editing.
 
 
 <div style="clear: both;"></div>
