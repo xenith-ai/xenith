@@ -4,7 +4,7 @@
 
 <img align="left" src="https://cdn.shaneduffy.io/shaneduffy/mikudance.gif" width="120"/>
 
-**Decentralizing AI with WebAssembly**
+**Decentralizing AI with Web Assembly**
 
 Xenith is a platform to run AI fully in-browser—voice assistants with custom wake words, voices, and LLMs, powered by Web Assembly. The goal is to expand beyond LLMs and add more on-device AI capabilities over time, including video and audio editing.
 
