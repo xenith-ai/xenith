@@ -37,7 +37,8 @@
             ],
             "styles": ["src/styles.scss"],
             "scripts": [
-              "src/assets/whisper/stream.js"
+              "src/assets/whisper/stream.js",
+              "src/assets/whisper/main.js"
             ],
             "webWorkerTsConfig": "tsconfig.worker.json"
           },
@@ -106,7 +107,8 @@
             ],
             "styles": ["src/styles.scss"],
             "scripts": [
-              "src/assets/whisper/stream.js"
+              "src/assets/whisper/stream.js",
+              "src/assets/whisper/main.js"
             ],
             "webWorkerTsConfig": "tsconfig.worker.json"
           }

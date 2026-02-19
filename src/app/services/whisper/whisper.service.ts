@@ -53,7 +53,7 @@ export class WhisperService {
     try {
       console.log('Loading Whisper module...');
 
-      this.whisperModule = await (window as any).WhisperModule();
+      this.whisperModule = await (window as any).StreamModule();
 
       if (this.whisperModule) {
         console.log('Whisper module loaded successfully.');

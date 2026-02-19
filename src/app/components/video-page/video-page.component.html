@@ -1,0 +1,39 @@
+<div class="content-page-container">
+  <div class="video-page">
+    <h1 class="page-title">Video</h1>
+    <p class="body">Upload an audio file to transcribe with one-shot Whisper (main.js + libmain.worker).</p>
+
+    <div class="upload-section">
+      <label class="file-label">
+        <span class="file-button">Choose audio file</span>
+        <input
+          type="file"
+          accept="audio/*"
+          class="file-input"
+          (change)="onFileSelected($event)"
+          [disabled]="processing"
+        />
+      </label>
+      <span class="status" *ngIf="processing">Processing…</span>
+      <span class="status error" *ngIf="error">{{ error }}</span>
+    </div>
+
+    @if (transcription) {
+      <div class="transcription-result">
+        <h2 class="result-heading">Transcription</h2>
+        <p class="result-text">{{ transcription }}</p>
+        <h3 class="segments-heading">Word-level timings</h3>
+        <ul class="segments-list">
+          @for (seg of segments; track seg.t0 + seg.t1 + seg.text) {
+            <li class="segment">
+              <span class="segment-time">[{{ seg.t0 | number:'1.2-2' }}s – {{ seg.t1 | number:'1.2-2' }}s]</span>
+              <span class="segment-text">{{ seg.text }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <a routerLink="/" class="back-link">← Back to home</a>
+  </div>
+</div>

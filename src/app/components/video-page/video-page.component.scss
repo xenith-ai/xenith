@@ -1,0 +1,139 @@
+@import "../../../variables.scss";
+
+$sidebar-width: 320px;
+
+.content-page-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding-top: $nav-top-height;
+  transition: left 0.3s ease-out, width 0.3s ease-out;
+
+  :host-context(.sidebar-open) & {
+    @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
+      left: $sidebar-width;
+      width: calc(100% - #{$sidebar-width});
+    }
+  }
+}
+
+.video-page {
+  padding: 2rem;
+  max-width: 42rem;
+  color: $text-color;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.body {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.upload-section {
+  margin: 1.5rem 0;
+}
+
+.file-label {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.file-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: $button-color-1;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 0.95rem;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.status {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
+
+  &.error {
+    color: #f66;
+  }
+}
+
+.transcription-result {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+}
+
+.result-heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.result-text {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.segments-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.segments-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.segment {
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
+
+  .segment-time {
+    font-size: 0.85em;
+    opacity: 0.8;
+    margin-right: 0.5rem;
+  }
+
+  .segment-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 1.5rem;
+  color: $button-color-1;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
