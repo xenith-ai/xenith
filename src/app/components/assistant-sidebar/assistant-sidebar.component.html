@@ -107,5 +107,70 @@
       <span>+ Add Assistant</span>
     </button>
   </div>
+
+  <div class="sidebar-content" *ngIf="showClips">
+    <div class="sidebar-section-header">
+      <h3 class="sidebar-section-title">Clips</h3>
+    </div>
+    <div class="clips-list">
+      <div
+        *ngFor="let clip of clips"
+        class="clip-item"
+        [class.extracting]="clip.status === 'extracting'"
+        [class.ready]="clip.status === 'ready'"
+        [class.error]="clip.status === 'error'"
+      >
+        <div class="clip-main">
+          <span class="clip-name" [title]="clip.name">{{ clip.name }}</span>
+          <span class="clip-status">
+            <span *ngIf="clip.status === 'pending'">pending</span>
+            <span *ngIf="clip.status === 'extracting'" class="clip-status-extracting">
+              <span class="spinner"></span> extracting…
+            </span>
+            <span *ngIf="clip.status === 'ready' && !clip.transcribing && !clip.segments?.length">ready</span>
+            <span *ngIf="clip.status === 'ready' && clip.transcribing" class="clip-status-extracting">
+              <span class="spinner"></span> transcribing…
+            </span>
+            <span *ngIf="clip.status === 'ready' && clip.segments?.length">transcribed</span>
+            <span *ngIf="clip.status === 'error'" [title]="clip.errorMessage">error</span>
+          </span>
+        </div>
+        <p *ngIf="clip.status === 'error' && clip.errorMessage" class="clip-error-msg">{{ clip.errorMessage }}</p>
+        <div *ngIf="clip.status === 'ready' && !clip.transcribing && !clip.segments?.length" class="clip-actions">
+          <button type="button" class="clip-transcribe-btn" (click)="onTranscribeClip(clip)">
+            Transcribe
+          </button>
+        </div>
+        <p *ngIf="clip.transcriptionError" class="clip-error-msg">{{ clip.transcriptionError }}</p>
+        <div *ngIf="clip.segments?.length" class="clip-transcription-evidence">
+          <p class="clip-transcription-text" [title]="clip.transcription">{{ clip.transcription }}</p>
+          <div class="clip-word-timings">
+            <span class="clip-word-timings-label">Word-level timings:</span>
+            <ul class="clip-segments-list">
+              <li *ngFor="let seg of clip.segments" class="clip-segment">
+                <span class="clip-segment-time">[{{ seg.t0 | number:'1.2-2' }}s – {{ seg.t1 | number:'1.2-2' }}s]</span>
+                <span class="clip-segment-text">{{ seg.text }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="clips.length === 0" class="empty-state">
+        <p>No clips yet</p>
+        <p class="empty-state-hint">Add video clips to extract audio</p>
+      </div>
+    </div>
+    <input
+      #addClipsInput
+      type="file"
+      accept="video/*"
+      multiple
+      class="add-clips-input"
+      (change)="onClipsSelected($event)"
+    />
+    <button class="add-assistant-button" (click)="triggerAddClips()">
+      <span>+ Add Video Clips</span>
+    </button>
+  </div>
 </div>
 

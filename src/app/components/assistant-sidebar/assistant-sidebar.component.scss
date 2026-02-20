@@ -438,7 +438,170 @@
   &:hover {
     background: $button-hover-color-1;
   }
+}
 
+.add-clips-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.clips-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1rem;
+  min-height: 0;
+}
+
+.clip-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.25rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.875rem;
+
+  &.extracting {
+    background: rgba($button-color-1, 0.15);
+  }
+
+  &.ready {
+    background: rgba(0, 200, 150, 0.12);
+  }
+
+  &.error {
+    background: rgba(255, 100, 100, 0.12);
+  }
+}
+
+.clip-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.clip-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.clip-error-msg {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 180, 180, 0.95);
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.clip-status {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.clip-status-extracting {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  .spinner {
+    width: 10px;
+    height: 10px;
+    border-width: 2px;
+  }
+}
+
+.clip-actions {
+  margin-top: 0.25rem;
+}
+
+.clip-transcribe-btn {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.6rem;
+  background: rgba($button-color-1, 0.25);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba($button-color-1, 0.5);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+
+  &:hover {
+    background: rgba($button-color-1, 0.35);
+    border-color: rgba($button-color-1, 0.7);
+  }
+}
+
+.clip-transcription-evidence {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+}
+
+.clip-transcription-text {
+  margin: 0 0 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.35;
+  word-break: break-word;
+  max-height: 4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.clip-word-timings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.clip-word-timings-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.clip-segments-list {
+  margin: 0;
+  padding-left: 1rem;
+  list-style: none;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.clip-segment {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-bottom: 0.15rem;
+  font-size: 0.75rem;
+}
+
+.clip-segment-time {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.clip-segment-text {
+  color: rgba(255, 255, 255, 0.85);
+  word-break: break-word;
 }
 
 @keyframes fadeIn {

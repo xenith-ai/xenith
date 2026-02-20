@@ -1,10 +1,12 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AssistantService } from '../../services/assistant/assistant.service';
 import { AudioService } from '../../services/audio/audio.service';
 import { LLMService } from '../../services/llm/llm.service';
+import { ClipService } from '../../services/clip/clip.service';
 import { Assistant } from '../../models/assistant.model';
+import { Clip } from '../../models/clip.model';
 
 @Component({
   selector: 'app-assistant-sidebar',
@@ -20,12 +22,15 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
   @Output() addAssistantRequested = new EventEmitter<void>();
   @Output() assistantEditRequested = new EventEmitter<Assistant>();
 
+  @ViewChild('addClipsInput') addClipsInput: ElementRef<HTMLInputElement> | null = null;
+
   isStartingListening = false;
   private checkInterval: any = null;
 
   constructor(
     public assistantService: AssistantService,
     public audioService: AudioService,
+    public clipService: ClipService,
     private llmService: LLMService,
     private cdr: ChangeDetectorRef,
     public router: Router
@@ -34,6 +39,32 @@ export class AssistantSidebarComponent implements OnInit, OnDestroy {
   get showAssistants(): boolean {
     const url = this.router.url;
     return url === '/' || url === '' || url.startsWith('/chat');
+  }
+
+  get showClips(): boolean {
+    return this.router.url === '/video';
+  }
+
+  get clips(): Clip[] {
+    return this.clipService.getClips();
+  }
+
+  triggerAddClips(): void {
+    this.addClipsInput?.nativeElement?.click();
+  }
+
+  onClipsSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input?.files;
+    if (files?.length) {
+      this.clipService.addClips(Array.from(files));
+      input.value = '';
+    }
+  }
+
+  async onTranscribeClip(clip: Clip): Promise<void> {
+    await this.clipService.transcribeClip(clip);
+    this.cdr.detectChanges();
   }
 
   get currentAssistantId(): string | null {

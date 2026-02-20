@@ -23,6 +23,8 @@
     "@angular/platform-browser-dynamic": "^18.2.14",
     "@angular/router": "^18.2.14",
     "@diffusionstudio/vits-web": "^1.0.3",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@mlc-ai/web-llm": "^0.2.78",
     "@types/uuid": "^9.0.7",
     "axios": "^1.6.7",
