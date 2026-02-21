@@ -25,6 +25,8 @@ export class AudioService {
   private readonly bufferSize: number = 1024;
   private readonly sampleRate: number = 16000;
   private readonly vadConfidenceThreshold: number = 0.5;
+  /** Match worklet: 0.5s chunks at 16 kHz (same size as live VAD). */
+  private readonly vadWindowSamples: number = this.sampleRate * 0.5;
 
   public processingStates: Map<AudioProcessor, boolean> = new Map();
   public listening: boolean = false;
@@ -53,6 +55,7 @@ export class AudioService {
    * Initializes the model sessions for VAD.
    */
   private async initializeModelSessions() {
+    if (this.vadSession) return;
     ort.env.wasm.wasmPaths = '/assets/onnx/';
     ort.env.wasm.numThreads = 1;
     this.vadSession = await ort.InferenceSession.create(
@@ -310,6 +313,80 @@ export class AudioService {
       // VAD is not active, save the audio buffer for later
       this.previousWhisperBuffer = whisperAudioData;
     }
+  }
+
+  /**
+   * Returns contiguous speech segments (start/end sample indices) for 16 kHz mono PCM.
+   * Uses Silero VAD in 512-sample windows and merges adjacent speech windows.
+   * Segments are padded slightly and short gaps are merged so Whisper gets natural chunks.
+   */
+  public async getSpeechSegments(
+    pcm: Float32Array
+  ): Promise<{ startSample: number; endSample: number }[]> {
+    if (!this.vadSession) {
+      await this.initializeModelSessions();
+    }
+    if (!this.vadSession) {
+      throw new Error('❌ VAD session is not initialized.');
+    }
+    const W = this.vadWindowSamples;
+    const paddingSamples = Math.min(512, Math.floor(this.sampleRate * 0.05)); // 50 ms pad
+    const minSegmentSamples = Math.max(W, Math.floor(this.sampleRate * 0.2)); // at least 0.2 s
+    const maxGapSamples = Math.floor(this.sampleRate * 0.25); // merge if gap < 0.25 s
+
+    const numWindows = Math.ceil(pcm.length / W);
+    const speechFlags: boolean[] = [];
+    for (let i = 0; i < numWindows; i++) {
+      const start = i * W;
+      const end = Math.min(start + W, pcm.length);
+      let chunk: Float32Array = pcm.slice(start, end);
+      if (chunk.length < W) {
+        const padded = new Float32Array(W);
+        padded.set(chunk);
+        chunk = padded;
+      }
+      const score = await this.runVAD(chunk);
+      speechFlags.push(score > this.vadConfidenceThreshold);
+    }
+
+    const raw: { startSample: number; endSample: number }[] = [];
+    let segStart: number | null = null;
+    for (let i = 0; i < speechFlags.length; i++) {
+      if (speechFlags[i]) {
+        if (segStart === null) segStart = i * W;
+      } else {
+        if (segStart !== null) {
+          raw.push({ startSample: segStart, endSample: (i + 1) * W });
+          segStart = null;
+        }
+      }
+    }
+    if (segStart !== null) {
+      raw.push({ startSample: segStart, endSample: numWindows * W });
+    }
+
+    const padded: { startSample: number; endSample: number }[] = raw.map(
+      ({ startSample, endSample }) => ({
+        startSample: Math.max(0, startSample - paddingSamples),
+        endSample: Math.min(pcm.length, endSample + paddingSamples),
+      })
+    );
+
+    const merged: { startSample: number; endSample: number }[] = [];
+    for (const seg of padded) {
+      const length = seg.endSample - seg.startSample;
+      if (length < minSegmentSamples) continue;
+      const last = merged[merged.length - 1];
+      if (
+        last &&
+        seg.startSample - last.endSample <= maxGapSamples
+      ) {
+        last.endSample = seg.endSample;
+      } else {
+        merged.push({ ...seg });
+      }
+    }
+    return merged;
   }
 
   /**

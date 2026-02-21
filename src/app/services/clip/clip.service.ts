@@ -9,6 +9,8 @@ import { WhisperOneShotService } from '../whisper-one-shot/whisper-one-shot.serv
 export class ClipService {
   private clips: Clip[] = [];
   private idCounter = 0;
+  /** Clip currently shown on the video page (has file + transcription). */
+  private videoPageClipId: string | null = null;
 
   constructor(
     private ffmpegService: FFmpegService,
@@ -41,7 +43,8 @@ export class ClipService {
       const blob = await this.ffmpegService.extractAudio(clip.file!);
       clip.audioBlob = blob;
       clip.status = 'ready';
-      clip.file = null;
+      this.downloadExtractedAudio(blob, clip.name);
+      this.transcribeClip(clip);
     } catch (err) {
       clip.status = 'error';
       clip.errorMessage = err instanceof Error ? err.message : String(err);
@@ -61,14 +64,44 @@ export class ClipService {
     try {
       const arrayBuffer = await clip.audioBlob.arrayBuffer();
       const pcm = await this.whisperOneShot.decodeTo16kMono(arrayBuffer);
-      const result = await this.whisperOneShot.transcribe(pcm);
+      const result = await this.whisperOneShot.transcribeWithVad(pcm);
       clip.transcription = result.transcription;
       clip.segments = result.segments;
+      this.setVideoPageClip(clip);
     } catch (err) {
       clip.transcriptionError = err instanceof Error ? err.message : String(err);
       console.error('[ClipService] Transcribe failed for', clip.name, err);
     } finally {
       clip.transcribing = false;
     }
+  }
+
+  /** Returns the clip to show on the video page. Requires file, transcription, and per-word segments (used for skip intervals). */
+  getVideoPageClip(): Clip | null {
+    if (!this.videoPageClipId) return null;
+    const clip = this.clips.find((c) => c.id === this.videoPageClipId);
+    if (!clip?.file || !clip.transcription) return null;
+    if (!clip.segments?.length) return null;
+    return clip;
+  }
+
+  private downloadExtractedAudio(blob: Blob, baseName: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${baseName}.wav`;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  private setVideoPageClip(clip: Clip): void {
+    const prev = this.videoPageClipId ? this.clips.find((c) => c.id === this.videoPageClipId) : null;
+    if (prev && prev.id !== clip.id && prev.file) {
+      prev.file = null;
+    }
+    this.videoPageClipId = clip.id;
   }
 }

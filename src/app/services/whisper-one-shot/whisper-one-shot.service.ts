@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { IndexedDBService } from '../indexed-db/indexed-db.service';
+import { AudioService } from '../audio/audio.service';
 import { ModelKey } from '../../enums/model-key.enum';
 import { WhisperSegment } from '../../models/whisper-segment.model';
 
+const WHISPER_SAMPLE_RATE = 16000;
+
 declare let window: any;
 
-const WHISPER_SAMPLE_RATE = 16000;
 const MODEL_BIN_ID = 'whisper.bin';
 
 export interface WhisperOneShotResult {
@@ -20,7 +22,15 @@ export class WhisperOneShotService {
   private oneShotModule: any = null;
   private oneShotInstance: number = 0;
 
-  constructor(private indexedDB: IndexedDBService) {}
+  constructor(
+    private indexedDB: IndexedDBService,
+    private audio: AudioService
+  ) {}
+
+  /** Clear loaded model so next transcribe() will load from IndexedDB again (e.g. after downloading a new model). */
+  resetInstance(): void {
+    this.oneShotInstance = 0;
+  }
 
   /** Load main.js script if not already on window. */
   loadScript(): Promise<void> {
@@ -55,7 +65,7 @@ export class WhisperOneShotService {
     if (this.oneShotInstance) return;
 
     const model = await this.indexedDB.readModel(ModelKey.WhisperTinyEn);
-    if (!model) throw new Error('Whisper model not found. Download it from the Chat / landing page first.');
+    if (!model) throw new Error('Whisper model not found. Use "Download models" on the Video page.');
 
     if (!mod.FS_createDataFile) throw new Error('Whisper module has no FS_createDataFile');
     mod.FS_createDataFile('/', MODEL_BIN_ID, model, true, true);
@@ -92,8 +102,41 @@ export class WhisperOneShotService {
     if (parsed.status !== 0) {
       throw new Error(`Whisper failed (status ${parsed.status})`);
     }
-    const segments = parsed.segments ?? [];
+    const rawSegments = parsed.segments ?? [];
+    const segments = rawSegments.filter(
+      (s) => typeof s.text === 'string' && s.text.replace(/\s+/g, '').length > 0
+    );
     const transcription = segments.map((s) => s.text).join('').replace(/\s+/g, ' ').trim();
     return { transcription, segments };
+  }
+
+  /**
+   * Run VAD to get speech segments, transcribe each segment with Whisper, then merge.
+   * Produces the same result shape as transcribe() but from segment-by-segment processing.
+   */
+  async transcribeWithVad(pcmF32: Float32Array): Promise<WhisperOneShotResult> {
+    const segments = await this.audio.getSpeechSegments(pcmF32);
+    if (segments.length === 0) {
+      return { transcription: '', segments: [] };
+    }
+    const allSegments: WhisperSegment[] = [];
+    const texts: string[] = [];
+    for (const { startSample, endSample } of segments) {
+      const slice = pcmF32.subarray(startSample, endSample);
+      const offsetSec = startSample / WHISPER_SAMPLE_RATE;
+      const result = await this.transcribe(slice);
+      for (const s of result.segments) {
+        allSegments.push({
+          text: s.text,
+          t0: s.t0 + offsetSec,
+          t1: s.t1 + offsetSec,
+        });
+      }
+      if (result.transcription) {
+        texts.push(result.transcription);
+      }
+    }
+    const transcription = texts.join(' ').replace(/\s+/g, ' ').trim();
+    return { transcription, segments: allSegments };
   }
 }

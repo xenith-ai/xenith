@@ -1,39 +1,60 @@
 <div class="content-page-container">
   <div class="video-page">
-    <h1 class="page-title">Video</h1>
-    <p class="body">Upload an audio file to transcribe with one-shot Whisper (main.js + libmain.worker).</p>
-
-    <div class="upload-section">
-      <label class="file-label">
-        <span class="file-button">Choose audio file</span>
-        <input
-          type="file"
-          accept="audio/*"
-          class="file-input"
-          (change)="onFileSelected($event)"
-          [disabled]="processing"
-        />
-      </label>
-      <span class="status" *ngIf="processing">Processing…</span>
-      <span class="status error" *ngIf="error">{{ error }}</span>
+    <div class="video-page-actions">
+      <button
+        type="button"
+        class="download-models-btn"
+        (click)="downloadModels()"
+        [disabled]="downloading || modelCached"
+      >
+        {{ downloading ? 'Downloading…' : modelCached ? 'Models downloaded' : 'Download models' }}
+      </button>
+      <span *ngIf="downloading && downloadProgress != null" class="download-progress">{{ downloadProgress }}%</span>
+      <p *ngIf="downloadError" class="download-error">{{ downloadError }}</p>
     </div>
-
-    @if (transcription) {
-      <div class="transcription-result">
-        <h2 class="result-heading">Transcription</h2>
-        <p class="result-text">{{ transcription }}</p>
-        <h3 class="segments-heading">Word-level timings</h3>
-        <ul class="segments-list">
-          @for (seg of segments; track seg.t0 + seg.t1 + seg.text) {
-            <li class="segment">
-              <span class="segment-time">[{{ seg.t0 | number:'1.2-2' }}s – {{ seg.t1 | number:'1.2-2' }}s]</span>
-              <span class="segment-text">{{ seg.text }}</span>
-            </li>
-          }
-        </ul>
+    <div class="two-column-layout" *ngIf="videoPageClip">
+      <div class="left-column">
+        <div class="transcription-result" *ngIf="transcription">
+          <p class="result-text">{{ transcription }}</p>
+        </div>
       </div>
-    }
-
-    <a routerLink="/" class="back-link">← Back to home</a>
+      <div class="right-column">
+        <div class="video-wrapper">
+          <div class="video-container">
+            <video
+              #videoEl
+              [src]="videoObjectUrl"
+              class="video-player"
+              (click)="togglePlay()"
+            ></video>
+          </div>
+          <div class="custom-controls">
+            <button type="button" class="play-pause-btn" (click)="togglePlay()" [attr.aria-label]="isPaused ? 'Play' : 'Pause'">
+              <span class="play-icon" *ngIf="isPaused">▶</span>
+              <span class="pause-icon" *ngIf="!isPaused">❚❚</span>
+            </button>
+            <div
+              class="track-bar"
+              *ngIf="videoDuration > 0 && playIntervals.length"
+              (click)="onBarClick($event)"
+              role="slider"
+              [attr.aria-valuenow]="currentTime"
+              [attr.aria-valuemin]="0"
+              [attr.aria-valuemax]="videoDuration"
+            >
+              <div class="track-bg"></div>
+              <div
+                *ngFor="let iv of playIntervals"
+                class="track-interval"
+                [style.left.%]="(iv.start / videoDuration) * 100"
+                [style.width.%]="((iv.end - iv.start) / videoDuration) * 100"
+              ></div>
+              <div class="track-playhead" [style.left.%]="playheadFraction * 100"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p *ngIf="!videoPageClip" class="video-page-empty">Add clips from the sidebar to transcribe and play.</p>
   </div>
 </div>

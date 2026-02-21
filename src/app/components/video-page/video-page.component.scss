@@ -1,6 +1,8 @@
 @import "../../../variables.scss";
 
 $sidebar-width: 320px;
+$video-width: 560px;
+$video-height: 315px;
 
 .content-page-container {
   position: absolute;
@@ -21,119 +23,214 @@ $sidebar-width: 320px;
 }
 
 .video-page {
-  padding: 2rem;
-  max-width: 42rem;
+  padding: 1.5rem;
+  height: calc(100% - #{$nav-top-height});
   color: $text-color;
+  box-sizing: border-box;
 }
 
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin: 0 0 1rem 0;
+.video-page-actions {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-.body {
-  margin: 0 0 1rem 0;
-  line-height: 1.6;
-  opacity: 0.9;
-}
-
-.upload-section {
-  margin: 1.5rem 0;
-}
-
-.file-label {
-  display: inline-block;
-  cursor: pointer;
-}
-
-.file-button {
-  display: inline-block;
+.download-models-btn {
+  font: inherit;
+  font-size: 0.9rem;
   padding: 0.5rem 1rem;
-  background: $button-color-1;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 0.95rem;
+  background: rgba($button-color-1, 0.3);
+  color: $text-color;
+  border: 1px solid rgba($button-color-1, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
 
-  &:hover {
-    opacity: 0.9;
+  &:hover:not(:disabled) {
+    background: rgba($button-color-1, 0.45);
+    border-color: rgba($button-color-1, 0.65);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: default;
   }
 }
 
-.file-input {
-  position: absolute;
-  width: 0;
-  height: 0;
-  opacity: 0;
+.download-progress {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.download-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #f66;
+}
+
+.video-page-empty {
+  margin: 1rem 0 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+}
+
+.two-column-layout {
+  display: grid;
+  grid-template-columns: 1fr $video-width;
+  gap: 2rem;
+  height: 100%;
+  align-items: start;
+  min-height: 0;
+
+  @media screen and (max-width: 960px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+}
+
+.left-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   overflow: hidden;
 }
 
-.status {
-  display: block;
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
-  opacity: 0.9;
-
-  &.error {
-    color: #f66;
-  }
-}
-
 .transcription-result {
-  margin-top: 1.5rem;
+  flex: 1;
+  min-height: 0;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
-}
-
-.result-heading {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: $border-radius-1;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-y: auto;
 }
 
 .result-text {
-  margin: 0 0 1rem 0;
-  line-height: 1.6;
+  margin: 0;
+  line-height: 1.65;
   white-space: pre-wrap;
   word-break: break-word;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.92);
 }
 
-.segments-heading {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
+.right-column {
+  flex-shrink: 0;
+  min-width: 0;
 }
 
-.segments-list {
-  margin: 0;
-  padding-left: 1.25rem;
-  list-style: disc;
+.video-wrapper {
+  width: $video-width;
+  max-width: 100%;
 }
 
-.segment {
-  margin-bottom: 0.25rem;
-  line-height: 1.5;
-
-  .segment-time {
-    font-size: 0.85em;
-    opacity: 0.8;
-    margin-right: 0.5rem;
-  }
-
-  .segment-text {
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
+.video-container {
+  width: $video-width;
+  height: $video-height;
+  max-width: 100%;
+  background: $background-color-3;
+  border-radius: $border-radius-1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.back-link {
-  display: inline-block;
-  margin-top: 1.5rem;
-  color: $button-color-1;
-  text-decoration: none;
+.video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  cursor: pointer;
+}
+
+.custom-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: $background-color-2;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.play-pause-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba($button-color-1, 0.25);
+  border: 1px solid rgba($button-color-1, 0.4);
+  border-radius: 6px;
+  color: $text-color;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s, border-color 0.2s;
 
   &:hover {
-    text-decoration: underline;
+    background: rgba($button-color-1, 0.4);
+    border-color: rgba($button-color-1, 0.6);
+  }
+
+  .play-icon,
+  .pause-icon {
+    display: block;
+    line-height: 1;
+  }
+}
+
+.track-bar {
+  flex: 1;
+  position: relative;
+  height: 28px;
+  min-width: 0;
+  cursor: pointer;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.track-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+}
+
+.track-interval {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba($button-color-1, 0.45);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.track-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1.5px;
+  background: $text-color;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@media screen and (max-width: 960px) {
+  .video-container {
+    width: 100%;
+    max-width: $video-width;
+    margin: 0 auto;
+  }
+
+  .video-wrapper {
+    width: 100%;
+    max-width: $video-width;
+    margin: 0 auto;
   }
 }

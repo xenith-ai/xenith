@@ -544,66 +544,6 @@
   }
 }
 
-.clip-transcription-evidence {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 0.8rem;
-}
-
-.clip-transcription-text {
-  margin: 0 0 0.5rem;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.35;
-  word-break: break-word;
-  max-height: 4em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-
-.clip-word-timings {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.clip-word-timings-label {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.clip-segments-list {
-  margin: 0;
-  padding-left: 1rem;
-  list-style: none;
-  max-height: 120px;
-  overflow-y: auto;
-}
-
-.clip-segment {
-  display: flex;
-  gap: 0.5rem;
-  align-items: baseline;
-  margin-bottom: 0.15rem;
-  font-size: 0.75rem;
-}
-
-.clip-segment-time {
-  flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.5);
-  font-variant-numeric: tabular-nums;
-}
-
-.clip-segment-text {
-  color: rgba(255, 255, 255, 0.85);
-  word-break: break-word;
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;

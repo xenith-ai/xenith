@@ -33,7 +33,8 @@ export class FFmpegService {
   }
 
   /**
-   * Extract audio from a video file. Returns a WAV blob (16kHz mono suitable for Whisper).
+   * Extract audio from a video file. Returns a WAV blob (48kHz mono). High sample rate
+   * preserves quality; resampling to 16kHz for Whisper happens in the app for better timing.
    */
   async extractAudio(videoFile: File): Promise<Blob> {
     await this.load();
@@ -54,7 +55,7 @@ export class FFmpegService {
         '-i', inputPath,
         '-vn',
         '-acodec', 'pcm_s16le',
-        '-ar', '16000',
+        '-ar', '48000',
         '-ac', '1',
         outputPath,
       ]);

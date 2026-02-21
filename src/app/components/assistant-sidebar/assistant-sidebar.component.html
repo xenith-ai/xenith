@@ -142,18 +142,6 @@
           </button>
         </div>
         <p *ngIf="clip.transcriptionError" class="clip-error-msg">{{ clip.transcriptionError }}</p>
-        <div *ngIf="clip.segments?.length" class="clip-transcription-evidence">
-          <p class="clip-transcription-text" [title]="clip.transcription">{{ clip.transcription }}</p>
-          <div class="clip-word-timings">
-            <span class="clip-word-timings-label">Word-level timings:</span>
-            <ul class="clip-segments-list">
-              <li *ngFor="let seg of clip.segments" class="clip-segment">
-                <span class="clip-segment-time">[{{ seg.t0 | number:'1.2-2' }}s – {{ seg.t1 | number:'1.2-2' }}s]</span>
-                <span class="clip-segment-text">{{ seg.text }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
       </div>
       <div *ngIf="clips.length === 0" class="empty-state">
         <p>No clips yet</p>
