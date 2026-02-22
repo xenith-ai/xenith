@@ -21,6 +21,7 @@
 
   <nav class="sidebar-nav">
     <button type="button" class="sidebar-nav-link" [class.active]="showAssistants" (click)="navigateToChat(); closeSidebarOnMobile()">chat</button>
+    <a routerLink="/image" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">image</a>
     <a routerLink="/video" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">video</a>
     <a routerLink="/audio" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">audio</a>
     <a routerLink="/mission" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">mission</a>
