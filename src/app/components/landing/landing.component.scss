@@ -6,7 +6,16 @@ $pre-collapse-chat-margin: 4em;
 $chat-width: calc($mobile-collapse-width - (2 * $pre-collapse-chat-margin));
 $chat-height: 30em;
 $gradient-z: calc($page-container-z + 1);
+$overlay-z: calc($page-container-z + 1.5);
 $content-z: calc($page-container-z + 2);
+
+.background-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: $overlay-z;
+  background: rgba(0, 0, 0, 0.40);
+  pointer-events: none;
+}
 
 #title-container {
   z-index: $content-z;
@@ -51,7 +60,9 @@ app-chat {
 // No adjustment needed - sidebar will overlay on top
 
 @media screen and (max-width: $mobile-collapse-width) {
-  #gradient-1, #gradient-2 {
+  #gradient-1,
+  #gradient-2,
+  .background-overlay {
     display: none;
   }
 
@@ -73,6 +84,11 @@ app-chat {
 }
 
 //* --- Orb Animation --- *//
+// Darker orb colors (same hue/saturation, lower lightness only — no alpha)
+$orb-1: hsl(158, 100%, 42%);
+$orb-2: hsl(252, 100%, 42%);
+$orb-3: hsl(197, 100%, 42%);
+$orb-4: hsl(315, 100%, 38%);
 
 $orb-speed: 30s;
 $orb-easing: cubic-bezier(0.4, 0.2, 0.2, 0.8);
@@ -103,8 +119,8 @@ $orb-z: 9979;
   width: $chat-width;
   height: $chat-width;
   filter: blur(calc($chat-width / 5));
-  background-image: linear-gradient($glow-1, $glow-2);
-  animation: rotate $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;;
+  background-image: linear-gradient($orb-1, $orb-2);
+  animation: rotate $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;
   border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
 }
 
@@ -115,8 +131,8 @@ $orb-z: 9979;
   width: $chat-width;
   height: $chat-width;
   filter: blur(calc($chat-width / 5));
-  background-image: linear-gradient($glow-3, $glow-4);
-  animation: rotate-counter $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;;
+  background-image: linear-gradient($orb-3, $orb-4);
+  animation: rotate-counter $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;
   border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
   transition: opacity 5s linear;
 }
