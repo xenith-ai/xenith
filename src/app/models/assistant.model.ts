@@ -53,7 +53,10 @@ export class Assistant implements IChatParticipant {
     );
   }
 
-  private onTranscription(transcription: Transcription): void {
+  private onTranscription(
+    transcription: Transcription,
+    _isFinal?: boolean
+  ): void {
     if (!transcription?.indexableTranscription) {
       this.handleSilence();
       return;
@@ -95,14 +98,20 @@ export class Assistant implements IChatParticipant {
     );
   }
 
-  private handleSilence(): void {
-    if (this.triggered && this.draftText.length > 0) {
-      this.sendMessage(this.draftText, true);
-      this.draftText = '';
-      this.triggered = false;
-      // Notify that this assistant is no longer triggered
-      this.onTriggered?.(null as any);
+  private async handleSilence(): Promise<void> {
+    if (!this.triggered || this.draftText.length === 0) {
+      return;
     }
+    // Wait for stream to finish processing and yield final transcription so draft is complete
+    try {
+      await this.audioService.waitForFinalTranscription(3000);
+    } catch {
+      // Timeout or error: send with what we have
+    }
+    this.sendMessage(this.draftText, true);
+    this.draftText = '';
+    this.triggered = false;
+    this.onTriggered?.(null as any);
   }
 
   public sendMessage(message: IChatMessage, respondToUser: boolean): void;

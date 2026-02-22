@@ -3,7 +3,7 @@ class AudioProcessor extends AudioWorkletProcessor {
     super();
     this.sampleRate = 16000;
 
-    this.whisperBufferSize = this.sampleRate * 2; // 2s (Whisper)
+    this.whisperBufferSize = this.sampleRate * 1; // 0.5s (Whisper)
     this.vadBufferSize = this.sampleRate * 0.5; // 0.5s (VAD)
 
     this.whisperBuffer = new Float32Array(this.whisperBufferSize);

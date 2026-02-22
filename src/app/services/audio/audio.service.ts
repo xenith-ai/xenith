@@ -39,12 +39,15 @@ export class AudioService {
 
   private readonly registeredCallbacks: Map<
     AudioProcessor,
-    Map<string, (message: any) => void>
+    Map<string, (message: any, isFinal?: boolean) => void>
   > = new Map();
 
   constructor(private whisperService: WhisperService) {
-    whisperService.transcriptionCallback = (transcription: Transcription) => {
-      this.notifyAll(transcription, AudioProcessor.Whisper);
+    whisperService.transcriptionCallback = (
+      transcription: Transcription,
+      isFinal?: boolean
+    ) => {
+      this.notifyAll(transcription, AudioProcessor.Whisper, isFinal);
     };
     this.initializeModelSessions();
   }
@@ -197,12 +200,26 @@ export class AudioService {
    * Notifies all registered callbacks or optionally filters by processor type.
    * @param message - The message to send to the callbacks.
    * @param processorType - The type of audio processor.
+   * @param isFinal - If true, this transcription came from a final (end-of-utterance) chunk; stream has drained.
    */
-  private notifyAll(message: any, processorType: AudioProcessor): void {
+  private notifyAll(
+    message: any,
+    processorType: AudioProcessor,
+    isFinal?: boolean
+  ): void {
     const callbacks = this.registeredCallbacks.get(processorType);
     if (callbacks) {
-      callbacks.forEach((callback) => callback(message));
+      callbacks.forEach((callback) => callback(message, isFinal));
     }
+  }
+
+  /**
+   * Waits until the Whisper stream has processed all buffered chunks and yielded a final transcription,
+   * or the timeout is reached. Call before sending the message so the draft includes all transcriptions.
+   * @param timeoutMs - Max ms to wait for final transcription.
+   */
+  public waitForFinalTranscription(timeoutMs: number): Promise<void> {
+    return this.whisperService.waitForFinalTranscription(timeoutMs);
   }
 
   /**

@@ -15,8 +15,14 @@ export class WhisperService {
 
   private polling: boolean = false;
 
+  /** Resolves when the next transcription with isFinal is delivered. Used to wait for stream drain before send. */
+  private pendingFinalPromise: {
+    resolve: () => void;
+    reject: (err: unknown) => void;
+  } | null = null;
+
   public transcriptionCallback:
-    | ((transcription: Transcription) => void)
+    | ((transcription: Transcription, isFinal?: boolean) => void)
     | null = null;
 
   constructor() {
@@ -128,8 +134,10 @@ export class WhisperService {
         throw new Error('Whisper module init function is not available.');
       }
 
+      // lookbackSeconds: prepended overlap per chunk (e.g. 3 = 3s). Min 1s processing is hard-coded in WASM.
       this.whisperInstance = await this.whisperModule.init(
-        this.modelBinId
+        this.modelBinId,
+        0
       );
 
       if (this.whisperInstance) {
@@ -168,9 +176,50 @@ export class WhisperService {
 
       const transcribed = await this.whisperModule.get_transcribed();
       if (transcribed) {
-        this.transcriptionDetected(transcribed);
+        const isFinal =
+          typeof this.whisperModule.get_last_transcription_was_final ===
+          'function'
+            ? await this.whisperModule.get_last_transcription_was_final()
+            : undefined;
+        this.transcriptionDetected(transcribed, isFinal);
       }
     }
+  }
+
+  /**
+   * Returns a promise that resolves when a transcription from a final chunk has been
+   * delivered (stream has processed the end-of-utterance and yielded). Use before
+   * sending the message so all buffered transcriptions are included.
+   * If a final transcription was already delivered (e.g. silence timer fired after the fact), resolves immediately.
+   * @param timeoutMs Resolve after this many ms if no final received (still allows send with current draft).
+   */
+  public async waitForFinalTranscription(timeoutMs: number): Promise<void> {
+    if (
+      this.whisperModule?.get_last_transcription_was_final &&
+      (await this.whisperModule.get_last_transcription_was_final())
+    ) {
+      return; // already received final for this utterance
+    }
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        if (this.pendingFinalPromise) {
+          this.pendingFinalPromise = null;
+          resolve(); // timeout: send with what we have
+        }
+      }, timeoutMs);
+      this.pendingFinalPromise = {
+        resolve: () => {
+          clearTimeout(timeout);
+          this.pendingFinalPromise = null;
+          resolve();
+        },
+        reject: (err) => {
+          clearTimeout(timeout);
+          this.pendingFinalPromise = null;
+          reject(err);
+        },
+      };
+    });
   }
 
   private stopPolling() {
@@ -180,8 +229,9 @@ export class WhisperService {
   /**
    * Processes the transcription from Whisper and calls the transcription callback.
    * @param transcription Transcription string from Whisper.
+   * @param isFinal True if this came from a final (end-of-utterance) chunk; stream has drained for this utterance.
    */
-  private transcriptionDetected(transcription: string): void {
+  private transcriptionDetected(transcription: string, isFinal?: boolean): void {
     const filteredTranscription = this.removeDescriptions(transcription);
     const indexableTranscription = this.makeIndexable(
       filteredTranscription
@@ -193,7 +243,10 @@ export class WhisperService {
     );
 
     if (this.transcriptionCallback) {
-      this.transcriptionCallback(transcriptionContainer);
+      this.transcriptionCallback(transcriptionContainer, isFinal);
+    }
+    if (isFinal && this.pendingFinalPromise) {
+      this.pendingFinalPromise.resolve();
     }
   }
 
