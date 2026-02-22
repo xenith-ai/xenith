@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, ViewChild, HostListener } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ViewChild,
+  HostListener,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ChatComponent } from '../chat/chat.component';
@@ -27,7 +33,7 @@ import { VitsService } from '../../services/vits/vits.service';
   styleUrl: './landing.component.scss',
   imports: [CommonModule, RouterOutlet, ChatComponent],
 })
-export class LandingComponent {
+export class LandingComponent implements OnDestroy {
   @ViewChild(ChatComponent) chat!: ChatComponent;
 
   private startedListeningFlow = false;
@@ -400,6 +406,10 @@ export class LandingComponent {
       }
     }
   };
+
+  ngOnDestroy(): void {
+    this.audioService.unregisterCallback(this.newAssistant.id);
+  }
 
   @HostListener('document:click', ['$event'])
   onPageClick(event: MouseEvent): void {
