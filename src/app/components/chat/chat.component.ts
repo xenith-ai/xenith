@@ -1,6 +1,7 @@
 import {
   ChangeDetectorRef,
   Component,
+  DoCheck,
   ElementRef,
   Input,
   ViewChild,
@@ -23,7 +24,7 @@ import { AudioService } from '../../services/audio/audio.service';
   styleUrl: './chat.component.scss',
   imports: [CommonModule, RouterOutlet, InstanceOfPipe, ChatMessageComponent],
 })
-export class ChatComponent {
+export class ChatComponent implements DoCheck {
   @ViewChild('chatMessages') chatMessages!: ElementRef;
   @ViewChild('chatInput') chatInput!: ElementRef;
 
@@ -35,6 +36,8 @@ export class ChatComponent {
   public TextMessage = TextMessage;
   public ButtonMessage = ButtonMessage;
 
+  private lastDraftLength = 0;
+
   constructor(private cdr: ChangeDetectorRef, public audioService: AudioService) {}
 
   ngOnInit() {
@@ -42,6 +45,21 @@ export class ChatComponent {
       this.cdr.detectChanges();
       this.scrollToBottom();
     };
+  }
+
+  ngDoCheck(): void {
+    const len = this.assistant.draftText?.length ?? 0;
+    if (len !== this.lastDraftLength) {
+      this.lastDraftLength = len;
+      setTimeout(() => this.scrollInputToEnd(), 0);
+    }
+  }
+
+  private scrollInputToEnd(): void {
+    const el = this.chatInput?.nativeElement as HTMLInputElement | undefined;
+    if (el && el.scrollWidth > el.clientWidth) {
+      el.scrollLeft = el.scrollWidth - el.clientWidth;
+    }
   }
 
   protected inputOnEnter(element: HTMLInputElement) {

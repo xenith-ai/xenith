@@ -12,4 +12,5 @@ import { RouterModule } from '@angular/router';
 export class PlaceholderPageComponent {
   @Input() title = 'In Development';
   @Input() description: string | null = null;
+  @Input() gifSrc: string | null = null;
 }

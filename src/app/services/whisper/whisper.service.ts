@@ -137,7 +137,7 @@ export class WhisperService {
       // lookbackSeconds: prepended overlap per chunk (e.g. 3 = 3s). Min 1s processing is hard-coded in WASM.
       this.whisperInstance = await this.whisperModule.init(
         this.modelBinId,
-        0
+        1
       );
 
       if (this.whisperInstance) {

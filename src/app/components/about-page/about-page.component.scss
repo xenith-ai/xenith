@@ -20,7 +20,7 @@ $sidebar-width: 320px;
   }
 }
 
-.mission-page {
+.about-page {
   padding: 2rem;
   max-width: 42rem;
   color: $text-color;
@@ -64,6 +64,14 @@ $sidebar-width: 320px;
   margin: 0 0 1rem 0;
   line-height: 1.6;
   opacity: 0.9;
+
+  a {
+    color: $button-color-1;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 .back-link {

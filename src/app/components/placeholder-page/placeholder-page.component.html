@@ -1,7 +1,8 @@
-<div class="content-page-container">
+<div class="content-page-container" [class.centered-layout]="gifSrc">
   <div class="placeholder-page">
     <h1 class="page-title">{{ title }}</h1>
     <p class="body" *ngIf="description">{{ description }}</p>
-    <a routerLink="/" class="back-link">← Back to home</a>
+    <img *ngIf="gifSrc" [src]="gifSrc" alt="" class="placeholder-gif" />
+    <a routerLink="/about" class="back-link">← about xenith</a>
   </div>
 </div>

@@ -8,7 +8,7 @@
 
 Powered by Web Assembly, Xenith enables fully client-side execution of LLM-based voice assistants with custom wake-word detection, synthetic voices of your choice, and flexible model support. Because all inference happens in-browser, your data stays private and your experience stays fast and offline-capable.
 
-The vision: evolve assistants further while expanding into diverse new browser AI capabilities — all local, private, and running on Web Assembly — making advanced decentralized AI the norm.
+The vision is to evolve assistants further while expanding into diverse new browser AI capabilities: all local, private, and running on Web Assembly.
 
 
 <div style="clear: both;"></div>

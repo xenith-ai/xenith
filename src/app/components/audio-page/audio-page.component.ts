@@ -7,7 +7,8 @@ import { PlaceholderPageComponent } from '../placeholder-page/placeholder-page.c
   imports: [PlaceholderPageComponent],
   template: `<app-placeholder-page
     title="Audio"
-    description="In Development :)"
+    description="in development"
+    gifSrc="assets/img/tohru-dragon-maid.gif"
   />`,
 })
 export class AudioPageComponent {}
