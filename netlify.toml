@@ -11,6 +11,10 @@
   to = "/index.html"
   status = 200
 [[redirects]]
+  from = "/image"
+  to = "/index.html"
+  status = 200
+[[redirects]]
   from = "/video"
   to = "/index.html"
   status = 200
@@ -24,6 +28,11 @@
   status = 200
 [[redirects]]
   from = "/chat"
+  to = "/index.html"
+  status = 200
+# Catch-all for any other client route (direct visits / refresh)
+[[redirects]]
+  from = "/*"
   to = "/index.html"
   status = 200
 
