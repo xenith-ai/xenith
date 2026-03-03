@@ -10,6 +10,8 @@ Powered by Web Assembly, Xenith enables fully client-side execution of LLM-based
 
 The vision is to evolve assistants further while expanding into diverse new browser AI capabilities: all local, private, and running on Web Assembly.
 
+[Blog post w/ some technical details](https://shaneduffy.io/blog/i-built-a-voice-assistant-that-runs-entirely-in-your-browser)
+
 
 <div style="clear: both;"></div>
 
