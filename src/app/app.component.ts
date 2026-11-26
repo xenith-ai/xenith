@@ -31,8 +31,14 @@ export class AppComponent implements OnInit, OnDestroy {
   addDialogOpen = false;
   editingAssistant: Assistant | null = null;
   selectedAssistant: Assistant | null = null;
+  isLandingPage = true;
   private routerSubscription?: Subscription;
   private resizeSubscription?: Subscription;
+  private closeSidebarHandler?: () => void;
+
+  get isOnLandingPage(): boolean {
+    return this.isLandingPage;
+  }
 
   constructor(
     private router: Router,
@@ -43,15 +49,24 @@ export class AppComponent implements OnInit, OnDestroy {
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
-        const chatMatch = event.urlAfterRedirects?.match(/^\/chat\/([^/]+)$/)
-          ?? event.url.match(/^\/chat\/([^/]+)$/);
+        const url = event.urlAfterRedirects ?? event.url;
+        this.isLandingPage = url === '/' || url === '';
+        const chatMatch = url.match(/^\/chat\/([^/]+)$/);
         if (chatMatch) {
           this.assistantService.setLastSelectedAssistantId(chatMatch[1]);
         }
         this.updateSidebarVisibility();
       });
 
+    this.isLandingPage = this.router.url === '/' || this.router.url === '';
     this.updateSidebarVisibility();
+
+    this.closeSidebarHandler = () => {
+      if (this.isLandingPage && this.sidebarOpen) {
+        this.closeSidebar();
+      }
+    };
+    window.addEventListener('close-sidebar', this.closeSidebarHandler);
 
     this.resizeSubscription = fromEvent(window, 'resize')
       .pipe(debounceTime(100))
@@ -61,11 +76,14 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.routerSubscription?.unsubscribe();
     this.resizeSubscription?.unsubscribe();
+    if (this.closeSidebarHandler) {
+      window.removeEventListener('close-sidebar', this.closeSidebarHandler);
+    }
   }
 
   private updateSidebarVisibility(): void {
-    // On desktop, sidebar open by default
-    if (window.innerWidth > 624) {
+    // Desktop: sidebar open by default, but not on landing
+    if (window.innerWidth > 624 && !this.isLandingPage) {
       this.sidebarOpen = true;
     } else {
       this.sidebarOpen = false;
@@ -74,6 +92,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   openSidebar(): void {
     this.sidebarOpen = true;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
   }
 
   onAssistantSelected(assistant: Assistant): void {
@@ -113,7 +135,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
     if (this.selectedAssistant?.id === assistant.id) {
       this.selectedAssistant = null;
-      this.router.navigate(['/chat']);
+      this.router.navigate(['/']);
     }
   }
 }

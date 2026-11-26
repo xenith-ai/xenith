@@ -4,7 +4,7 @@
     [assistant]="assistant"
     [currentUser]="currentUser"
   ></app-chat>
-  <div *ngIf="!assistant" class="empty-chat">
-    <p>Select or add an assistant from the sidebar to start chatting.</p>
+  <div *ngIf="!assistant" class="loading-container">
+    <p>Loading assistant...</p>
   </div>
 </div>

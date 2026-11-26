@@ -1,0 +1,138 @@
+@import '../../../variables.scss';
+
+//* --- Content Structure --- *//
+
+$pre-collapse-chat-margin: 4em;
+$chat-width: calc($mobile-collapse-width - (2 * $pre-collapse-chat-margin));
+$chat-height: 30em;
+$gradient-z: calc($page-container-z + 1);
+$overlay-z: calc($page-container-z + 1.5);
+$content-z: calc($page-container-z + 2);
+
+.background-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: $overlay-z;
+  background: rgba(0, 0, 0, 0.40);
+  pointer-events: none;
+}
+
+#title-container {
+  z-index: $content-z;
+  text-align: center;
+  margin-bottom: 1.5em;
+
+  > h1 {
+    color: $logo-color;
+    margin-bottom: 0.0em;
+  }
+
+  > h2 {
+    color: $logo-color;
+    margin: 0;
+  }
+}
+
+#landing-footer {
+  z-index: $content-z;
+  margin-top: 1em;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#primary-chat-container {
+  z-index: $content-z;
+  width: $chat-width;
+  height: $chat-height;
+  background: $background-color-3;
+  border-radius: $border-radius-1;
+  overflow: clip;
+  box-shadow: 0 4px 15px rgba(151, 214, 223, 0.1);
+}
+
+app-chat {
+  width: 100%;
+  height: 100%;
+}
+
+// On landing page, sidebar should overlay and not shift the chat window
+// No adjustment needed - sidebar will overlay on top
+
+@media screen and (max-width: $mobile-collapse-width) {
+  #gradient-1,
+  #gradient-2,
+  .background-overlay {
+    display: none;
+  }
+
+  #landing-footer {
+    display: none;
+  }
+
+  #title-container {
+    > h1 {
+      display: none;
+    }
+  }
+
+  #primary-chat-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+}
+
+//* --- Orb Animation --- *//
+// Darker orb colors (same hue/saturation, lower lightness only — no alpha)
+$orb-1: hsl(158, 100%, 42%);
+$orb-2: hsl(252, 100%, 42%);
+$orb-3: hsl(197, 100%, 42%);
+$orb-4: hsl(315, 100%, 38%);
+
+$orb-speed: 30s;
+$orb-easing: cubic-bezier(0.4, 0.2, 0.2, 0.8);
+$orb-z: 9979;
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate-counter {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+#gradient-1 {
+  position: absolute;
+  z-index: $gradient-z;
+
+  width: $chat-width;
+  height: $chat-width;
+  filter: blur(calc($chat-width / 5));
+  background-image: linear-gradient($orb-1, $orb-2);
+  animation: rotate $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+#gradient-2 {
+  position: absolute;
+  z-index: $gradient-z;
+
+  width: $chat-width;
+  height: $chat-width;
+  filter: blur(calc($chat-width / 5));
+  background-image: linear-gradient($orb-3, $orb-4);
+  animation: rotate-counter $orb-speed $orb-easing infinite, gradientAnimation 5s infinite;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  transition: opacity 5s linear;
+}

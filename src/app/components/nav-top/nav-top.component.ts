@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Output, Input, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AssistantService } from '../../services/assistant/assistant.service';
 
@@ -10,6 +10,7 @@ import { AssistantService } from '../../services/assistant/assistant.service';
   styleUrl: './nav-top.component.scss',
 })
 export class NavTopComponent implements OnInit, OnDestroy {
+  @Input() isLandingPage: boolean = false;
   @Output() menuClick = new EventEmitter<void>();
 
   private checkInterval: any = null;
@@ -20,7 +21,6 @@ export class NavTopComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Poll for triggered assistant changes
     this.checkInterval = setInterval(() => {
       this.cdr.detectChanges();
     }, 100);
