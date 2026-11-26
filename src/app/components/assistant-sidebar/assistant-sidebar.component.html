@@ -19,15 +19,7 @@
     </button>
   </div>
 
-  <nav class="sidebar-nav">
-    <button type="button" class="sidebar-nav-link" [class.active]="showAssistants" (click)="navigateToChat(); closeSidebarOnMobile()">chat</button>
-    <a routerLink="/image" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">image</a>
-    <a routerLink="/video" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">video</a>
-    <a routerLink="/audio" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">audio</a>
-    <a routerLink="/about" class="sidebar-nav-link" routerLinkActive="active" (click)="closeSidebarOnMobile()">about</a>
-  </nav>
-
-  <div class="sidebar-content" *ngIf="showAssistants">
+  <div class="sidebar-content">
     <div class="sidebar-section-header">
       <div class="section-title-row">
         <span
@@ -109,4 +101,5 @@
     </button>
   </div>
 </div>
+
 

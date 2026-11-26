@@ -52,7 +52,21 @@ export class ChatPageComponent implements OnInit {
       if (id) {
         this.assistantId = id;
         await this.loadAssistant(id);
+        return;
       }
+
+      // No assistant in URL: open last selected (or first) if any exist
+      this.assistant = null;
+      this.assistantId = null;
+      const assistants = this.assistantService.getAssistants();
+      if (assistants.length === 0) {
+        return;
+      }
+      const lastId = this.assistantService.getLastSelectedAssistantId();
+      const target = lastId
+        ? assistants.find(a => a.id === lastId) ?? assistants[0]
+        : assistants[0];
+      this.router.navigate(['/chat', target.id], { replaceUrl: true });
     });
   }
 
@@ -65,8 +79,7 @@ export class ChatPageComponent implements OnInit {
         void this.ensureAssistantLlmCachedOrDownloading();
       }
     } else {
-      // Assistant not found, redirect to landing page
-      this.router.navigate(['/']);
+      this.router.navigate(['/chat']);
     }
   }
 

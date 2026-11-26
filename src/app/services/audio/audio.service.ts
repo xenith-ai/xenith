@@ -304,7 +304,7 @@ export class AudioService {
    * @param whisperAudioData - The audio data for Whisper processing.
    */
   private handleWhisper(whisperAudioData: Float32Array) {
-    // Skip until Whisper is initialized (e.g. user went to chat without doing "Download AI Models" on landing)
+    // Skip until Whisper is initialized (e.g. user opened chat before downloading models)
     if (!this.whisperService.whisperInstance) {
       return;
     }

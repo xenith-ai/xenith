@@ -21,12 +21,15 @@
   }
 }
 
-.loading-container {
+.empty-chat {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
   color: $text-color;
+  opacity: 0.7;
+  padding: 2rem;
+  text-align: center;
 }
 
 app-chat {

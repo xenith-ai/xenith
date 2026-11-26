@@ -43,12 +43,9 @@
     }
   }
 
-  // On desktop, overlay when open (especially on landing page)
   @media screen and (min-width: calc($mobile-collapse-width + 1px)) {
     &.open {
       pointer-events: auto !important;
-      // On landing page, sidebar should overlay, not push content
-      // This is handled by not adjusting the landing page layout
     }
   }
 }
@@ -113,41 +110,6 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.sidebar-nav {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.sidebar-nav-link {
-  display: block;
-  width: 100%;
-  padding: 0.5rem 1rem;
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  font: inherit;
-  font-size: 0.95rem;
-  text-align: left;
-  background: none;
-  border: none;
-  border-left: 3px solid transparent;
-  cursor: pointer;
-  transition: color 0.2s, background 0.15s;
-
-  &:hover {
-    color: $text-color;
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  &.active {
-    color: $text-color;
-    border-left-color: $button-color-1;
-    background: rgba(255, 255, 255, 0.04);
-  }
 }
 
 .sidebar-section-header {
